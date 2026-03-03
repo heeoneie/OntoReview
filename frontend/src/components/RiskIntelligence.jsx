@@ -443,6 +443,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                   setCompliance(null);
                   setMeeting(null);
                   setRiskLevel(null);
+                  setDataSource(null);
                   setErrors({});
                 }}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
@@ -543,12 +544,12 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           {dataSource === 'youtube' ? (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/50 border border-red-800/60 text-xs font-medium text-red-400">
               <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              YouTube 실데이터
+              {t('risk.youtube_live_data')}
             </span>
           ) : (
             <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-400">
               <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              데모 시나리오
+              {t('risk.demo_scenario')}
             </span>
           )}
         </div>

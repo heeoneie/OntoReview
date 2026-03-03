@@ -1052,7 +1052,7 @@ def _real_generate_meeting(
     }
 
 
-def analyze_youtube_scenario(  # pylint: disable=too-many-locals
+def analyze_youtube_scenario(  # pylint: disable=too-many-locals,too-many-statements
     signals: list[dict], brand: str, lang: str = "ko",
     db: Session | None = None,
 ) -> dict:
@@ -1098,8 +1098,14 @@ def analyze_youtube_scenario(  # pylint: disable=too-many-locals
   "risk_keywords": ["keyword1", "keyword2"]
 }}"""
 
-    overview_raw = call_openai_json(client, overview_prompt, system_prompt=_get_system_prompt(lang))
-    overview = extract_json_from_text(overview_raw) or {}
+    try:
+        overview_raw = call_openai_json(
+            client, overview_prompt, system_prompt=_get_system_prompt(lang)
+        )
+        overview = extract_json_from_text(overview_raw) or {}
+    except Exception:  # pylint: disable=broad-except
+        logger.error("YouTube overview LLM 호출 실패", exc_info=True)
+        overview = {}
 
     incident_title = overview.get("incident_title", f"{brand} 리스크 감지")
     incident_summary = overview.get(
@@ -1126,11 +1132,36 @@ def analyze_youtube_scenario(  # pylint: disable=too-many-locals
     if _cfg.LLM_PROVIDER == "google":
         # 순차 실행 — Gemini RPM 초과 방지
         n = len(signals)
-        ontology = _real_generate_ontology(client, signals_text, incident_context, n, lang, db=db)
-        compliance = _real_generate_compliance(
-            client, signals_text, incident_context, n, brand, lang
-        )
-        meeting = _real_generate_meeting(client, incident_context, brand, lang)
+        try:
+            ontology = _real_generate_ontology(
+                client, signals_text, incident_context, n, lang, db=db
+            )
+        except Exception:  # pylint: disable=broad-except
+            logger.error("온톨로지 생성 실패", exc_info=True)
+            ontology = {"nodes": [], "links": [], "summary": "온톨로지 생성 실패"}
+        try:
+            compliance = _real_generate_compliance(
+                client, signals_text, incident_context, n, brand, lang
+            )
+        except Exception:  # pylint: disable=broad-except
+            logger.error("컴플라이언스 보고서 생성 실패", exc_info=True)
+            compliance = {
+                "overall_risk_level": risk_level,
+                "monitoring_summary": "",
+                "risk_events": [],
+                "next_actions": [],
+            }
+        try:
+            meeting = _real_generate_meeting(client, incident_context, brand, lang)
+        except Exception:  # pylint: disable=broad-except
+            logger.error("회의 안건 생성 실패", exc_info=True)
+            meeting = {
+                "meeting_title": "",
+                "urgency": "긴급",
+                "attendees": [],
+                "agenda_items": [],
+                "preparation": [],
+            }
     else:
         # 병렬 실행 — OpenAI 속도 우선
         llm_timeout = 120

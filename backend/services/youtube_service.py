@@ -20,6 +20,9 @@ RISK_TRIGGERS: dict[str, list[str]] = {
     "gaming":    ["pay to win", "rigged", "dead game", "toxic", "crunch"],
 }
 
+MAX_VIDEOS_LIMIT = 20
+MAX_COMMENTS_LIMIT = 100
+
 
 def _search_videos(query: str, max_results: int, api_key: str) -> list[dict]:
     """YouTube 검색으로 관련 영상 목록 반환 (영어 콘텐츠 우선)"""
@@ -31,9 +34,13 @@ def _search_videos(query: str, max_results: int, api_key: str) -> list[dict]:
         "relevanceLanguage": "en",
         "key": api_key,
     }
-    resp = requests.get(f"{YOUTUBE_API_BASE}/search", params=params, timeout=15)
-    resp.raise_for_status()
-    data = resp.json()
+    try:
+        resp = requests.get(f"{YOUTUBE_API_BASE}/search", params=params, timeout=15)
+        resp.raise_for_status()
+        data = resp.json()
+    except RequestException as e:
+        logger.warning("YouTube 검색 실패 query=%s: %s", query, e)
+        return []
 
     videos = []
     seen_ids: set[str] = set()
@@ -145,6 +152,13 @@ def collect_youtube_signals(  # pylint: disable=too-many-locals
     Returns:
         (signals, meta)  — signals는 channel_signal 딕셔너리 목록
     """
+    if max_videos <= 0 or max_videos > MAX_VIDEOS_LIMIT:
+        raise ValueError(f"max_videos must be 1-{MAX_VIDEOS_LIMIT}, got {max_videos}")
+    if max_comments_per_video <= 0 or max_comments_per_video > MAX_COMMENTS_LIMIT:
+        raise ValueError(
+            f"max_comments_per_video must be 1-{MAX_COMMENTS_LIMIT}, got {max_comments_per_video}"
+        )
+
     api_key = config.YOUTUBE_API_KEY
     if not api_key:
         raise ValueError("YOUTUBE_API_KEY가 설정되지 않았습니다. .env 파일을 확인하세요.")

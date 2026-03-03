@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { getDatasetInfo, getEvaluationMetrics } from '../api/client';
+import { useLang } from '../contexts/LangContext';
 
 const CATEGORY_LABELS = {
   delivery_delay: 'Delivery Delay',
@@ -46,6 +47,7 @@ function ScoreBadge({ value = 0 }) {
 }
 
 export default function ModelQuality() {
+  const { lang } = useLang();
   const [metrics, setMetrics] = useState(null);
   const [datasetInfo, setDatasetInfo] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -105,7 +107,7 @@ export default function ModelQuality() {
             onClick={() => setExpanded((v) => !v)}
             className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
           >
-            {expanded ? '접기' : '상세 보기'}
+            {expanded ? (lang === 'ko' ? '접기' : 'Collapse') : (lang === 'ko' ? '상세 보기' : 'Details')}
           </button>
         </div>
       </div>
@@ -183,7 +185,7 @@ export default function ModelQuality() {
             )}
 
             <div className="mt-3 text-xs text-zinc-600">
-              Evaluated {meta?.evaluated_at ? new Date(meta.evaluated_at).toLocaleDateString('ko-KR') : ''} ·
+              Evaluated {meta?.evaluated_at ? new Date(meta.evaluated_at).toLocaleDateString(lang === 'ko' ? 'ko-KR' : 'en-US') : ''} ·
               temp={meta?.temperature}
             </div>
           </div>

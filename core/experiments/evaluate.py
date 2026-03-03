@@ -109,8 +109,15 @@ class Evaluator:
         # 예측 결과를 리뷰 순서대로 정렬
         predictions = {}
         for item in categorization.get('categories', []):
-            review_num = item['review_number'] - 1  # 0-indexed
-            predictions[review_num] = item['category']
+            if not isinstance(item, dict):
+                continue
+            review_num = item.get('review_number')
+            category = item.get('category')
+            if not isinstance(review_num, int) or not isinstance(category, str):
+                continue
+            review_idx = review_num - 1  # 0-indexed
+            if 0 <= review_idx < len(reviews_text_list):
+                predictions[review_idx] = category
 
         # 순서대로 리스트 생성
         pred_list = [predictions.get(i, 'other') for i in range(len(reviews_text_list))]

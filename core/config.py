@@ -16,7 +16,12 @@ RECENT_PERIOD_DAYS = 30
 COMPARISON_PERIOD_DAYS = 60
 
 # LLM provider: "openai" (prod default) or "google" (local dev)
-LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai")
+_VALID_LLM_PROVIDERS = {"openai", "google"}
+LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").strip().lower()
+if LLM_PROVIDER not in _VALID_LLM_PROVIDERS:
+    raise ValueError(
+        f"LLM_PROVIDER must be one of {_VALID_LLM_PROVIDERS}, got '{LLM_PROVIDER}'"
+    )
 
 # LLM settings
 LLM_MODEL = "gpt-4o-mini"               # OpenAI primary model

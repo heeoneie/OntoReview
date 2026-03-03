@@ -5,6 +5,8 @@ import asyncio
 import csv
 import json
 import logging
+import os
+import tempfile
 from datetime import datetime, timezone
 from pathlib import Path
 
@@ -103,8 +105,16 @@ async def run_evaluation():
                     for k, v in metrics["per_class_metrics"].items()
                 },
             }
-            with open(METRICS_FILE, "w", encoding="utf-8") as f:
-                json.dump(output, f, indent=2, ensure_ascii=False)
+            dir_path = METRICS_FILE.parent
+            dir_path.mkdir(parents=True, exist_ok=True)
+            fd, tmp_path = tempfile.mkstemp(dir=str(dir_path), suffix=".tmp")
+            try:
+                with os.fdopen(fd, "w", encoding="utf-8") as f:
+                    json.dump(output, f, indent=2, ensure_ascii=False)
+                os.replace(tmp_path, str(METRICS_FILE))
+            except BaseException:
+                os.unlink(tmp_path)
+                raise
             return output
 
         saved = await asyncio.to_thread(_run)

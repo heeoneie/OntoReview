@@ -52,6 +52,8 @@ export const translations = {
       errDemo: '데모 시나리오 분석 실패', errOntology: '온톨로지 생성 실패',
       errCompliance: '보고서 생성 실패', errMeeting: '회의 안건 생성 실패',
       errGeneric: '생성 실패',
+      youtube_live_data: 'YouTube 실데이터',
+      demo_scenario: '데모 시나리오',
     },
     mock: {
       viralRisk: '역바이럴', high: '높음', medium: '보통', low: '낮음',
@@ -168,6 +170,8 @@ export const translations = {
       errDemo: 'Demo scenario analysis failed', errOntology: 'Ontology generation failed',
       errCompliance: 'Report generation failed', errMeeting: 'Agenda generation failed',
       errGeneric: 'Generation failed',
+      youtube_live_data: 'YouTube Live Data',
+      demo_scenario: 'Demo Scenario',
     },
     mock: {
       viralRisk: 'Viral Risk:', high: 'High', medium: 'Medium', low: 'Low',

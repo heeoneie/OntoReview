@@ -38,6 +38,8 @@ def _get_gemini_client():
     """Gemini 클라이언트 반환"""
     global _gemini_client  # pylint: disable=global-statement
     if _gemini_client is None:
+        if not config.GOOGLE_API_KEY:
+            raise RuntimeError("GOOGLE_API_KEY가 설정되지 않았습니다.")
         _gemini_client = genai.Client(api_key=config.GOOGLE_API_KEY)
     return _gemini_client
 
@@ -105,7 +107,8 @@ def call_openai_json(
                     last_exc = e
                     continue  # 재시도
                 break  # 429 외 에러는 바로 OpenAI 폴백
-            except Exception:  # pylint: disable=broad-except
+            except Exception as e:  # pylint: disable=broad-except
+                last_exc = e
                 break  # 비 429 예외는 바로 OpenAI 폴백
 
         logger.warning("Gemini 재시도 소진, OpenAI 폴백 (last_exc=%s)", last_exc)
