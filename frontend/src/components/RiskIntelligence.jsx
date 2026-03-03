@@ -350,12 +350,13 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       </div>
 
-      {/* ── Amazon Review Ingestion ── */}
+      {/* ── Amazon Risk Scan ── */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
         <div className="flex items-center gap-2 mb-3">
-          <ShoppingCart className="text-orange-400" size={16} />
+          <ShoppingCart className="text-red-400" size={16} />
           <span className="text-sm font-bold text-white">{t('risk.amazonTitle')}</span>
         </div>
+        <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('risk.amazonLabel')}</label>
         <div className="flex gap-2">
           <input
             type="text"
@@ -363,18 +364,19 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             onChange={(e) => setAmazonUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAmazonIngest()}
             placeholder={t('risk.amazonPlaceholder')}
-            className="flex-1 bg-zinc-800 border border-zinc-700 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-orange-600 transition-colors"
+            className="flex-1 bg-zinc-800 border border-zinc-700 hover:border-red-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition-all duration-200"
           />
           <button
             onClick={handleAmazonIngest}
             disabled={amazonLoading || !amazonUrl.trim()}
-            className="px-5 py-2.5 bg-orange-600 text-white rounded-xl font-semibold hover:bg-orange-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm flex-shrink-0"
+            className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 shadow-sm shadow-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
           >
             {amazonLoading
               ? <><Loader2 className="animate-spin" size={15} />{t('risk.amazonIngesting')}</>
-              : <><ShoppingCart size={15} />{t('risk.amazonBtn')}</>}
+              : <><ScanSearch size={15} />{t('risk.amazonBtn')}</>}
           </button>
         </div>
+        <p className="text-xs text-zinc-500 mt-1">{t('risk.amazonHelper')}</p>
         {amazonToast && (
           <p className={`mt-2 text-xs font-medium ${amazonToast.includes('fail') || amazonToast.includes('실패') ? 'text-red-400' : 'text-emerald-400'}`}>
             {amazonToast}
