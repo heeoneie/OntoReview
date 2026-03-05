@@ -10,6 +10,7 @@ from datetime import datetime, timezone
 from sqlalchemy.orm import Session
 
 from backend.database.models import Node, Review
+from backend.services.legal_rag_service import match_precedent
 
 # Simple keyword → risk label mapping
 _HIGH_RISK_KEYWORDS = {
@@ -123,13 +124,27 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
     return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
     """Save 10 mock Amazon reviews + risk nodes into SQLite. Return summary."""
     reviews_saved = 0
     risks_created = 0
     now = datetime.now(timezone.utc)
 
     for item in MOCK_REVIEWS:
+        # Check for duplicate review (idempotency)
+        existing_review = (
+            db.query(Review.id)
+            .filter(
+                Review.source == "amazon",
+                Review.product_url == product_url,
+                Review.title == item["title"],
+                Review.body == item["body"],
+            )
+            .first()
+        )
+        if existing_review:
+            continue
+
         full_text = f"{item['title']} {item['body']}"
         severity, risk_label = _classify_severity(full_text)
 
@@ -147,6 +162,17 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:
 
         # Create or update a Node for high-severity reviews (reuse existing ontology Node table)
         if severity >= 8.0:
+            precedent = match_precedent(full_text)
+            # Dynamic Legal Exposure = Avg_Settlement × confidence × (severity / 10)
+            if precedent:
+                dynamic_exposure = int(
+                    precedent["settlement_avg_usd"]
+                    * precedent["confidence_score"]
+                    * (severity / 10.0)
+                )
+            else:
+                dynamic_exposure = 0
+
             normalized = (risk_label or "unknown risk").strip().lower()
             existing_node = (
                 db.query(Node)
@@ -156,12 +182,20 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:
             if existing_node:
                 existing_node.severity_score = max(existing_node.severity_score or 0, severity)
                 existing_node.last_seen_at = now
+                # Update precedent info if available
+                if precedent:
+                    existing_node.case_id = precedent["case_id"]
+                    existing_node.estimated_loss_usd = max(
+                        existing_node.estimated_loss_usd or 0, dynamic_exposure
+                    )
             else:
                 node = Node(
                     name=risk_label or "Unknown Risk",
                     normalized_name=normalized,
                     type="event",
                     severity_score=severity,
+                    case_id=precedent["case_id"] if precedent else None,
+                    estimated_loss_usd=dynamic_exposure,
                     source="amazon",
                     created_at=now,
                     last_seen_at=now,

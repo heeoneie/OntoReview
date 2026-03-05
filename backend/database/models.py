@@ -3,6 +3,7 @@
 from datetime import datetime, timezone
 
 from sqlalchemy import (
+    CheckConstraint,
     DateTime,
     Float,
     ForeignKey,
@@ -29,6 +30,8 @@ class Node(Base):
     normalized_name: Mapped[str] = mapped_column(String(512), nullable=False)
     type: Mapped[str] = mapped_column(String(64), nullable=False)
     severity_score: Mapped[float] = mapped_column(Float, default=0.0)
+    case_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
+    estimated_loss_usd: Mapped[int] = mapped_column(Integer, default=0)
     source: Mapped[str | None] = mapped_column(String(256), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(
@@ -46,6 +49,7 @@ class Node(Base):
 
     __table_args__ = (
         UniqueConstraint("normalized_name", "type", name="uq_node_norm_name_type"),
+        CheckConstraint("estimated_loss_usd >= 0", name="ck_node_estimated_loss_nonneg"),
     )
 
 
@@ -86,6 +90,9 @@ class Review(Base):
     """Ingested review from any source (Amazon, Coupang, CSV, etc.)."""
 
     __tablename__ = "reviews"
+    __table_args__ = (
+        CheckConstraint("rating BETWEEN 1 AND 5", name="ck_reviews_rating_1_5"),
+    )
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
     source: Mapped[str] = mapped_column(String(64), nullable=False)
