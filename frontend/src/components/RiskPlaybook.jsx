@@ -105,7 +105,11 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
   const handleRetry = () => {
     if (!hasNode) return;
-    fetchPlaybook(null);
+    // Abort any existing request before retrying
+    controllerRef.current?.abort();
+    const controller = new AbortController();
+    controllerRef.current = controller;
+    fetchPlaybook(controller);
   };
 
   /* ── Empty State: no node selected ── */
