@@ -124,7 +124,7 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
     return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
     """Save 10 mock Amazon reviews + risk nodes into SQLite. Return summary."""
     reviews_saved = 0
     risks_created = 0
@@ -160,7 +160,7 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:
         db.add(review)
         reviews_saved += 1
 
-        # Create a Node for high-severity reviews (reuse existing ontology Node table)
+        # Create or update a Node for high-severity reviews (reuse existing ontology Node table)
         if severity >= 8.0:
             precedent = match_precedent(full_text)
             # Dynamic Legal Exposure = Avg_Settlement × confidence × (severity / 10)
@@ -172,18 +172,35 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:
                 )
             else:
                 dynamic_exposure = 0
-            node = Node(
-                name=risk_label or "Unknown Risk",
-                normalized_name=(risk_label or "unknown risk").strip().lower(),
-                type="event",
-                severity_score=severity,
-                case_id=precedent["case_id"] if precedent else None,
-                estimated_loss_usd=dynamic_exposure,
-                source="amazon",
-                created_at=now,
-                last_seen_at=now,
+
+            normalized = (risk_label or "unknown risk").strip().lower()
+            existing_node = (
+                db.query(Node)
+                .filter(Node.normalized_name == normalized, Node.type == "event")
+                .first()
             )
-            db.add(node)
+            if existing_node:
+                existing_node.severity_score = max(existing_node.severity_score or 0, severity)
+                existing_node.last_seen_at = now
+                # Update precedent info if available
+                if precedent:
+                    existing_node.case_id = precedent["case_id"]
+                    existing_node.estimated_loss_usd = max(
+                        existing_node.estimated_loss_usd or 0, dynamic_exposure
+                    )
+            else:
+                node = Node(
+                    name=risk_label or "Unknown Risk",
+                    normalized_name=normalized,
+                    type="event",
+                    severity_score=severity,
+                    case_id=precedent["case_id"] if precedent else None,
+                    estimated_loss_usd=dynamic_exposure,
+                    source="amazon",
+                    created_at=now,
+                    last_seen_at=now,
+                )
+                db.add(node)
             risks_created += 1
 
     db.commit()
