@@ -1,11 +1,14 @@
-import { useState, useRef, lazy, Suspense } from 'react';
-import { Shield, Loader2, Radio, Building2, Zap, Share2, Download, Search, ScanSearch } from 'lucide-react';
+import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { Shield, Loader2, Radio, Building2, Zap, Share2, Download, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock } from 'lucide-react';
 import {
   generateOntology,
   generateComplianceReport,
   generateMeetingAgenda,
   runDemoScenario,
   analyzeYouTube,
+  getKpiSummary,
+  getRiskTimeline,
+  ingestAmazon,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 import OntologyGraph from './OntologyGraph';
@@ -143,6 +146,66 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [selectedExtra, setSelectedExtra] = useState(new Set());
   const [dataSource, setDataSource] = useState(null); // 'youtube' | 'mock'
   const inputRef = useRef(null);
+  const toastTimerRef = useRef(null);
+
+  // KPI live data
+  const [kpi, setKpi] = useState({ total_scanned_reviews: 0, critical_risks_detected: 0, today_new_ingestions: 0 });
+  const [amazonUrl, setAmazonUrl] = useState('');
+  const [amazonLoading, setAmazonLoading] = useState(false);
+  const [amazonToast, setAmazonToast] = useState('');
+  const [amazonToastType, setAmazonToastType] = useState('success');
+  const [timeline, setTimeline] = useState([]);
+
+  const refreshDashboard = useCallback(async () => {
+    try {
+      const [kpiRes, tlRes] = await Promise.all([getKpiSummary(), getRiskTimeline()]);
+      const safeKpi = kpiRes.data || {};
+      setKpi({
+        total_scanned_reviews: Number(safeKpi.total_scanned_reviews) || 0,
+        critical_risks_detected: Number(safeKpi.critical_risks_detected) || 0,
+        today_new_ingestions: Number(safeKpi.today_new_ingestions) || 0,
+      });
+      setTimeline(Array.isArray(tlRes.data) ? tlRes.data : []);
+    } catch {
+      // Reset to zero on fetch failure
+      setKpi({ total_scanned_reviews: 0, critical_risks_detected: 0, today_new_ingestions: 0 });
+      setTimeline([]);
+    }
+  }, []);
+
+  useEffect(() => { refreshDashboard(); }, [refreshDashboard]);
+
+  // Cleanup toast timer on unmount
+  useEffect(() => {
+    return () => {
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+    };
+  }, []);
+
+  const handleAmazonIngest = async () => {
+    if (!amazonUrl.trim() || amazonLoading) return;
+    setAmazonLoading(true);
+    setAmazonToast('');
+    try {
+      const res = await ingestAmazon(amazonUrl.trim());
+      const d = res.data;
+      setAmazonToastType('success');
+      if (lang === 'ko') {
+        setAmazonToast(`${d.reviews_ingested}건의 리뷰를 수집하고 ${d.risks_detected}건의 리스크를 탐지했습니다.`);
+      } else {
+        setAmazonToast(`Ingested ${d.reviews_ingested} reviews and detected ${d.risks_detected} risks.`);
+      }
+      setAmazonUrl('');
+      await refreshDashboard();
+    } catch {
+      setAmazonToastType('error');
+      setAmazonToast(t('risk.errGeneric'));
+    } finally {
+      setAmazonLoading(false);
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setAmazonToast(''), 4000);
+    }
+  };
 
   const toggleExtra = (id) => {
     setSelectedExtra((prev) => {
@@ -271,15 +334,15 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   return (
     <div className="space-y-6">
 
-      {/* ── 평시 모니터링 현황 ── */}
+      {/* ── Live KPI Dashboard (real data from SQLite) ── */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${kpi.critical_risks_detected > 0 ? 'bg-red-400' : 'bg-emerald-400'} opacity-50`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${kpi.critical_risks_detected > 0 ? 'bg-red-400' : 'bg-emerald-400'}`} />
             </span>
-            <span className="text-xs font-bold text-emerald-400 uppercase tracking-widest">{t('risk.live')}</span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${kpi.critical_risks_detected > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{t('risk.live')}</span>
             <span className="text-xs text-zinc-600">{t('risk.last24h')}</span>
           </div>
           <span className="text-xs text-zinc-600">{t('risk.lastScan')}</span>
@@ -287,30 +350,107 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         <div className="grid grid-cols-3 gap-3">
           <div className="bg-zinc-800/60 rounded-xl px-4 py-3 border border-zinc-700/60">
             <p className="text-xl font-bold text-white leading-none">
-              15,402
+              {kpi.total_scanned_reviews.toLocaleString()}
               {t('risk.count') && <span className="text-xs font-normal text-zinc-400 ml-1">{t('risk.count')}</span>}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">{t('risk.analyzedContent')}</p>
-            <p className="text-[11px] text-emerald-500 mt-0.5">{t('risk.contentGrowth')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('risk.kpiScanned')}</p>
           </div>
-          <div className="bg-emerald-950/40 rounded-xl px-4 py-3 border border-emerald-900/60">
-            <p className="text-xl font-bold text-emerald-400 leading-none">
-              0
+          <div className={`rounded-xl px-4 py-3 border ${kpi.critical_risks_detected > 0 ? 'bg-red-950/40 border-red-900/60' : 'bg-emerald-950/40 border-emerald-900/60'}`}>
+            <p className={`text-xl font-bold leading-none ${kpi.critical_risks_detected > 0 ? 'text-red-400' : 'text-emerald-400'}`}>
+              {kpi.critical_risks_detected}
               {t('risk.count') && <span className="text-xs font-normal text-zinc-400 ml-1">{t('risk.count')}</span>}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">{t('risk.detectedRisk')}</p>
-            <p className="text-[11px] text-emerald-500 mt-0.5">{t('risk.safeState')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('risk.kpiRisks')}</p>
+            {kpi.critical_risks_detected === 0 && (
+              <p className="text-[11px] text-emerald-500 mt-0.5">{t('risk.safeState')}</p>
+            )}
           </div>
           <div className="bg-zinc-800/60 rounded-xl px-4 py-3 border border-zinc-700/60">
             <p className="text-xl font-bold text-white leading-none">
-              99.97
-              <span className="text-xs font-normal text-zinc-400 ml-1">{t('risk.pct')}</span>
+              {kpi.today_new_ingestions.toLocaleString()}
+              {t('risk.count') && <span className="text-xs font-normal text-zinc-400 ml-1">{t('risk.count')}</span>}
             </p>
-            <p className="text-xs text-zinc-500 mt-1">{t('risk.uptime')}</p>
-            <p className="text-[11px] text-zinc-500 mt-0.5">{t('risk.noIncident')}</p>
+            <p className="text-xs text-zinc-500 mt-1">{t('risk.kpiToday')}</p>
           </div>
         </div>
       </div>
+
+      {/* ── Amazon Risk Scan ── */}
+      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
+        <div className="flex items-center gap-2 mb-3">
+          <ShoppingCart className="text-red-400" size={16} />
+          <span className="text-sm font-bold text-white">{t('risk.amazonTitle')}</span>
+        </div>
+        <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('risk.amazonLabel')}</label>
+        <div className="flex gap-2">
+          <input
+            type="text"
+            value={amazonUrl}
+            onChange={(e) => setAmazonUrl(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleAmazonIngest()}
+            placeholder={t('risk.amazonPlaceholder')}
+            className="flex-1 bg-zinc-800 border border-zinc-700 hover:border-red-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition-all duration-200"
+          />
+          <button
+            onClick={handleAmazonIngest}
+            disabled={amazonLoading || !amazonUrl.trim()}
+            className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 shadow-sm shadow-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
+          >
+            {amazonLoading
+              ? <><Loader2 className="animate-spin" size={15} />{t('risk.amazonIngesting')}</>
+              : <><ScanSearch size={15} />{t('risk.amazonBtn')}</>}
+          </button>
+        </div>
+        <p className="text-xs text-zinc-500 mt-1">{t('risk.amazonHelper')}</p>
+        {amazonToast && (
+          <p className={`mt-2 text-xs font-medium ${amazonToastType === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
+            {amazonToast}
+          </p>
+        )}
+      </div>
+
+      {/* ── Risk Timeline ── */}
+      {timeline.length > 0 && (
+        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
+          <div className="flex items-center gap-2 mb-4">
+            <Clock className="text-red-400" size={16} />
+            <span className="text-sm font-bold text-white">{t('risk.timelineTitle')}</span>
+            <span className="text-xs text-zinc-600 ml-auto">
+              {lang === 'ko' ? `${timeline.length}건 탐지` : `${timeline.length} detections`}
+            </span>
+          </div>
+          <div className="space-y-2 max-h-64 overflow-y-auto">
+            {timeline.map((item) => {
+              const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
+              const colors = {
+                critical: 'bg-red-950/60 border-red-800 text-red-400',
+                high: 'bg-orange-950/60 border-orange-800 text-orange-400',
+                medium: 'bg-amber-950/60 border-amber-800 text-amber-400',
+              };
+              const badgeColors = {
+                critical: 'bg-red-600 text-white',
+                high: 'bg-orange-600 text-white',
+                medium: 'bg-amber-600 text-white',
+              };
+              return (
+                <div key={item.id} className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${colors[sev]}`}>
+                  <AlertTriangle size={16} className="flex-shrink-0" />
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm font-medium text-white truncate">{item.name}</p>
+                    {item.detail && <p className="text-xs text-zinc-500 truncate">{item.detail}</p>}
+                  </div>
+                  <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${badgeColors[sev]}`}>
+                    {t(`risk.severity${sev.charAt(0).toUpperCase() + sev.slice(1)}`)}
+                  </span>
+                  <span className="text-[11px] text-zinc-600 flex-shrink-0 w-16 text-right">
+                    {item.source}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
 
       {/* Header Card */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
