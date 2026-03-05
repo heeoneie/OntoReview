@@ -49,6 +49,7 @@ class Node(Base):
 
     __table_args__ = (
         UniqueConstraint("normalized_name", "type", name="uq_node_norm_name_type"),
+        CheckConstraint("estimated_loss_usd >= 0", name="ck_node_estimated_loss_nonneg"),
     )
 
 

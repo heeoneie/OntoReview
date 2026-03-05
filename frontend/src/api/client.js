@@ -55,7 +55,8 @@ export const runDemoScenario = (industry = 'ecommerce', lang = 'ko') =>
   api.post('/risk/demo', null, { params: { industry, lang } });
 
 // 플레이북 API
-export const generatePlaybook = (body) => api.post('/risk/playbook/generate', body);
+export const generatePlaybook = (body, config = {}) =>
+  api.post('/risk/playbook/generate', body, config);
 
 // KPI & Amazon pipeline
 export const getKpiSummary = () => api.get('/kpi/summary');

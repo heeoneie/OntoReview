@@ -74,7 +74,7 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
       node_name: selectedNodeName,
       industry: industry || 'ecommerce',
       lang,
-    })
+    }, { signal })
       .then((res) => {
         if (!signal?.aborted) setScenarios(res.data?.scenarios ?? []);
       })
