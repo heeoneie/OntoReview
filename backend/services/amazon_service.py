@@ -25,16 +25,26 @@ _RISK_CANDIDATE_KEYWORDS = frozenset([
     "fake", "scam", "lie", "melt", "reaction",
 ])
 
-# Simple keyword → risk label mapping (fallback for legacy compatibility)
+# Keyword → canonical risk_category mapping (must match legal_cases.json)
 _HIGH_RISK_KEYWORDS = {
-    "rash": "Skin Irritation / Allergic Reaction",
-    "lawsuit": "Legal Threat / Litigation Risk",
-    "fda": "Regulatory Violation (FDA)",
-    "burn": "Product Safety Hazard",
-    "hospital": "Consumer Injury Report",
-    "allergic": "Skin Irritation / Allergic Reaction",
-    "toxic": "Chemical Safety Concern",
-    "recall": "Regulatory Violation (FDA)",
+    "rash": "Product Liability",
+    "burn": "Product Liability",
+    "allergy": "Product Liability",
+    "allergic": "Product Liability",
+    "injury": "Product Liability",
+    "hospital": "Product Liability",
+    "scar": "Product Liability",
+    "toxic": "Product Liability",
+    "lawsuit": "Regulatory & Class Action",
+    "fda": "Regulatory & Class Action",
+    "recall": "Regulatory & Class Action",
+    "sue": "Regulatory & Class Action",
+    "choking": "Regulatory & Class Action",
+    "reaction": "Product Liability",
+    "fake": "Consumer Fraud",
+    "scam": "Consumer Fraud",
+    "lie": "Consumer Fraud",
+    "melt": "Product Liability",
 }
 
 
@@ -50,7 +60,7 @@ def detect_risk_candidate(text: str) -> bool:
     if not text:
         return False
     lower = text.lower()
-    return any(kw in lower for kw in _RISK_CANDIDATE_KEYWORDS)
+    return any(re.search(rf"\b{kw}\b", lower) for kw in _RISK_CANDIDATE_KEYWORDS)
 
 MOCK_REVIEWS = [
     {

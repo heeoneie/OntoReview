@@ -7,6 +7,7 @@ Fallback: Weighted TF (Term Frequency) keyword scoring when embeddings unavailab
 import json
 import logging
 import math
+import re
 from pathlib import Path
 from typing import Optional, TypedDict
 
@@ -120,7 +121,7 @@ def _match_via_tf_top_k(
 
     for case in cases:
         keywords = case["trigger_keywords"]
-        hits = sum(1 for kw in keywords if kw in text_lower)
+        hits = sum(1 for kw in keywords if re.search(rf"\b{re.escape(kw)}\b", text_lower))
         if hits == 0:
             continue
 

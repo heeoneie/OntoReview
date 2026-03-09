@@ -23,8 +23,11 @@ RISK_CATEGORIES = [
     "Product Liability",
     "Regulatory & Class Action",
     "Consumer Fraud",
-    "Safe",
+    "Safe",  # Special: no legal case, used to mark non-risk reviews
 ]
+
+# Categories that exist in legal_cases.json (used for RAG filtering)
+LEGAL_RISK_CATEGORIES = [c for c in RISK_CATEGORIES if c != "Safe"]
 
 
 class RiskClassification(TypedDict):
@@ -97,8 +100,13 @@ OUTPUT FORMAT (JSON only):
             logger.warning("Invalid risk_category '%s', defaulting to Safe", risk_category)
             risk_category = "Safe"
 
-        confidence = float(result.get("confidence", 0.5))
-        confidence = max(0.0, min(1.0, confidence))  # Clamp to 0-1
+        # Normalize severity when category is Safe
+        if risk_category == "Safe":
+            severity = 2.0
+            confidence = 0.0
+        else:
+            confidence = float(result.get("confidence", 0.5))
+            confidence = max(0.0, min(1.0, confidence))  # Clamp to 0-1
 
         return RiskClassification(
             severity=severity,

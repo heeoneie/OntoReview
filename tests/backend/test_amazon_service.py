@@ -1,7 +1,6 @@
 """Tests for Amazon mock ingestion and risk detection pipeline."""
 
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import patch
 
 from backend.services.amazon_service import detect_risk_candidate, _classify_severity
 
@@ -22,7 +21,7 @@ class TestDetectRiskCandidate:
         assert detect_risk_candidate("This violates FDA regulations") is True
 
     def test_detects_recall_keyword(self):
-        assert detect_risk_candidate("This product should be recalled") is True
+        assert detect_risk_candidate("This product needs a recall") is True
 
     def test_detects_hospital_keyword(self):
         assert detect_risk_candidate("I ended up in the hospital") is True
@@ -88,7 +87,7 @@ class TestClassifySeverity:
         with patch("backend.services.amazon_service.classify_with_llm", side_effect=Exception("API Error")):
             severity, label = _classify_severity("I got a rash")
         assert severity == 9.0
-        assert label == "Skin Irritation / Allergic Reaction"
+        assert label == "Product Liability"
 
     def test_llm_failure_with_no_keywords_returns_safe(self):
         """When LLM fails and no keywords match, return safe."""
@@ -96,7 +95,7 @@ class TestClassifySeverity:
         # Let's use a text that passes detect_risk_candidate but has no _HIGH_RISK_KEYWORDS match
         with patch("backend.services.amazon_service.detect_risk_candidate", return_value=True):
             with patch("backend.services.amazon_service.classify_with_llm", side_effect=Exception("API Error")):
-                # Using text without any _HIGH_RISK_KEYWORDS
-                severity, label = _classify_severity("This product is a lie")  # 'lie' is in candidate but not in _HIGH_RISK_KEYWORDS
+                # Using text that passes candidate filter but has no _HIGH_RISK_KEYWORDS match
+                severity, label = _classify_severity("This product is mediocre quality")
         assert severity == 2.0
         assert label is None

@@ -274,6 +274,8 @@ class TestClassifyWithLlm:
             with patch("core.analyzer.call_openai_json", return_value=mock_response):
                 result = classify_with_llm("Some review text")
         assert result["risk_category"] == "Safe"
+        assert result["severity"] == 2.0
+        assert result["confidence"] == 0.0
 
     def test_exception_returns_safe_fallback(self):
         with patch("core.analyzer.get_client", return_value=MagicMock()):
