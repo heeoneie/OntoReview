@@ -1,4 +1,8 @@
-"""Audit event logging service — append-only trail for Duty of Care."""
+"""Audit event logging service — append-only trail for Duty of Care.
+
+Audit writes use a dedicated session so they survive caller rollbacks,
+ensuring the append-only trail remains durable.
+"""
 
 import json
 import logging
@@ -6,6 +10,7 @@ from typing import Optional
 
 from sqlalchemy.orm import Session
 
+from backend.database.database import SessionLocal
 from backend.database.models import AuditEvent, AuditEventType
 
 logger = logging.getLogger(__name__)
@@ -23,7 +28,7 @@ def _safe_json_loads(raw: str | None) -> dict | None:
 
 
 def log_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    db: Session,
+    db: Session,  # noqa: ARG001 — kept for call-site compatibility
     scan_id: str,
     event_type: AuditEventType,
     review_id: Optional[str] = None,
@@ -31,7 +36,11 @@ def log_event(  # pylint: disable=too-many-arguments,too-many-positional-argumen
     details: Optional[dict] = None,
     created_by: str = "system",
 ) -> AuditEvent:
-    """Append a single audit event to the database."""
+    """Append a single audit event using a dedicated session.
+
+    Uses an independent session so audit rows survive caller rollbacks,
+    preserving the append-only guarantee for Duty of Care evidence.
+    """
     event = AuditEvent(
         scan_id=scan_id,
         event_type=event_type,
@@ -40,8 +49,15 @@ def log_event(  # pylint: disable=too-many-arguments,too-many-positional-argumen
         details=json.dumps(details, ensure_ascii=False) if details else None,
         created_by=created_by,
     )
-    db.add(event)
-    db.flush()
+    audit_db = SessionLocal()
+    try:
+        audit_db.add(event)
+        audit_db.commit()
+    except Exception:
+        audit_db.rollback()
+        logger.warning("Failed to persist audit event %s/%s", scan_id, event_type, exc_info=True)
+    finally:
+        audit_db.close()
     return event
 
 

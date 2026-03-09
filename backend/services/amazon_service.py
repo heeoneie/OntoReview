@@ -253,9 +253,16 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
 
         # Create or update a Node for medium+ severity reviews
         if severity >= 4.0:
-            precedent_result = match_precedent(
-                full_text, risk_category=risk_label,
-            )
+            try:
+                precedent_result = match_precedent(
+                    full_text, risk_category=risk_label,
+                )
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.warning(
+                    "Precedent matching failed for '%s': %s",
+                    item["title"], exc,
+                )
+                precedent_result = None
             if precedent_result:
                 log_event(
                     db, scan_id,

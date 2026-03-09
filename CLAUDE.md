@@ -99,12 +99,16 @@ $5,400,000
 
 Do NOT build:
 
-- Vector databases (Pinecone, Chroma)
+- Vector databases (Pinecone, Chroma, Qdrant) for production paths
 - Microservice architectures
 - Complex authentication systems
 - Large-scale crawlers
 - Distributed queues
 - Kubernetes / Docker orchestration
+
+> **Note:** `chromadb` exists in requirements.txt and `core/experiments/rag_system.py`
+> as an experimental/research path only. It is NOT used in the demo pipeline.
+> TODO: Remove chromadb dependency and experiment code before production release.
 
 This is a **hackathon demo system**.
 
@@ -127,10 +131,10 @@ Database
 ORM  
 - SQLAlchemy
 
-LLM  
-- GPT-4o-mini
-- Amazon Nova via Bedrock
-- google
+LLM (default: gpt-4o-mini)
+- GPT-4o-mini (primary, default)
+- Gemini 2.0 Flash (fallback when OpenAI fails)
+- Amazon Nova via Bedrock (optional, for AWS demos only)
 
 ---
 
@@ -359,21 +363,18 @@ Displays:
 
 🤖 LLM Usage Rules
 
-Use only:
+Default model: `gpt-4o-mini`
+Fallback model: `gemini-2.0-flash` (automatic on OpenAI failure)
 
-model = "gpt-4o-mini"
+Allowed exceptions:
+- Amazon Nova via Bedrock (AWS demo environments only)
+- `text-embedding-3-small` for legal case embedding (cached at startup)
 
 Do NOT use:
+- GPT-4 / GPT-4 Turbo (too expensive for hackathon)
+- Large embedding models (ada-002 etc.)
 
-GPT-4
-
-GPT-4 Turbo
-
-large embedding APIs
-
-Maximum tokens per request:
-
-500
+Maximum tokens per request: 500
 🎬 Required Demo Scenario
 
 The entire system must support this 3-minute demo flow.

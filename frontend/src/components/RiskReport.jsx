@@ -1,4 +1,5 @@
 import { useRef, useCallback, useState } from 'react';
+import { flushSync } from 'react-dom';
 import { Download, Loader2 } from 'lucide-react';
 import html2canvas from 'html2canvas';
 import { jsPDF } from 'jspdf';
@@ -23,16 +24,20 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
     const el = reportRef.current;
     if (!el) return;
 
-    setGenerating(true);
-    // Compute timestamp at export time, not render time
-    setGeneratedAt(new Date().toLocaleString('en-US', {
+    // Flush state synchronously so DOM reflects the new timestamp before capture
+    const generatedAtText = new Date().toLocaleString('en-US', {
       year: 'numeric', month: 'long', day: 'numeric',
       hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
-    }));
+    });
+    flushSync(() => {
+      setGenerating(true);
+      setGeneratedAt(generatedAtText);
+    });
 
     try {
       // Briefly make visible for capture (still off-screen)
       el.style.display = 'block';
+      await new Promise(requestAnimationFrame);
 
       const canvas = await html2canvas(el, {
         scale: 2,

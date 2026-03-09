@@ -41,8 +41,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables ensured.")
 
-    # Pre-compute legal case embeddings (non-blocking on failure)
-    await asyncio.to_thread(warm_embedding_cache)
+    # Pre-compute legal case embeddings (fail-open with timeout)
+    try:
+        await asyncio.wait_for(
+            asyncio.to_thread(warm_embedding_cache),
+            timeout=60,
+        )
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("Embedding cache warm-up skipped: %s", exc)
 
     yield
     # ── Shutdown ── (nothing to clean up)
