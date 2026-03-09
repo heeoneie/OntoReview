@@ -9,6 +9,7 @@ Pipeline: Review → detect_risk_candidate() → classify_with_llm() → match_p
 import logging
 import re
 from datetime import datetime, timezone
+from typing import Optional
 
 from sqlalchemy.orm import Session
 
@@ -48,7 +49,7 @@ _HIGH_RISK_KEYWORDS = {
 }
 
 
-def detect_risk_candidate(text: str) -> bool:
+def detect_risk_candidate(text: Optional[str]) -> bool:
     """Fast keyword filter to identify potential risk reviews.
 
     Only candidate reviews are sent to the LLM for classification,
