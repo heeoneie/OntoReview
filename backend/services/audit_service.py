@@ -11,6 +11,17 @@ from backend.database.models import AuditEvent, AuditEventType
 logger = logging.getLogger(__name__)
 
 
+def _safe_json_loads(raw: str | None) -> dict | None:
+    """Defensively parse JSON string, returning fallback on failure."""
+    if not raw:
+        return None
+    try:
+        return json.loads(raw)
+    except json.JSONDecodeError:
+        logger.warning("Malformed JSON in audit details: %.100s", raw)
+        return {"_raw": raw}
+
+
 def log_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     db: Session,
     scan_id: str,
@@ -52,9 +63,7 @@ def get_recent_events(db: Session, limit: int = 50) -> list[dict]:
             "event_type": r.event_type,
             "review_id": r.review_id,
             "risk_category": r.risk_category,
-            "details": (
-                json.loads(r.details) if r.details else None
-            ),
+            "details": _safe_json_loads(r.details),
             "created_by": r.created_by,
         }
         for r in rows

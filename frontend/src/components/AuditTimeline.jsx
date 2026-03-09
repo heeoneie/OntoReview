@@ -1,9 +1,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { FileText, ShieldAlert, Search, Scale, CheckCircle2, Radio } from 'lucide-react';
 import { useLang } from '../contexts/LangContext';
-import axios from 'axios';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+import { getAuditEvents } from '../api/client';
 
 const EVENT_CONFIG = {
   scan_started:       { icon: Radio,         accent: 'text-sky-400',    border: 'border-sky-500/30',  bg: 'bg-sky-950/20',    badge: 'bg-sky-500/20 text-sky-300 ring-sky-500/30' },
@@ -56,8 +54,8 @@ export default function AuditTimeline() {
 
   const fetchEvents = useCallback(async () => {
     try {
-      const { data } = await axios.get(`${API_BASE}/audit/events`, { params: { limit: 50 } });
-      setEvents(data);
+      const res = await getAuditEvents(50);
+      setEvents(res.data);
     } catch {
       // silent — keep last data
     } finally {
@@ -235,8 +233,8 @@ function DetailsCell({ details, eventType }) {
   if (eventType === 'precedent_matched') {
     return (
       <div className="flex flex-col gap-0.5">
-        {details.case_name && (
-          <span className="text-amber-300/90 font-medium truncate">{details.case_name}</span>
+        {(details.case_title || details.case_name) && (
+          <span className="text-amber-300/90 font-medium truncate">{details.case_title || details.case_name}</span>
         )}
         {details.expected_exposure_usd != null && (
           <span className="text-amber-400/70 font-mono text-[10px]">

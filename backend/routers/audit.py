@@ -37,9 +37,10 @@ def create_audit_event(
     db: Session = Depends(get_db),
 ):
     """Manually log an audit event (debugging / external triggers)."""
+    scan_id = body.scan_id or str(uuid.uuid4())
     log_event(
         db,
-        scan_id=body.scan_id or str(uuid.uuid4()),
+        scan_id=scan_id,
         event_type=body.event_type,
         review_id=body.review_id,
         risk_category=body.risk_category,
@@ -47,4 +48,4 @@ def create_audit_event(
         created_by=body.created_by,
     )
     db.commit()
-    return {"status": "ok"}
+    return {"status": "ok", "scan_id": scan_id}

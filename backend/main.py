@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 import sys
@@ -41,7 +42,7 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     logger.info("Database tables ensured.")
 
     # Pre-compute legal case embeddings (non-blocking on failure)
-    warm_embedding_cache()
+    await asyncio.to_thread(warm_embedding_cache)
 
     yield
     # ── Shutdown ── (nothing to clean up)

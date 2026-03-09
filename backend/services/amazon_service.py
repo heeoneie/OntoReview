@@ -263,9 +263,9 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
                     details={
                         "title": item["title"],
                         "risk_category": risk_label,
-                        "case_name": precedent_result[
+                        "case_title": precedent_result[
                             "primary_match"
-                        ].get("case_name"),
+                        ].get("case_title"),
                         "expected_exposure_usd": precedent_result[
                             "expected_exposure_usd"
                         ],

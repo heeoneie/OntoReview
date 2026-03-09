@@ -17,17 +17,19 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
   const { t } = useLang();
   const reportRef = useRef(null);
   const [generating, setGenerating] = useState(false);
-
-  const now = new Date().toLocaleString('en-US', {
-    year: 'numeric', month: 'long', day: 'numeric',
-    hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
-  });
+  const [generatedAt, setGeneratedAt] = useState('');
 
   const generateRiskReport = useCallback(async () => {
     const el = reportRef.current;
     if (!el) return;
 
     setGenerating(true);
+    // Compute timestamp at export time, not render time
+    setGeneratedAt(new Date().toLocaleString('en-US', {
+      year: 'numeric', month: 'long', day: 'numeric',
+      hour: '2-digit', minute: '2-digit', timeZoneName: 'short',
+    }));
+
     try {
       // Briefly make visible for capture (still off-screen)
       el.style.display = 'block';
@@ -40,8 +42,6 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
         width: 794,       // A4 width at 96dpi
         windowWidth: 794,
       });
-
-      el.style.display = 'none';
 
       const imgData = canvas.toDataURL('image/png');
       const imgWidth = 210; // A4 mm
@@ -62,6 +62,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
       const filename = `OntoReview_Risk_Report_${new Date().toISOString().slice(0, 10)}.pdf`;
       pdf.save(filename);
     } finally {
+      el.style.display = 'none';
       setGenerating(false);
     }
   }, []);
@@ -122,7 +123,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
               </div>
               <div>
                 <span className="font-semibold text-gray-800">Generated: </span>
-                {now}
+                {generatedAt}
               </div>
             </div>
           </div>
@@ -195,7 +196,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
                         <td className="py-2 pr-3 text-gray-600">{item.type || '—'}</td>
                         <td className={`py-2 pr-3 font-mono ${sevColor}`}>{sev.toFixed(1)}</td>
                         <td className="py-2 text-right text-gray-700 font-mono">
-                          {item.estimated_loss_usd ? `$${item.estimated_loss_usd.toLocaleString()}` : '—'}
+                          {typeof item.estimated_loss_usd === 'number' ? `$${item.estimated_loss_usd.toLocaleString()}` : '—'}
                         </td>
                       </tr>
                     );
@@ -226,10 +227,10 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
                     const d = evt.details || {};
                     return (
                       <tr key={evt.id || i} className="border-b border-gray-100">
-                        <td className="py-2 pr-3 text-gray-800 font-medium">{d.case_name || '—'}</td>
+                        <td className="py-2 pr-3 text-gray-800 font-medium">{d.case_title || d.case_name || '—'}</td>
                         <td className="py-2 pr-3 text-gray-600">{d.risk_category || evt.risk_category || '—'}</td>
                         <td className="py-2 text-right text-gray-700 font-mono">
-                          {d.expected_exposure_usd ? `$${Number(d.expected_exposure_usd).toLocaleString()}` : '—'}
+                          {d.expected_exposure_usd != null ? `$${Number(d.expected_exposure_usd).toLocaleString()}` : '—'}
                         </td>
                       </tr>
                     );

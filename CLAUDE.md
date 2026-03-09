@@ -246,11 +246,14 @@ Example entry:
 
 ```json
 {
-  "case_name": "Johnson & Johnson Talc Case",
+  "case_id": "PL-2023-TALC",
+  "case_title": "Johnson & Johnson Talc Case",
   "risk_category": "Product Liability",
-  "keywords": ["cancer", "talc", "toxic"],
-  "settlement_usd": 2100000000
+  "trigger_keywords": ["cancer", "talc", "toxic"],
+  "historical_settlement": {"min": 1500000000, "max": 2700000000, "avg": 2100000000}
 }
+```
+
 Matching Strategy
 
 Allowed techniques:
@@ -280,10 +283,12 @@ Fields:
 
 - id
 - timestamp (Indexed)
-- scan_id (Correlation ID - UUID)
+- scan_id (Correlation ID - UUID, Indexed)
 - event_type (Enum: SCAN_STARTED, REVIEW_CLASSIFIED, PRECEDENT_MATCHED, RISK_FLAGGED, SCAN_COMPLETED)
-- risk_category
+- review_id (nullable)
+- risk_category (nullable)
 - details (JSON text)
+- created_by (default: "system")
 
 Example:
 
