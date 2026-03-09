@@ -64,6 +64,10 @@ export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
 
+// Audit trail
+export const getAuditEvents = (limit = 50) =>
+  api.get('/audit/events', { params: { limit } });
+
 // AI 모델 평가 API
 export const getEvaluationMetrics = () => api.get('/evaluate/metrics');
 export const getDatasetInfo = () => api.get('/evaluate/dataset/info');

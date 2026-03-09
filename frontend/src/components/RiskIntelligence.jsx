@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Shield, Loader2, Radio, Building2, Zap, Share2, Download, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale } from 'lucide-react';
+import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale } from 'lucide-react';
 import {
   generateOntology,
   generateComplianceReport,
@@ -9,6 +9,7 @@ import {
   getKpiSummary,
   getRiskTimeline,
   ingestAmazon,
+  getAuditEvents,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 import OntologyGraph from './OntologyGraph';
@@ -16,6 +17,8 @@ import ComplianceReport from './ComplianceReport';
 import MeetingAgenda from './MeetingAgenda';
 import MockScenario from './MockScenario';
 import RiskLoadingSpinner from './RiskLoadingSpinner';
+import AuditTimeline from './AuditTimeline';
+import RiskReport from './RiskReport';
 const DevModelQuality = import.meta.env.DEV ? lazy(() => import('./ModelQuality')) : null;
 
 const INDUSTRIES = [
@@ -175,10 +178,13 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [amazonToast, setAmazonToast] = useState('');
   const [amazonToastType, setAmazonToastType] = useState('success');
   const [timeline, setTimeline] = useState([]);
+  const [auditEvents, setAuditEvents] = useState([]);
 
   const refreshDashboard = useCallback(async () => {
     try {
-      const [kpiRes, tlRes] = await Promise.all([getKpiSummary(), getRiskTimeline()]);
+      const [kpiRes, tlRes, auditRes] = await Promise.all([
+        getKpiSummary(), getRiskTimeline(), getAuditEvents(50),
+      ]);
       const safeKpi = kpiRes.data || {};
       setKpi({
         total_scanned_reviews: Number(safeKpi.total_scanned_reviews) || 0,
@@ -188,6 +194,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         total_legal_exposure_usd: Number(safeKpi.total_legal_exposure_usd) || 0,
       });
       setTimeline(Array.isArray(tlRes.data) ? tlRes.data : []);
+      setAuditEvents(Array.isArray(auditRes.data) ? auditRes.data : []);
     } catch {
       // Reset to zero on fetch failure
       setKpi({
@@ -198,6 +205,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         total_legal_exposure_usd: 0,
       });
       setTimeline([]);
+      setAuditEvents([]);
     }
   }, []);
 
@@ -351,9 +359,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     setTimeout(() => setShareToast(''), 2500);
   };
 
-  const handleDownload = () => {
-    window.print();
-  };
+  // PDF download handled by RiskReport component
 
   const isAnyLoading = Object.values(loading).some(Boolean);
   const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
@@ -565,6 +571,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       )}
 
+      {/* ── Audit Trail (Duty of Care) ── */}
+      <AuditTimeline />
+
       {/* Header Card */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
         <div className="flex items-start justify-between mb-5">
@@ -612,12 +621,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 </div>
               )}
             </div>
-            <button
-              onClick={handleDownload}
-              className="px-3 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700 transition-colors text-sm flex items-center gap-1.5 border border-zinc-700"
-            >
-              <Download size={14} />{t('risk.downloadBtn')}
-            </button>
+            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} />
             {analysisResult && (
               <button
                 onClick={runAll}

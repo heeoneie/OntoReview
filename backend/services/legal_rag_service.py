@@ -1,6 +1,6 @@
 """Embedding-based Micro-RAG for US case law precedent matching.
 
-Primary: OpenAI text-embedding-3-small cosine similarity.
+Primary: OpenAI text-embedding-3-small cosine similarity (cached at startup).
 Fallback: Weighted TF (Term Frequency) keyword scoring when embeddings unavailable.
 """
 
@@ -8,6 +8,7 @@ import json
 import logging
 import math
 import re
+import threading
 from pathlib import Path
 from typing import Optional, TypedDict
 
@@ -42,10 +43,64 @@ def _load_cases() -> list[dict]:
         return json.load(f)
 
 
-# ── Embedding helpers ──────────────────────────────────────────────
+# ── Embedding cache ──────────────────────────────────────────────
 
 _EMBED_MODEL = "text-embedding-3-small"
 
+# Thread-safe in-memory cache: case_id → embedding vector
+_embedding_cache: dict[str, list[float]] = {}
+_cache_lock = threading.Lock()
+_cache_ready = False  # pylint: disable=invalid-name
+
+
+def warm_embedding_cache() -> None:
+    """Pre-compute embeddings for all legal case keyword phrases.
+
+    Called once at FastAPI startup. On failure, the cache stays empty
+    and match_precedent() falls back to TF scoring automatically.
+    """
+    global _cache_ready  # pylint: disable=global-statement
+    try:
+        from core.utils.openai_client import (  # pylint: disable=import-outside-toplevel
+            get_client,
+        )
+
+        client = get_client()
+        if client is None:
+            logger.warning(
+                "Embedding cache skipped: no OpenAI client available",
+            )
+            return
+
+        cases = _load_cases()
+        texts = [
+            ", ".join(c["trigger_keywords"]) for c in cases
+        ]
+        case_ids = [c["case_id"] for c in cases]
+
+        # Batch embedding — single API call for all cases
+        resp = client.embeddings.create(
+            model=_EMBED_MODEL, input=texts,
+        )
+
+        with _cache_lock:
+            for idx, item in enumerate(resp.data):
+                _embedding_cache[case_ids[idx]] = item.embedding
+            _cache_ready = True
+
+        logger.info(
+            "Embedding cache warmed: %d cases pre-computed",
+            len(_embedding_cache),
+        )
+
+    except Exception:  # pylint: disable=broad-except
+        logger.warning(
+            "Embedding cache warmup failed — TF fallback will be used",
+            exc_info=True,
+        )
+
+
+# ── Embedding helpers ──────────────────────────────────────────────
 
 def _get_embedding(client, text: str) -> list[float]:
     """Fetch a single embedding vector from OpenAI."""
@@ -65,8 +120,10 @@ def _cosine_similarity(a: list[float], b: list[float]) -> float:
 def _match_via_embedding_top_k(
     text: str, cases: list[dict], top_k: int = _TOP_K
 ) -> list[PrecedentMatch]:
-    """Cosine similarity between input text and each case's keyword phrase.
+    """Cosine similarity between input text and cached case embeddings.
 
+    Uses pre-computed cache when available (1 API call per review).
+    Falls back to per-case embedding calls if cache is cold.
     Returns top K matches above threshold, sorted by similarity descending.
     """
     try:
@@ -78,19 +135,30 @@ def _match_via_embedding_top_k(
         if client is None:
             return []
 
+        # Single API call: embed the incoming review text
         text_vec = _get_embedding(client, text)
         scored_matches: list[tuple[float, PrecedentMatch]] = []
 
+        with _cache_lock:
+            use_cache = _cache_ready
+
         for case in cases:
-            keyword_phrase = ", ".join(case["trigger_keywords"])
-            kw_vec = _get_embedding(client, keyword_phrase)
+            case_id = case["case_id"]
+
+            # Use cached embedding if available, otherwise compute
+            if use_cache and case_id in _embedding_cache:
+                kw_vec = _embedding_cache[case_id]
+            else:
+                keyword_phrase = ", ".join(case["trigger_keywords"])
+                kw_vec = _get_embedding(client, keyword_phrase)
+
             sim = _cosine_similarity(text_vec, kw_vec)
 
             # Only include matches above threshold
             if sim >= _EMBEDDING_THRESHOLD:
                 settlement = case["historical_settlement"]
                 match = PrecedentMatch(
-                    case_id=case["case_id"],
+                    case_id=case_id,
                     risk_category=case["risk_category"],
                     case_title=case["case_title"],
                     settlement_avg_usd=settlement["avg"],
@@ -103,7 +171,10 @@ def _match_via_embedding_top_k(
         return [match for _, match in scored_matches[:top_k]]
 
     except Exception:  # pylint: disable=broad-except
-        logger.warning("Embedding RAG failed, falling back to TF scoring", exc_info=True)
+        logger.warning(
+            "Embedding RAG failed, falling back to TF scoring",
+            exc_info=True,
+        )
         return []
 
 
@@ -121,7 +192,10 @@ def _match_via_tf_top_k(
 
     for case in cases:
         keywords = case["trigger_keywords"]
-        hits = sum(1 for kw in keywords if re.search(rf"\b{re.escape(kw)}\b", text_lower))
+        hits = sum(
+            1 for kw in keywords
+            if re.search(rf"\b{re.escape(kw)}\b", text_lower)
+        )
         if hits == 0:
             continue
 
@@ -148,11 +222,15 @@ def _match_via_tf_top_k(
 
 # ── Public API ────────────────────────────────────────────────────
 
-def _filter_cases(cases: list[dict], risk_category: Optional[str]) -> list[dict]:
-    """Filter cases by risk_category. Falls back to all cases if no match."""
+def _filter_cases(
+    cases: list[dict], risk_category: Optional[str],
+) -> list[dict]:
+    """Filter cases by risk_category. Falls back to all if no match."""
     if not risk_category:
         return cases
-    filtered = [c for c in cases if c["risk_category"] == risk_category]
+    filtered = [
+        c for c in cases if c["risk_category"] == risk_category
+    ]
     return filtered if filtered else cases
 
 
@@ -167,14 +245,14 @@ def match_precedent(
                        (e.g. "Product Liability"). Falls back to all cases
                        if no cases match the category.
 
-    Strategy: Category filter → Embedding cosine similarity → TF fallback.
+    Strategy: Category filter -> Embedding cosine similarity -> TF fallback.
     Returns top 3 matches with estimated exposure range.
     Returns None when no case matches above threshold.
     """
     all_cases = _load_cases()
     cases = _filter_cases(all_cases, risk_category)
 
-    # Primary: embedding-based
+    # Primary: embedding-based (uses cache — 1 API call per review)
     matches = _match_via_embedding_top_k(text, cases)
 
     # Fallback: deterministic keyword TF if embedding returns nothing
@@ -192,16 +270,19 @@ def match_precedent(
     # Calculate confidence-weighted expected exposure
     # Formula: sum(settlement * confidence) / sum(confidence)
     weighted_sum = sum(
-        m["settlement_avg_usd"] * m["confidence_score"] for m in matches
+        m["settlement_avg_usd"] * m["confidence_score"]
+        for m in matches
     )
     confidence_sum = sum(m["confidence_score"] for m in matches)
-    expected_exposure = int(weighted_sum / confidence_sum) if confidence_sum > 0 else 0
+    expected_exposure = (
+        int(weighted_sum / confidence_sum) if confidence_sum > 0 else 0
+    )
 
     return PrecedentMatchResult(
         matches=matches,
         expected_exposure_usd=expected_exposure,
         estimated_exposure_range=exposure_range,
-        primary_match=matches[0],  # Best match for backward compatibility
+        primary_match=matches[0],
     )
 
 
