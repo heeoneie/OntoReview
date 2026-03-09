@@ -65,8 +65,13 @@ class TestClassifySeverity:
             "risk_category": "Product Liability",
             "confidence": 0.95,
         }
-        with patch("backend.services.amazon_service.classify_with_llm", return_value=mock_classification):
-            severity, label = _classify_severity("I got a severe rash")
+        mock_target = (
+            "backend.services.amazon_service.classify_with_llm"
+        )
+        with patch(mock_target, return_value=mock_classification):
+            severity, label = _classify_severity(
+                "I got a severe rash",
+            )
         assert severity == 9.0
         assert label == "Product Liability"
 
@@ -77,25 +82,38 @@ class TestClassifySeverity:
             "risk_category": "Safe",
             "confidence": 0.9,
         }
-        with patch("backend.services.amazon_service.classify_with_llm", return_value=mock_classification):
-            severity, label = _classify_severity("Minor rash but it went away")
+        mock_target = (
+            "backend.services.amazon_service.classify_with_llm"
+        )
+        with patch(mock_target, return_value=mock_classification):
+            severity, label = _classify_severity(
+                "Minor rash but it went away",
+            )
         assert severity == 2.0
         assert label is None
 
     def test_llm_failure_falls_back_to_keywords(self):
         """When LLM fails, keyword fallback is used."""
-        with patch("backend.services.amazon_service.classify_with_llm", side_effect=Exception("API Error")):
+        mock_target = (
+            "backend.services.amazon_service.classify_with_llm"
+        )
+        with patch(mock_target, side_effect=Exception("API Error")):
             severity, label = _classify_severity("I got a rash")
         assert severity == 9.0
         assert label == "Product Liability"
 
     def test_llm_failure_with_no_keywords_returns_safe(self):
         """When LLM fails and no keywords match, return safe."""
-        # This is a tricky case - the text has 'allergic' keyword so it will match
-        # Let's use a text that passes detect_risk_candidate but has no _HIGH_RISK_KEYWORDS match
-        with patch("backend.services.amazon_service.detect_risk_candidate", return_value=True):
-            with patch("backend.services.amazon_service.classify_with_llm", side_effect=Exception("API Error")):
-                # Using text that passes candidate filter but has no _HIGH_RISK_KEYWORDS match
-                severity, label = _classify_severity("This product is mediocre quality")
+        candidate_target = (
+            "backend.services.amazon_service.detect_risk_candidate"
+        )
+        llm_target = (
+            "backend.services.amazon_service.classify_with_llm"
+        )
+        with patch(candidate_target, return_value=True):
+            with patch(llm_target, side_effect=Exception("Error")):
+                severity, label = _classify_severity(
+                    "This product is mediocre quality",
+                )
         assert severity == 2.0
         assert label is None
