@@ -3,11 +3,13 @@ import { useLang } from './contexts/LangContext';
 import ErrorBoundary from './components/ErrorBoundary';
 import RiskIntelligence from './components/RiskIntelligence';
 import RiskPlaybook from './components/RiskPlaybook';
+import AgentSetup from './components/AgentSetup';
 import './index.css';
 
 const TABS = [
   { id: 'risk',     labelKey: 'tabs.risk',     soon: false },
   { id: 'playbook', labelKey: 'tabs.playbook', soon: false },
+  { id: 'agent',    labelKey: 'tabs.agent',    soon: false },
 ];
 
 function App() {
@@ -98,6 +100,11 @@ function App() {
                 });
               }}
             />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'agent' && (
+          <ErrorBoundary>
+            <AgentSetup />
           </ErrorBoundary>
         )}
       </main>
