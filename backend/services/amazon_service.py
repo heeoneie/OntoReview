@@ -193,7 +193,7 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
         return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals,too-many-statements
     """Save 10 mock Amazon reviews + risk nodes into SQLite. Return summary."""
     scan_id = str(uuid.uuid4())
     reviews_saved = 0
