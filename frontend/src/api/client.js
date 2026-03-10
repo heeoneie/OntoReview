@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
-  timeout: 180000, // 크롤링 시간 고려하여 3분
+  timeout: 120000,
 });
 
 export const uploadCSV = (file) => {
@@ -63,6 +63,7 @@ export const getKpiSummary = () => api.get('/kpi/summary');
 export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
+export const runFullDemo = () => api.post('/data/demo', null, { timeout: 180000 });
 
 // Audit trail
 export const getAuditEvents = (limit = 50) =>

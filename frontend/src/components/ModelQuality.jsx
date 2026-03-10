@@ -55,15 +55,12 @@ export default function ModelQuality() {
 
   useEffect(() => {
     Promise.all([
-      getEvaluationMetrics().then((r) => r.data),
-      getDatasetInfo().then((r) => r.data),
+      getEvaluationMetrics().then((r) => r.data).catch(() => null),
+      getDatasetInfo().then((r) => r.data).catch(() => null),
     ])
       .then(([m, d]) => {
         setMetrics(m);
         setDatasetInfo(d);
-      })
-      .catch((err) => {
-        console.error('ModelQuality fetch failed:', err);
       })
       .finally(() => setLoading(false));
   }, []);

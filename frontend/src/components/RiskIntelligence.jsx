@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale } from 'lucide-react';
+import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale, Rocket } from 'lucide-react';
 import {
   generateOntology,
   generateComplianceReport,
@@ -10,6 +10,7 @@ import {
   getRiskTimeline,
   ingestAmazon,
   getAuditEvents,
+  runFullDemo,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 import OntologyGraph from './OntologyGraph';
@@ -145,6 +146,13 @@ function formatLegalExposure(amount) {
   return `$${amount.toLocaleString()}`;
 }
 
+function getErrorMessage(err, t) {
+  if (err?.code === 'ECONNABORTED' || err?.message?.includes('timeout')) {
+    return t('risk.errTimeout');
+  }
+  return err?.response?.data?.detail || t('risk.errGeneric');
+}
+
 export default function RiskIntelligence({ analysisResult, onNavigatePlaybook }) {
   const { t, lang } = useLang();
   const [demoResult, setDemoResult] = useState(null);
@@ -180,6 +188,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [scanId, setScanId] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [auditEvents, setAuditEvents] = useState([]);
+  const [fullDemoLoading, setFullDemoLoading] = useState(false);
+  const [fullDemoStep, setFullDemoStep] = useState('');
 
   const refreshDashboard = useCallback(async () => {
     try {
@@ -235,13 +245,47 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       }
       setAmazonUrl('');
       await refreshDashboard();
-    } catch {
+    } catch (err) {
       setAmazonToastType('error');
-      setAmazonToast(t('risk.errGeneric'));
+      setAmazonToast(getErrorMessage(err, t));
     } finally {
       setAmazonLoading(false);
       if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
       toastTimerRef.current = setTimeout(() => setAmazonToast(''), 4000);
+    }
+  };
+
+  const handleFullDemo = async () => {
+    if (fullDemoLoading) return;
+    setFullDemoLoading(true);
+    try {
+      // Step 1: Ingest reviews
+      setFullDemoStep(t('risk.fullDemoStep1'));
+      const res = await runFullDemo();
+      const d = res.data;
+      setScanId(d.scan_id ?? null);
+
+      // Step 2: Refresh dashboard (ontology/KPI/timeline/audit)
+      setFullDemoStep(t('risk.fullDemoStep2'));
+      await refreshDashboard();
+
+      // Step 3: Done
+      setFullDemoStep(t('risk.fullDemoStep3'));
+      setAmazonToastType('success');
+      if (lang === 'ko') {
+        setAmazonToast(`Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`);
+      } else {
+        setAmazonToast(`Full Demo complete — ${d.reviews_ingested} reviews, ${d.risks_detected} risks detected`);
+      }
+      await new Promise((r) => setTimeout(r, 1200));
+    } catch (err) {
+      setAmazonToastType('error');
+      setAmazonToast(getErrorMessage(err, t));
+    } finally {
+      setFullDemoLoading(false);
+      setFullDemoStep('');
+      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
+      toastTimerRef.current = setTimeout(() => setAmazonToast(''), 5000);
     }
   };
 
@@ -297,7 +341,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       if (data.compliance) setCompliance(data.compliance);
       if (data.meeting) setMeeting(data.meeting);
     } catch (err) {
-      setErrors({ demo: err.response?.data?.detail || t('risk.errDemo') });
+      setErrors({ demo: getErrorMessage(err, t) });
     } finally {
       setLoading((prev) => ({ ...prev, demo: false }));
     }
@@ -318,7 +362,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         generateMeetingAgenda(analysisData),
       ]);
       if (ontRes.status === 'fulfilled') setOntology(ontRes.value.data);
-      else setErrors((prev) => ({ ...prev, ontology: t('risk.errOntology') }));
+      else setErrors((prev) => ({ ...prev, ontology: getErrorMessage(ontRes.reason, t) }));
       if (compRes.status === 'fulfilled') {
         setCompliance(compRes.value.data);
         const lvl = compRes.value.data?.overall_risk_level;
@@ -326,9 +370,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         else if (lvl === '경고') setRiskLevel('ORANGE');
         else if (lvl === '주의') setRiskLevel('YELLOW');
         else setRiskLevel('GREEN');
-      } else setErrors((prev) => ({ ...prev, compliance: t('risk.errCompliance') }));
+      } else setErrors((prev) => ({ ...prev, compliance: getErrorMessage(compRes.reason, t) }));
       if (meetRes.status === 'fulfilled') setMeeting(meetRes.value.data);
-      else setErrors((prev) => ({ ...prev, meeting: t('risk.errMeeting') }));
+      else setErrors((prev) => ({ ...prev, meeting: getErrorMessage(meetRes.reason, t) }));
     } finally {
       setLoading((prev) => ({ ...prev, all: false }));
     }
@@ -341,8 +385,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       if (type === 'ontology') { const res = await generateOntology(analysisData); setOntology(res.data); }
       else if (type === 'compliance') { const res = await generateComplianceReport(analysisData); setCompliance(res.data); }
       else if (type === 'meeting') { const res = await generateMeetingAgenda(analysisData); setMeeting(res.data); }
-    } catch {
-      setErrors((prev) => ({ ...prev, [type]: t('risk.errGeneric') }));
+    } catch (err) {
+      setErrors((prev) => ({ ...prev, [type]: getErrorMessage(err, t) }));
     } finally {
       setLoading((prev) => ({ ...prev, [type]: false }));
     }
@@ -469,6 +513,41 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             <p className="text-[10px] text-zinc-600 mt-1.5">
               {t('risk.kpiScanned')}: {kpi.total_scanned_reviews.toLocaleString()}
             </p>
+          </div>
+        </div>
+      </div>
+
+      {/* ── Run Full Demo ── */}
+      <div className="bg-gradient-to-r from-indigo-950/60 to-purple-950/60 rounded-2xl border border-indigo-800/60 px-6 py-4">
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-indigo-900/60 border border-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Rocket className="text-indigo-400" size={18} />
+            </div>
+            <div>
+              <p className="text-sm font-bold text-white">{t('risk.fullDemoBtn')}</p>
+              <p className="text-xs text-zinc-500">
+                {lang === 'ko'
+                  ? '50건 리뷰 수집 → 리스크 분류 → 판례 매칭 → KPI 갱신'
+                  : '50 reviews → risk classification → precedent matching → KPI refresh'}
+              </p>
+            </div>
+          </div>
+          <div className="flex items-center gap-3">
+            {fullDemoStep && (
+              <span className="text-xs font-medium text-indigo-300 animate-pulse">
+                {fullDemoStep}
+              </span>
+            )}
+            <button
+              onClick={handleFullDemo}
+              disabled={fullDemoLoading}
+              className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
+            >
+              {fullDemoLoading
+                ? <><Loader2 className="animate-spin" size={15} />{t('risk.fullDemoRunning')}</>
+                : <><Rocket size={15} />{t('risk.fullDemoBtn')}</>}
+            </button>
           </div>
         </div>
       </div>
