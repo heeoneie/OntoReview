@@ -11,8 +11,10 @@ from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.database.database import get_db
+from backend.database.models import Edge, Node, Review
 from backend.services import progress
 from backend.services.amazon_service import ingest_amazon_mock
+from backend.services.risk_service import generate_ontology
 from backend.services.crawler_service import (
     crawl_reviews,
     save_reviews_to_csv,
@@ -307,8 +309,6 @@ def run_full_demo(db: Session = Depends(get_db)):
     """One-click full demo: ingest → ontology → KPI."""
     try:
         # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        from backend.database.models import Edge, Node, Review
-
         db.query(Edge).delete()
         db.query(Node).delete()
         db.query(Review).delete()
@@ -320,8 +320,6 @@ def run_full_demo(db: Session = Depends(get_db)):
         )
 
         # (2) Generate ontology from ingested risk nodes
-        from backend.services.risk_service import generate_ontology
-
         risk_nodes = (
             db.query(Node)
             .filter(Node.severity_score >= 4.0)
@@ -348,7 +346,7 @@ def run_full_demo(db: Session = Depends(get_db)):
                 db,
             )
             ontology_generated = True
-        except Exception:
+        except (KeyError, ValueError, RuntimeError):
             logger.warning("Ontology generation failed, skipping")
 
         # (3) Build KPI summary

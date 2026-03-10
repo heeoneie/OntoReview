@@ -191,7 +191,8 @@ MOCK_REVIEWS = [
         "title": "Serum left a permanent scar",
         "body": (
             "This vitamin C serum from a K-Beauty brand left a dark scar on my jawline after "
-            "only three uses. My dermatologist confirmed it was a chemical injury from the product. "
+            "only three uses. My dermatologist confirmed it was a chemical "
+            "injury from the product. "
             "I'm documenting everything for a potential lawsuit."
         ),
     },
@@ -593,7 +594,7 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
         return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals,too-many-statements
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals,too-many-statements,too-many-branches
     """Save 50 mock Amazon reviews + risk nodes into SQLite. Return summary."""
     scan_id = str(uuid.uuid4())
     reviews_saved = 0
