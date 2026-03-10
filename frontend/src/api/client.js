@@ -97,6 +97,13 @@ export const addCustomRule = (rule) =>
 export const deleteCustomRule = (ruleId) =>
   api.delete(`/studio/rules/${ruleId}`);
 
+// Global Compliance Tracker API
+export const getRegulations = (jurisdiction) =>
+  api.get('/compliance/regulations', { params: jurisdiction ? { jurisdiction } : {} });
+export const runComplianceCheck = (body) =>
+  api.post('/compliance/check', body);
+export const getComplianceSummary = () => api.get('/compliance/summary');
+
 // YouTube 실데이터 분석 API
 export const analyzeYouTube = (query, brand, options = {}) =>
   api.post('/youtube/analyze', {
