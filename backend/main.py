@@ -18,6 +18,7 @@ if PROJECT_ROOT not in sys.path:
 from backend.database.database import engine  # pylint: disable=wrong-import-position
 from backend.database.models import Base  # pylint: disable=wrong-import-position
 from backend.routers import (  # pylint: disable=wrong-import-position
+    agent,
     analysis,
     audit,
     data,
@@ -97,6 +98,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+app.include_router(agent.router, prefix="/api/agent", tags=["agent"])
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
 app.include_router(reply.router, prefix="/api/reply", tags=["reply"])

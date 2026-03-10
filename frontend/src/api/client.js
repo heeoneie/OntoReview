@@ -79,6 +79,13 @@ export const getDatasetInfo = () => api.get('/evaluate/dataset/info');
 export const searchBrandRisks = (brand, product) =>
   api.post('/discovery/search', { brand, product });
 
+// Agent Communication Setup API
+export const getAgentConfigs = () => api.get('/agent/configs');
+export const updateAgentConfig = (agentType, config) =>
+  api.put(`/agent/configs/${agentType}`, config);
+export const simulateAgent = (body) =>
+  api.post('/agent/simulate', body);
+
 // YouTube 실데이터 분석 API
 export const analyzeYouTube = (query, brand, options = {}) =>
   api.post('/youtube/analyze', {
