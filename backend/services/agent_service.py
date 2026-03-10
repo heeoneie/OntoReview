@@ -6,8 +6,8 @@ allowed actions, escalation thresholds, and auto-response toggles.
 
 import json
 import logging
-import re
 
+from core.utils.json_utils import extract_json_from_text
 from core.utils.openai_client import call_openai_json, get_client
 
 logger = logging.getLogger(__name__)
@@ -191,7 +191,7 @@ Rules:
         raw = call_openai_json(client, prompt)
 
         # Parse JSON from response
-        result = _extract_json(raw)
+        result = extract_json_from_text(raw)
         if result:
             result["agent_type"] = agent_type
             result["config_snapshot"] = {
@@ -268,14 +268,3 @@ def _fallback_response(  # pylint: disable=too-many-arguments,too-many-positiona
             "auto_response": config["auto_response"],
         },
     }
-
-
-def _extract_json(text: str) -> dict | None:
-    """Extract JSON object from LLM response text."""
-    match = re.search(r"\{[\s\S]*?\}", text)
-    if match:
-        try:
-            return json.loads(match.group())
-        except json.JSONDecodeError:
-            return None
-    return None

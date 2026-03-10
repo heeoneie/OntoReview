@@ -150,3 +150,28 @@ class AuditEvent(Base):
     created_by: Mapped[str] = mapped_column(
         String(64), default="system",
     )
+
+
+class CustomRule(Base):
+    """Domain-specific risk rules uploaded via Ontology Studio."""
+
+    __tablename__ = "custom_rules"
+
+    id: Mapped[int] = mapped_column(
+        Integer, primary_key=True, autoincrement=True,
+    )
+    domain_name: Mapped[str] = mapped_column(
+        String(128), nullable=False,
+    )
+    keyword: Mapped[str] = mapped_column(
+        String(256), nullable=False,
+    )
+    owl_class: Mapped[str] = mapped_column(
+        String(128), nullable=False,
+    )
+    severity_override: Mapped[float] = mapped_column(
+        Float, default=5.0,
+    )
+    created_at: Mapped[datetime] = mapped_column(
+        DateTime(timezone=True), default=_utcnow,
+    )

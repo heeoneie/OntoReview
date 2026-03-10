@@ -27,6 +27,7 @@ from backend.routers import (  # pylint: disable=wrong-import-position
     kpi,
     reply,
     risk,
+    studio,
     youtube,
 )
 from backend.services.legal_rag_service import (  # pylint: disable=wrong-import-position
@@ -34,6 +35,9 @@ from backend.services.legal_rag_service import (  # pylint: disable=wrong-import
 )
 from backend.services.ontology_engine import (  # pylint: disable=wrong-import-position
     init_ontology,
+)
+from backend.services.ontology_studio_service import (  # pylint: disable=wrong-import-position
+    load_custom_rules_into_ontology,
 )
 
 logger = logging.getLogger("ontoreview.startup")
@@ -63,6 +67,14 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
         init_ontology()
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning("OWL ontology init skipped: %s", exc)
+
+    # Load custom domain rules into OWL keyword map (fail-open)
+    try:
+        from backend.database.database import SessionLocal  # pylint: disable=import-outside-toplevel
+        with SessionLocal() as session:
+            load_custom_rules_into_ontology(session)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("Custom rules loading skipped: %s", exc)
 
     # Pre-compute legal case embeddings (fail-open with timeout)
     try:
@@ -108,6 +120,7 @@ app.include_router(youtube.router, prefix="/api/youtube", tags=["youtube"])
 app.include_router(kpi.router, prefix="/api/kpi", tags=["kpi"])
 app.include_router(audit.router, prefix="/api/audit", tags=["audit"])
 app.include_router(discovery.router, prefix="/api/discovery", tags=["discovery"])
+app.include_router(studio.router, prefix="/api/studio", tags=["studio"])
 
 
 @app.get("/api/health")
