@@ -272,6 +272,14 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const handleFullDemo = async () => {
     if (fullDemoLoading) return;
     setFullDemoLoading(true);
+    // Reset analysis states for fresh results
+    setDemoResult(null);
+    setOntology(null);
+    setCompliance(null);
+    setMeeting(null);
+    setRiskLevel(null);
+    setDataSource(null);
+    setErrors({});
     try {
       // Step 1: Ingest reviews + risk classification + precedent matching
       setFullDemoStep(t('risk.fullDemoStep1'));
@@ -279,19 +287,30 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       const d = res.data;
       setScanId(d.scan_id ?? null);
 
-      // Step 2: Refresh dashboard (KPI/timeline/audit) + fetch ontology graph
+      // Step 2: AI analysis — generate ontology, compliance, meeting via LLM
       setFullDemoStep(t('risk.fullDemoStep2'));
-      await Promise.all([refreshDashboard(), fetchOntologyGraph()]);
+      const demoRes = await runDemoScenario(industry, lang);
+      const demoData = injectBrand(demoRes.data, brandName.trim() || 'K-Brand');
+      setDemoResult(demoData);
+      setRiskLevel(demoData.risk_level);
+      if (demoData.ontology) setOntology(demoData.ontology);
+      if (demoData.compliance) setCompliance(demoData.compliance);
+      if (demoData.meeting) setMeeting(demoData.meeting);
+      setDataSource('mock');
 
-      // Step 3: Done
+      // Step 3: Refresh dashboard (KPI/timeline/audit)
       setFullDemoStep(t('risk.fullDemoStep3'));
+      await refreshDashboard();
+
+      // Step 4: Done
+      setFullDemoStep(t('risk.fullDemoStep4'));
       setAmazonToastType('success');
       if (lang === 'ko') {
         setAmazonToast(`Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`);
       } else {
         setAmazonToast(`Full Demo complete — ${d.reviews_ingested} reviews, ${d.risks_detected} risks detected`);
       }
-      await new Promise((r) => setTimeout(r, 1200));
+      await new Promise((r) => setTimeout(r, 800));
     } catch (err) {
       setAmazonToastType('error');
       setAmazonToast(getErrorMessage(err, t));
@@ -609,8 +628,68 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       </div>
 
       {/* ══════════════════════════════════════════════════════════
-           Scan Results — shown only after a scan has been executed
+           Results — unified view for both Full Demo and Risk Analysis
          ══════════════════════════════════════════════════════════ */}
+
+      {/* Loading spinner */}
+      {(loading.demo || loading.all) && (
+        <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
+      )}
+
+      {/* 스캔 애니메이션 (handleDemo flow) */}
+      {scanPhase && (
+        <div className="bg-zinc-900 rounded-2xl border border-indigo-900 p-6 flex items-center gap-4">
+          <div className="w-10 h-10 bg-indigo-950 border border-indigo-800 rounded-xl flex items-center justify-center flex-shrink-0">
+            <ScanSearch className="text-indigo-400 animate-pulse" size={20} />
+          </div>
+          <div>
+            <p className="text-sm font-semibold text-white">{t('risk.scanPhaseTitle')}</p>
+            <p className="text-xs text-zinc-500 mt-0.5">
+              <span className="text-indigo-400 font-medium">
+                {[brandName, productName].filter(Boolean).join(' ')}
+              </span>
+              {t('risk.scanPhaseHint')}
+            </p>
+          </div>
+          <div className="ml-auto flex gap-1">
+            {[0, 1, 2, 3].map((i) => (
+              <div
+                key={i}
+                className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
+                style={{ animationDelay: `${i * 0.15}s` }}
+              />
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* Error */}
+      {errors.demo && (
+        <div className="bg-red-950 border border-red-800 text-red-400 rounded-xl px-4 py-3 text-sm">{errors.demo}</div>
+      )}
+
+      {/* Risk Level Banner */}
+      <RiskLevelBanner level={riskLevel} />
+
+      {/* 데이터 소스 뱃지 */}
+      {demoResult && dataSource && (
+        <div className="flex items-center gap-2">
+          {dataSource === 'youtube' ? (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/50 border border-red-800/60 text-xs font-medium text-red-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+              {t('risk.youtube_live_data')}
+            </span>
+          ) : (
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-400">
+              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
+              {t('risk.demo_scenario')}
+            </span>
+          )}
+        </div>
+      )}
+
+      {/* Mock Scenario Cards */}
+      {demoResult && <MockScenario data={demoResult} />}
 
       {/* ── Risk Timeline ── */}
       {timeline.length > 0 && (
@@ -635,7 +714,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 high: 'bg-orange-600 text-white',
                 medium: 'bg-amber-600 text-white',
               };
-              // Determine risk category label from case_id prefix
               const getCaseLabel = (caseId) => {
                 if (!caseId) return null;
                 if (caseId.startsWith('PL-')) return t('risk.caseLabelProductLiability');
@@ -659,7 +737,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                       {item.source}
                     </span>
                   </div>
-                  {/* Legal Case Badge Row */}
                   {item.case_id && (
                     <div className="flex items-center gap-2 ml-7">
                       <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-950/70 border border-indigo-800/60 text-[10px] font-medium text-indigo-300">
@@ -678,7 +755,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       )}
 
-      {/* ── Ontology Graph (from DB after Full Demo, or from LLM analysis) ── */}
+      {/* ── Ontology Graph ── */}
       {(ontology || loading.ontology) && !loading.demo && !loading.all && (
         <OntologyGraph
           id="ontology-graph"
@@ -690,10 +767,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         />
       )}
 
-      {/* ── Audit Trail (Duty of Care) — only after scan ── */}
-      {hasScanned && <AuditTimeline />}
-
-      {/* ── Compliance + Meeting (from LLM analysis) ── */}
+      {/* ── Compliance + Meeting ── */}
       {(compliance || meeting || loading.compliance || loading.meeting) && !loading.demo && !loading.all && (
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           <ComplianceReport
@@ -710,6 +784,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           />
         </div>
       )}
+
+      {/* ── Audit Trail (Duty of Care) — only after scan ── */}
+      {hasScanned && <AuditTimeline />}
 
       {/* ══════════════════════════════════════════════════════════
            Advanced Analysis — brand/industry-specific risk scanning
@@ -900,68 +977,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       </div>
 
-      {/* Error */}
-      {errors.demo && (
-        <div className="bg-red-950 border border-red-800 text-red-400 rounded-xl px-4 py-3 text-sm">{errors.demo}</div>
-      )}
-
-      {/* 스캔 애니메이션 */}
-      {scanPhase && (
-        <div className="bg-zinc-900 rounded-2xl border border-indigo-900 p-6 flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-950 border border-indigo-800 rounded-xl flex items-center justify-center flex-shrink-0">
-            <ScanSearch className="text-indigo-400 animate-pulse" size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-white">{t('risk.scanPhaseTitle')}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              <span className="text-indigo-400 font-medium">
-                {[brandName, productName].filter(Boolean).join(' ')}
-              </span>
-              {t('risk.scanPhaseHint')}
-            </p>
-          </div>
-          <div className="ml-auto flex gap-1">
-            {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Risk Level Banner */}
-      <RiskLevelBanner level={riskLevel} />
-
-      {/* 데이터 소스 뱃지 */}
-      {demoResult && dataSource && (
-        <div className="flex items-center gap-2">
-          {dataSource === 'youtube' ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/50 border border-red-800/60 text-xs font-medium text-red-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
-              {t('risk.youtube_live_data')}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              {t('risk.demo_scenario')}
-            </span>
-          )}
-        </div>
-      )}
-
-      {/* Mock Scenario Cards */}
-      {demoResult && <MockScenario data={demoResult} />}
-
-      {/* 전체 로딩 스피너 */}
-      {(loading.demo || loading.all) && (
-        <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
-      )}
-
       {/* Empty State — only when no scan and no analysis results */}
-      {!isAnyLoading && !hasResults && !demoResult && !hasScanned && (
+      {!isAnyLoading && !hasResults && !demoResult && !hasScanned && !fullDemoLoading && (
         <div className="bg-zinc-900 rounded-2xl border border-dashed border-zinc-700 p-12 text-center">
           <Shield className="text-zinc-700 mx-auto mb-3" size={44} />
           <p className="text-zinc-500 text-sm leading-relaxed">
