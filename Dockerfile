@@ -1,27 +1,31 @@
-FROM python:3.11-slim
+# ── Stage 1: Frontend Build ──
+FROM node:20-alpine AS builder
 
-# Install Node.js for frontend build
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    curl \
-    && curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
-    && apt-get install -y --no-install-recommends nodejs \
-    && apt-get clean && rm -rf /var/lib/apt/lists/*
+WORKDIR /build
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci --ignore-scripts
+COPY frontend/ .
+RUN npm run build
+
+# ── Stage 2: Python Runtime ──
+FROM python:3.11-slim
 
 WORKDIR /app
 
-# Install Python dependencies
-COPY requirements.txt .
-RUN pip install --no-cache-dir -r requirements.txt \
-    && pip install --no-cache-dir uvicorn[standard] fastapi
+# Install Python dependencies first (layer cache)
+COPY requirements-prod.txt .
+RUN pip install --no-cache-dir -r requirements-prod.txt \
+    && pip install --no-cache-dir uvicorn[standard] fastapi \
+    && rm -rf /root/.cache/pip
 
-# Copy project files
-COPY . .
+# Copy backend & core source
+COPY backend/ backend/
+COPY core/ core/
 
-# Build frontend
-RUN cd frontend && npm ci && npm run build
+# Copy frontend build artifacts from Stage 1
+COPY --from=builder /build/dist frontend/dist
 
 # Expose port (Railway sets PORT env var)
 EXPOSE ${PORT:-8000}
 
-# Start server
 CMD uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}
