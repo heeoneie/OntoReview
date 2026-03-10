@@ -108,7 +108,12 @@ function CustomRiskNode({ data }) {
       <div className="flex items-center gap-2 mb-1">
         <Icon size={14} className="text-zinc-400 flex-shrink-0" />
         <span className="text-xs text-zinc-500 capitalize">{data.type}</span>
-        {isOwl && (
+        {isOwl && data.owl_class && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium truncate max-w-[90px]" title={data.owl_class}>
+            {data.owl_class}
+          </span>
+        )}
+        {isOwl && !data.owl_class && (
           <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">
             OWL
           </span>
@@ -483,21 +488,26 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               {selectedNode.data.is_owl && (
                 <div>
                   <h5 className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider mb-2">
-                    OWL Ontology Reasoning
+                    OWL Ontology Classification
                   </h5>
-                  <div className="bg-purple-950/30 border border-purple-800/40 rounded-lg p-2.5 space-y-1.5">
-                    <p className="text-[10px] text-purple-300">
+                  <div className="bg-purple-950/30 border border-purple-800/40 rounded-lg p-3 space-y-2">
+                    {selectedNode.data.owl_class && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-zinc-500">Class</span>
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-700/50 text-purple-200 font-mono font-semibold">
+                          {selectedNode.data.owl_class}
+                        </span>
+                      </div>
+                    )}
+                    <p className="text-[10px] text-purple-300/70">
                       Detected via OWL class hierarchy inference
                     </p>
-                    {selectedNode.data.owl_class && (
-                      <p className="text-[10px] text-zinc-400">
-                        Class: <span className="text-purple-300 font-mono">{selectedNode.data.owl_class}</span>
-                      </p>
-                    )}
                     {selectedNode.data.instance_count > 0 && (
-                      <p className="text-[10px] text-zinc-400">
-                        Instances: <span className="text-amber-300 font-mono">{selectedNode.data.instance_count}</span>
-                      </p>
+                      <div className="flex items-center gap-2">
+                        <span className="text-[10px] text-zinc-500">Instances</span>
+                        <span className="text-xs text-amber-300 font-mono font-semibold">{selectedNode.data.instance_count}</span>
+                        <span className="text-[10px] text-zinc-600">accumulated</span>
+                      </div>
                     )}
                   </div>
                 </div>

@@ -15,7 +15,9 @@ from sqlalchemy.orm import Session
 
 # Ontology persistence
 from backend.database.graph_store import persist_ontology
-from backend.services.ontology_engine import owl_to_reactflow, get_ontology_stats
+from backend.services.ontology_engine import (
+    owl_to_reactflow, get_ontology_stats, classify_with_ontology,
+)
 from core import config as _cfg
 from core.utils.json_utils import extract_json_from_text
 from core.utils.openai_client import call_openai_json, get_client
@@ -777,6 +779,24 @@ def _signals_to_text(signals: list) -> str:
     return json.dumps(signals, ensure_ascii=False, indent=2)
 
 
+def _enrich_nodes_with_owl(ontology: dict) -> None:
+    """Apply OWL classification to ontology nodes in-place."""
+    for node in ontology.get("nodes", []):
+        label = node.get("label") or node.get("name") or ""
+        severity = float(node.get("severity") or node.get("severity_score") or 0)
+        try:
+            owl_result = classify_with_ontology(
+                label, {"severity": severity, "risk_category": node.get("type")},
+            )
+        except Exception:  # pylint: disable=broad-except
+            continue
+        if owl_result.get("risk_class", "RiskEvent") != "RiskEvent":
+            node["is_owl"] = True
+            node["owl_class"] = owl_result["risk_class"]
+            node["reasoning_path"] = owl_result.get("reasoning_path", [])
+            node["severity"] = owl_result.get("severity", severity)
+
+
 def _demo_generate_ontology(
     client, signals_text: str, incident_context: str, lang: str = "ko",
     db: Session | None = None,
@@ -817,6 +837,7 @@ risk_type 노드에 severity 10 포함."""
     result = extract_json_from_text(content)
     if result and "nodes" in result:
         persist_ontology(db, result, source="demo")
+        _enrich_nodes_with_owl(result)
         return result
     return {"nodes": [], "links": [], "summary": "온톨로지 생성 실패"}
 
