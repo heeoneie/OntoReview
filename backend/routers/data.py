@@ -310,7 +310,7 @@ def run_full_demo(db: Session = Depends(get_db)):
     demo_url = "https://amazon.com/dp/B0DEMO50"
     try:
         # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        # TODO: Scope Edge deletion to demo-related edges only in production
+        # FUTURE: Scope Edge deletion to demo-related edges only in production
         db.query(Edge).delete()
         db.query(Node).filter(Node.source == "amazon").delete()
         db.query(Review).filter(
