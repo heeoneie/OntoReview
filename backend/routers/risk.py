@@ -119,6 +119,9 @@ def get_ontology_graph(
                 "label": n.name,
                 "type": n.type,
                 "severity_score": n.severity_score,
+                "is_owl": bool(n.owl_class),
+                "owl_class": n.owl_class,
+                "reasoning_path": n.reasoning_path,
             },
             "position": {"x": 0, "y": 0},
         }

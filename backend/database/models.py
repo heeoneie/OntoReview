@@ -46,6 +46,8 @@ class Node(Base):
     case_id: Mapped[str | None] = mapped_column(String(32), nullable=True)
     estimated_loss_usd: Mapped[int] = mapped_column(Integer, default=0)
     source: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    owl_class: Mapped[str | None] = mapped_column(String(128), nullable=True)
+    reasoning_path: Mapped[str | None] = mapped_column(Text, nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), default=_utcnow)
     last_seen_at: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), default=_utcnow, onupdate=_utcnow,

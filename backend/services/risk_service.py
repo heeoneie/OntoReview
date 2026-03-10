@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 # Ontology persistence
 from backend.database.graph_store import persist_ontology
+from backend.services.ontology_engine import owl_to_reactflow, get_ontology_stats
 from core import config as _cfg
 from core.utils.json_utils import extract_json_from_text
 from core.utils.openai_client import call_openai_json, get_client
@@ -67,9 +68,34 @@ def _get_industry(analysis_data: dict) -> dict:
 
 
 def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
-    """분석 결과를 기반으로 온톨로지 지식 그래프 생성"""
+    """분석 결과를 기반으로 온톨로지 지식 그래프 생성.
+
+    Merges OWL ontology reasoning data with LLM-generated graph.
+    OWL nodes are marked with is_owl=True and include reasoning_path.
+    """
     lang = analysis_data.get("lang", "ko")
     ind = _get_industry(analysis_data)
+
+    # Step 1: Get OWL ontology state (accumulated from prior scans)
+    owl_graph = None
+    owl_stats = None
+    try:
+        owl_graph = owl_to_reactflow(min_severity=0.0)
+        owl_stats = get_ontology_stats()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("OWL ontology export failed, falling back to LLM-only")
+
+    # Step 2: LLM-generated ontology graph (enriched with OWL context)
+    owl_context = ""
+    if owl_stats and owl_stats.get("instances", 0) > 0:
+        owl_context = f"""
+## OWL 온톨로지 현황 (자동 추론 결과)
+- 리스크 클래스: {owl_stats['classes']}개
+- 축적된 인스턴스: {owl_stats['instances']}개
+- 클래스별 분포: {json.dumps(owl_stats.get('class_breakdown', {}), ensure_ascii=False)}
+이 데이터를 반영하여 온톨로지 그래프에 OWL 추론 결과를 통합하세요.
+"""
+
     prompt = f"""다음은 {ind['name']} 산업의 멀티채널({ind['channels']}) 고객 피드백 분석 결과입니다.
 이 데이터를 기반으로 리스크 온톨로지 지식 그래프를 생성하세요.
 
@@ -78,7 +104,7 @@ def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
 - 급증 이슈: {json.dumps(analysis_data.get('emerging_issues', []), ensure_ascii=False)}
 - 개선 권고: {json.dumps(analysis_data.get('recommendations', []), ensure_ascii=False)}
 - 전체 카테고리: {json.dumps(analysis_data.get('all_categories', {}), ensure_ascii=False)}
-
+{owl_context}
 ## 산업 컨텍스트
 - 산업: {ind['name']}
 - 주요 리스크: {ind['risks']}
@@ -129,7 +155,27 @@ def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
     result = extract_json_from_text(content)
 
     if not result or "nodes" not in result:
+        # Fall back to OWL-only graph if LLM fails
+        if owl_graph and owl_graph.get("nodes"):
+            return owl_graph
         return {"nodes": [], "links": [], "summary": "온톨로지 생성에 실패했습니다."}
+
+    # Step 3: Merge OWL nodes into LLM graph
+    if owl_graph and owl_graph.get("nodes"):
+        existing_labels = {n.get("label", "").lower() for n in result["nodes"]}
+        max_id = len(result["nodes"])
+        for owl_node in owl_graph["nodes"]:
+            if owl_node["label"].lower() not in existing_labels:
+                max_id += 1
+                owl_node["id"] = f"node_{max_id}"
+                owl_node["is_owl"] = True
+                result["nodes"].append(owl_node)
+                existing_labels.add(owl_node["label"].lower())
+
+        result["is_owl_enhanced"] = True
+        if owl_stats:
+            result["owl_stats"] = owl_stats
+
     persist_ontology(db, result, source="generate_ontology")
     return result
 
@@ -158,7 +204,7 @@ def generate_compliance_report(analysis_data: dict) -> dict:
   "report_title": "{ind['name']} 리스크 모니터링 보고서",
   "report_date": "{date.today().isoformat()}",
   "overall_risk_level": "주의",
-  "monitoring_summary": "최근 24시간 동안 {ind['channels']} 등 다수 채널에서 총 N건의 고객 피드백을 모니터링한 결과, 부정 피드백 M건이 감지되었습니다. 주요 리스크 영역은 ...",
+  "monitoring_summary": "최근 24시간 동안 {ind['channels']} 등 다수 채널에서 총 N건의 고객 피드백을 모니터링한 결과, 부정 피드백 M건이 감지되었습니다. 주요 리스크 영역은 ...",  # pylint: disable=line-too-long
   "monitored_channels": [
     {{"channel": "채널명", "feed_count": 100, "risk_count": 15, "status": "active"}}
   ],
@@ -756,7 +802,7 @@ def _demo_generate_ontology(
 ## 출력 형식
 {{
   "nodes": [
-    {{"id": "n1", "label": "노드명", "type": "category|root_cause|department|risk_type|channel|person|event|location|legal_clause", "severity": 8}}
+    {{"id": "n1", "label": "노드명", "type": "category|root_cause|department|risk_type|channel|person|event|location|legal_clause", "severity": 8}}  # pylint: disable=line-too-long
   ],
   "links": [
     {{"source": "n1", "target": "n2", "relation": "관계명"}}
@@ -796,7 +842,7 @@ def _demo_generate_compliance(
   "report_title": "OO 충전기 폭발 사건 긴급 리스크 보고서",
   "report_date": "2026-02-20",
   "overall_risk_level": "위험",
-  "monitoring_summary": "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일한 충전기 화재/폭발 사건이 동시 감지되었습니다. 개별 채널 황색 경보가 복합 발생으로 치명적(RED) 수준으로 격상되었습니다. 법적 분쟁 가능성, 집단 불매운동 징후, 기술적 결함 공개 등 3중 위기가 중첩된 상태입니다.",
+  "monitoring_summary": "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일한 충전기 화재/폭발 사건이 동시 감지되었습니다. 개별 채널 황색 경보가 복합 발생으로 치명적(RED) 수준으로 격상되었습니다.",  # pylint: disable=line-too-long
   "monitored_channels": [
     {{"channel": "쿠팡 리뷰", "feed_count": 1, "risk_count": 1, "status": "active"}},
     {{"channel": "YouTube 댓글", "feed_count": 1, "risk_count": 1, "status": "active"}},
@@ -812,19 +858,23 @@ def _demo_generate_compliance(
   "risk_events": [
     {{
       "id": 1, "severity": "critical", "category": "제품 안전 결함",
-      "channel": "쿠팡 리뷰", "description": "설명", "affected_count": 1, "recommended_action": "즉각 리콜 검토"
+      "channel": "쿠팡 리뷰", "description": "설명",
+      "affected_count": 1, "recommended_action": "즉각 리콜 검토"
     }},
     {{
       "id": 2, "severity": "high", "category": "집단 불매운동 징후",
-      "channel": "YouTube 댓글", "description": "설명", "affected_count": 156, "recommended_action": "대응 공지 게시"
+      "channel": "YouTube 댓글", "description": "설명",
+      "affected_count": 156, "recommended_action": "대응 공지 게시"
     }},
     {{
       "id": 3, "severity": "high", "category": "법적 분쟁 가능성",
-      "channel": "네이버 블로그", "description": "설명", "affected_count": 1200, "recommended_action": "법무팀 즉각 검토"
+      "channel": "네이버 블로그", "description": "설명",
+      "affected_count": 1200, "recommended_action": "법무팀 즉각 검토"
     }},
     {{
       "id": 4, "severity": "high", "category": "기술적 결함 공개 폭로",
-      "channel": "뽐뿌 커뮤니티", "description": "설명", "affected_count": 4500, "recommended_action": "제품 긴급 검수"
+      "channel": "뽐뿌 커뮤니티", "description": "설명",
+      "affected_count": 4500, "recommended_action": "제품 긴급 검수"
     }}
   ],
   "next_actions": ["즉각 조치 1", "즉각 조치 2", "즉각 조치 3"]
@@ -920,7 +970,8 @@ def _real_generate_ontology(  # pylint: disable=too-many-arguments,too-many-posi
 ## 출력 형식
 {{
   "nodes": [
-    {{"id": "n1", "label": "노드명 (영문)", "type": "signal|event|impact|response", "layer": 0, "severity": 7}}
+    {{"id": "n1", "label": "노드명 (영문)", "type": "signal|event|impact|response",
+      "layer": 0, "severity": 7}}
   ],
   "links": [
     {{"source": "n1", "target": "n2", "relation": "관계명"}}

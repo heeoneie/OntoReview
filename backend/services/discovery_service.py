@@ -245,7 +245,7 @@ def _mock_results() -> list[dict]:
     ]
 
 
-async def search_brand_risks(
+async def search_brand_risks(  # pylint: disable=too-many-locals
     brand_name: str, product_name: str | None = None,
 ) -> dict:
     """Search the web for brand-related risk signals.
