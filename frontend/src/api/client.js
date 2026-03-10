@@ -75,6 +75,10 @@ export const getAuditEvents = (limit = 50) =>
 export const getEvaluationMetrics = () => api.get('/evaluate/metrics');
 export const getDatasetInfo = () => api.get('/evaluate/dataset/info');
 
+// Web Discovery API
+export const searchBrandRisks = (brand, product) =>
+  api.post('/discovery/search', { brand, product });
+
 // YouTube 실데이터 분석 API
 export const analyzeYouTube = (query, brand, options = {}) =>
   api.post('/youtube/analyze', {

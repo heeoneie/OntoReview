@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale, Rocket } from 'lucide-react';
+import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale, Rocket, Globe, ExternalLink } from 'lucide-react';
 import {
   generateOntology,
   generateComplianceReport,
@@ -12,6 +12,7 @@ import {
   getAuditEvents,
   runFullDemo,
   getOntologyGraph,
+  searchBrandRisks,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 import OntologyGraph from './OntologyGraph';
@@ -191,6 +192,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [auditEvents, setAuditEvents] = useState([]);
   const [fullDemoLoading, setFullDemoLoading] = useState(false);
   const [fullDemoStep, setFullDemoStep] = useState('');
+  const [discoveryResults, setDiscoveryResults] = useState(null);
+  const [discoveryLoading, setDiscoveryLoading] = useState(false);
 
   const refreshDashboard = useCallback(async () => {
     try {
@@ -269,6 +272,20 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     }
   };
 
+  const handleDiscoveryScan = async (brand, product) => {
+    const b = brand || brandName.trim();
+    if (!b || discoveryLoading) return;
+    setDiscoveryLoading(true);
+    try {
+      const res = await searchBrandRisks(b, product || productName.trim() || null);
+      setDiscoveryResults(res.data);
+    } catch {
+      setDiscoveryResults(null);
+    } finally {
+      setDiscoveryLoading(false);
+    }
+  };
+
   const handleFullDemo = async () => {
     if (fullDemoLoading) return;
     setFullDemoLoading(true);
@@ -302,7 +319,11 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       setFullDemoStep(t('risk.fullDemoStep3'));
       await refreshDashboard();
 
-      // Step 4: Done
+      // Step 4: Web Discovery scan
+      setFullDemoStep(t('risk.fullDemoStep5'));
+      await handleDiscoveryScan(brandName.trim() || 'K-Brand', productName.trim() || null);
+
+      // Step 5: Done
       setFullDemoStep(t('risk.fullDemoStep4'));
       setAmazonToastType('success');
       if (lang === 'ko') {
@@ -440,7 +461,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
   // PDF download handled by RiskReport component
 
-  const isAnyLoading = Object.values(loading).some(Boolean) || fullDemoLoading;
+  const isAnyLoading = Object.values(loading).some(Boolean) || fullDemoLoading || discoveryLoading;
   const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
   const hasResults = ontology || compliance || meeting;
   const hasScanned = scanId || timeline.length > 0;
@@ -566,8 +587,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               <p className="text-sm font-bold text-white">{t('risk.fullDemoBtn')}</p>
               <p className="text-xs text-zinc-500">
                 {lang === 'ko'
-                  ? '50건 리뷰 수집 → 리스크 분류 → 판례 매칭 → KPI 갱신'
-                  : '50 reviews → risk classification → precedent matching → KPI refresh'}
+                  ? '50건 리뷰 수집 → 리스크 분류 → 판례 매칭 → KPI 갱신 → 웹 탐색'
+                  : '50 reviews → risk classification → precedent matching → KPI → web discovery'}
               </p>
             </div>
           </div>
@@ -752,6 +773,76 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               );
             })}
           </div>
+        </div>
+      )}
+
+      {/* ── Web Discovery Results ── */}
+      {(discoveryResults || discoveryLoading) && (
+        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-2">
+              <Globe className="text-cyan-400" size={16} />
+              <span className="text-sm font-bold text-white">{t('discovery.title')}</span>
+              {discoveryResults && (
+                <span className="text-xs text-zinc-500 ml-2">
+                  {t('discovery.result')
+                    .replace('{count}', discoveryResults.total_scanned)
+                    .replace('{risks}', discoveryResults.risks_found)}
+                </span>
+              )}
+            </div>
+            <button
+              onClick={() => handleDiscoveryScan()}
+              disabled={discoveryLoading || !brandName.trim()}
+              className="px-3 py-1.5 bg-cyan-900/40 text-cyan-300 rounded-lg text-xs font-medium border border-cyan-800/60 hover:bg-cyan-900/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
+            >
+              {discoveryLoading
+                ? <><Loader2 className="animate-spin" size={12} />{t('discovery.scanning')}</>
+                : <><Globe size={12} />{t('discovery.scan')}</>}
+            </button>
+          </div>
+
+          {discoveryLoading && (
+            <div className="flex items-center justify-center py-8 gap-2 text-zinc-500 text-sm">
+              <Loader2 className="animate-spin text-cyan-400" size={18} />
+              {t('discovery.scanning')}
+            </div>
+          )}
+
+          {discoveryResults && discoveryResults.results.length > 0 && (
+            <div className="space-y-2 max-h-80 overflow-y-auto">
+              {discoveryResults.results.map((item, idx) => (
+                <div key={idx} className="bg-red-950/30 border border-red-900/50 rounded-xl px-4 py-3">
+                  <div className="flex items-start gap-3">
+                    <AlertTriangle className="text-red-400 flex-shrink-0 mt-0.5" size={14} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
+                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-400">
+                          <Globe size={9} />
+                          {item.source_domain}
+                        </span>
+                        <a
+                          href={item.url}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                        >
+                          <ExternalLink size={9} />
+                          {t('discovery.source')}
+                        </a>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
+
+          {discoveryResults && discoveryResults.results.length === 0 && (
+            <p className="text-sm text-zinc-500 text-center py-6">{t('discovery.empty')}</p>
+          )}
         </div>
       )}
 
