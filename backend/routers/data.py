@@ -307,17 +307,30 @@ def ingest_amazon_reviews(
 @router.post("/demo")
 def run_full_demo(db: Session = Depends(get_db)):
     """One-click full demo: ingest → ontology → KPI."""
+    demo_url = "https://amazon.com/dp/B0DEMO50"
     try:
-        # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        db.query(Edge).delete()
-        db.query(Node).delete()
-        db.query(Review).delete()
-        db.commit()
+        # (0) Clear stale *demo* data only — preserve user-ingested data
+        demo_review_ids = [
+            r.id for r in db.query(Review.id)
+            .filter(Review.product_url == demo_url)
+            .all()
+        ]
+        if demo_review_ids:
+            db.query(Edge).filter(
+                Edge.source_id.in_(
+                    db.query(Node.id).filter(Node.source == "amazon")
+                )
+            ).delete(synchronize_session="fetch")
+            db.query(Node).filter(Node.source == "amazon").delete(
+                synchronize_session="fetch"
+            )
+            db.query(Review).filter(
+                Review.product_url == demo_url
+            ).delete(synchronize_session="fetch")
+            db.commit()
 
         # (1) Amazon mock ingest
-        ingest_result = ingest_amazon_mock(
-            "https://amazon.com/dp/B0DEMO50", db,
-        )
+        ingest_result = ingest_amazon_mock(demo_url, db)
 
         # (2) Generate ontology from ingested risk nodes
         risk_nodes = (
@@ -346,7 +359,7 @@ def run_full_demo(db: Session = Depends(get_db)):
                 db,
             )
             ontology_generated = True
-        except (KeyError, ValueError, RuntimeError):
+        except Exception:  # pylint: disable=broad-except
             logger.warning("Ontology generation failed, skipping")
 
         # (3) Build KPI summary

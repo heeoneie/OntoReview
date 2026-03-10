@@ -52,7 +52,7 @@ export const generateOntology = (analysisData) => api.post('/risk/ontology', ana
 export const generateComplianceReport = (analysisData) => api.post('/risk/compliance', analysisData);
 export const generateMeetingAgenda = (analysisData) => api.post('/risk/meeting', analysisData);
 export const runDemoScenario = (industry = 'ecommerce', lang = 'ko') =>
-  api.post('/risk/demo', null, { params: { industry, lang } });
+  api.post('/risk/demo', null, { params: { industry, lang }, timeout: 180000 });
 
 // 플레이북 API
 export const generatePlaybook = (body, config = {}) =>

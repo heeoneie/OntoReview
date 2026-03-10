@@ -42,33 +42,33 @@ _HIGH_RISK_KEYWORDS = {
     "hospital": "Product Liability",
     "scar": "Product Liability",
     "toxic": "Product Liability",
-    "lawsuit": "Regulatory & Class Action",
-    "fda": "Regulatory & Class Action",
-    "recall": "Regulatory & Class Action",
-    "sue": "Regulatory & Class Action",
-    "choking": "Regulatory & Class Action",
+    "lawsuit": "Class Action Risk",
+    "fda": "Regulatory Risk",
+    "recall": "Regulatory Risk",
+    "sue": "Class Action Risk",
+    "choking": "Consumer Safety",
     "reaction": "Product Liability",
-    "fake": "Consumer Fraud",
-    "scam": "Consumer Fraud",
-    "lie": "Consumer Fraud",
+    "fake": "False Advertising",
+    "scam": "False Advertising",
+    "lie": "False Advertising",
     "melt": "Product Liability",
-    "contaminated": "Food Safety",
-    "expired": "Food Safety",
-    "mold": "Food Safety",
-    "spoiled": "Food Safety",
-    "bacteria": "Food Safety",
-    "stomach": "Food Safety",
-    "vomit": "Food Safety",
-    "diarrhea": "Food Safety",
-    "parasite": "Food Safety",
-    "counterfeit": "Consumer Fraud",
-    "misleading": "Consumer Fraud",
-    "deceptive": "Consumer Fraud",
+    "contaminated": "Consumer Safety",
+    "expired": "Consumer Safety",
+    "mold": "Consumer Safety",
+    "spoiled": "Consumer Safety",
+    "bacteria": "Consumer Safety",
+    "stomach": "Consumer Safety",
+    "vomit": "Consumer Safety",
+    "diarrhea": "Consumer Safety",
+    "parasite": "Consumer Safety",
+    "counterfeit": "False Advertising",
+    "misleading": "False Advertising",
+    "deceptive": "False Advertising",
     "swollen": "Product Liability",
     "blister": "Product Liability",
     "hives": "Product Liability",
-    "banned": "Regulatory & Class Action",
-    "prohibited": "Regulatory & Class Action",
+    "banned": "Class Action Risk",
+    "prohibited": "Class Action Risk",
 }
 
 
@@ -594,13 +594,94 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
         return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals,too-many-statements,too-many-branches
+def _match_precedent_for_review(
+    full_text: str, risk_label: str, title: str, scan_id: str, db: Session,
+):
+    """Match legal precedent and log audit events. Returns (precedent_result, case_id, exposure)."""
+    try:
+        precedent_result = match_precedent(full_text, risk_category=risk_label)
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("Precedent matching failed for '%s': %s", title, exc)
+        precedent_result = None
+
+    if precedent_result:
+        log_event(
+            db, scan_id, AuditEventType.PRECEDENT_MATCHED,
+            details={
+                "title": title,
+                "risk_category": risk_label,
+                "case_title": precedent_result["primary_match"].get("case_title"),
+                "expected_exposure_usd": precedent_result["expected_exposure_usd"],
+            },
+        )
+
+    return precedent_result
+
+
+def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
+    item: dict, severity: float, risk_label: str, precedent_result,
+    seen_nodes: dict, now: datetime, db: Session,
+) -> None:
+    """Create or update a risk Node for a review."""
+    if precedent_result:
+        primary = precedent_result["primary_match"]
+        expected_exposure = precedent_result["expected_exposure_usd"]
+        dynamic_exposure = int(expected_exposure * (severity / 10.0))
+        case_id = primary["case_id"]
+    else:
+        dynamic_exposure = 0
+        case_id = None
+
+    node_title = item["title"].strip().lower()
+    normalized = (risk_label or "unknown risk").strip().lower()
+    node_key = f"{node_title}::{normalized}::event"
+
+    if node_key in seen_nodes:
+        existing_node = seen_nodes[node_key]
+        existing_node.severity_score = max(existing_node.severity_score or 0, severity)
+        existing_node.last_seen_at = now
+        if precedent_result:
+            existing_node.case_id = case_id
+            existing_node.estimated_loss_usd = max(
+                existing_node.estimated_loss_usd or 0, dynamic_exposure
+            )
+    else:
+        existing_node = (
+            db.query(Node)
+            .filter(Node.normalized_name == node_key, Node.type == "event")
+            .first()
+        )
+        if existing_node:
+            existing_node.severity_score = max(existing_node.severity_score or 0, severity)
+            existing_node.last_seen_at = now
+            if precedent_result:
+                existing_node.case_id = case_id
+                existing_node.estimated_loss_usd = max(
+                    existing_node.estimated_loss_usd or 0, dynamic_exposure
+                )
+            seen_nodes[node_key] = existing_node
+        else:
+            node = Node(
+                name=item["title"],
+                normalized_name=node_key,
+                type="event",
+                severity_score=severity,
+                case_id=case_id,
+                estimated_loss_usd=dynamic_exposure,
+                source="amazon",
+                created_at=now,
+                last_seen_at=now,
+            )
+            db.add(node)
+            seen_nodes[node_key] = node
+
+
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
     """Save 50 mock Amazon reviews + risk nodes into SQLite. Return summary."""
     scan_id = str(uuid.uuid4())
     reviews_saved = 0
     risks_created = 0
     now = datetime.now(timezone.utc)
-    # Track nodes created in this run to avoid UNIQUE constraint violations
     seen_nodes: dict[str, Node] = {}
 
     log_event(
@@ -612,7 +693,6 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
     )
 
     for item in MOCK_REVIEWS:
-        # Check for duplicate review (idempotency)
         existing_review = (
             db.query(Review.id)
             .filter(
@@ -650,102 +730,24 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
         db.add(review)
         reviews_saved += 1
 
-        # Only process legal RAG for severity >= 4 (skip Safe reviews)
         if severity < 4.0 or risk_label is None:
             continue
 
-        # Create or update a Node for medium+ severity reviews
-        if severity >= 4.0:
-            try:
-                precedent_result = match_precedent(
-                    full_text, risk_category=risk_label,
-                )
-            except Exception as exc:  # pylint: disable=broad-except
-                logger.warning(
-                    "Precedent matching failed for '%s': %s",
-                    item["title"], exc,
-                )
-                precedent_result = None
-            if precedent_result:
-                log_event(
-                    db, scan_id,
-                    AuditEventType.PRECEDENT_MATCHED,
-                    details={
-                        "title": item["title"],
-                        "risk_category": risk_label,
-                        "case_title": precedent_result[
-                            "primary_match"
-                        ].get("case_title"),
-                        "expected_exposure_usd": precedent_result[
-                            "expected_exposure_usd"
-                        ],
-                    },
-                )
+        precedent_result = _match_precedent_for_review(
+            full_text, risk_label, item["title"], scan_id, db,
+        )
 
-            log_event(
-                db, scan_id, AuditEventType.RISK_FLAGGED,
-                risk_category=risk_label,
-                details={
-                    "title": item["title"],
-                    "severity": severity,
-                },
-            )
+        log_event(
+            db, scan_id, AuditEventType.RISK_FLAGGED,
+            risk_category=risk_label,
+            details={"title": item["title"], "severity": severity},
+        )
 
-            # Dynamic Legal Exposure using confidence-weighted expected
-            if precedent_result:
-                primary = precedent_result["primary_match"]
-                expected_exposure = precedent_result["expected_exposure_usd"]
-                # Scale by severity (0-10 normalized to 0-1)
-                dynamic_exposure = int(expected_exposure * (severity / 10.0))
-                case_id = primary["case_id"]
-            else:
-                dynamic_exposure = 0
-                case_id = None
-
-            normalized = (risk_label or "unknown risk").strip().lower()
-            node_key = f"{normalized}::event"
-
-            if node_key in seen_nodes:
-                # Already created in this run — just update
-                existing_node = seen_nodes[node_key]
-                existing_node.severity_score = max(existing_node.severity_score or 0, severity)
-                existing_node.last_seen_at = now
-                if precedent_result:
-                    existing_node.case_id = case_id
-                    existing_node.estimated_loss_usd = max(
-                        existing_node.estimated_loss_usd or 0, dynamic_exposure
-                    )
-            else:
-                # Check DB for pre-existing node
-                existing_node = (
-                    db.query(Node)
-                    .filter(Node.normalized_name == normalized, Node.type == "event")
-                    .first()
-                )
-                if existing_node:
-                    existing_node.severity_score = max(existing_node.severity_score or 0, severity)
-                    existing_node.last_seen_at = now
-                    if precedent_result:
-                        existing_node.case_id = case_id
-                        existing_node.estimated_loss_usd = max(
-                            existing_node.estimated_loss_usd or 0, dynamic_exposure
-                        )
-                    seen_nodes[node_key] = existing_node
-                else:
-                    node = Node(
-                        name=risk_label or "Unknown Risk",
-                        normalized_name=normalized,
-                        type="event",
-                        severity_score=severity,
-                        case_id=case_id,
-                        estimated_loss_usd=dynamic_exposure,
-                        source="amazon",
-                        created_at=now,
-                        last_seen_at=now,
-                    )
-                    db.add(node)
-                    seen_nodes[node_key] = node
-            risks_created += 1
+        _upsert_event_node(
+            item, severity, risk_label, precedent_result,
+            seen_nodes, now, db,
+        )
+        risks_created += 1
 
     try:
         db.commit()

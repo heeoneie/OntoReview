@@ -440,7 +440,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
   // PDF download handled by RiskReport component
 
-  const isAnyLoading = Object.values(loading).some(Boolean);
+  const isAnyLoading = Object.values(loading).some(Boolean) || fullDemoLoading;
   const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
   const hasResults = ontology || compliance || meeting;
   const hasScanned = scanId || timeline.length > 0;
