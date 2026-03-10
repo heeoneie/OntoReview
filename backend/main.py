@@ -21,6 +21,7 @@ from backend.routers import (  # pylint: disable=wrong-import-position
     agent,
     analysis,
     audit,
+    compliance,
     data,
     discovery,
     evaluate,
@@ -111,6 +112,7 @@ app.add_middleware(
 )
 
 app.include_router(agent.router, prefix="/api/agent", tags=["agent"])
+app.include_router(compliance.router, prefix="/api/compliance", tags=["compliance"])
 app.include_router(data.router, prefix="/api/data", tags=["data"])
 app.include_router(analysis.router, prefix="/api/analysis", tags=["analysis"])
 app.include_router(reply.router, prefix="/api/reply", tags=["reply"])

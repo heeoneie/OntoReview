@@ -5,6 +5,7 @@ import RiskIntelligence from './components/RiskIntelligence';
 import RiskPlaybook from './components/RiskPlaybook';
 import AgentSetup from './components/AgentSetup';
 import OntologyStudio from './components/OntologyStudio';
+import ComplianceTracker from './components/ComplianceTracker';
 import './index.css';
 
 const TABS = [
@@ -12,6 +13,7 @@ const TABS = [
   { id: 'playbook', labelKey: 'tabs.playbook', soon: false },
   { id: 'agent',    labelKey: 'tabs.agent',    soon: false },
   { id: 'studio',   labelKey: 'tabs.studio',   soon: false },
+  { id: 'complianceTracker', labelKey: 'tabs.complianceTracker', soon: false },
 ];
 
 function App() {
@@ -112,6 +114,11 @@ function App() {
         {activeTab === 'studio' && (
           <ErrorBoundary>
             <OntologyStudio />
+          </ErrorBoundary>
+        )}
+        {activeTab === 'complianceTracker' && (
+          <ErrorBoundary>
+            <ComplianceTracker />
           </ErrorBoundary>
         )}
       </main>
