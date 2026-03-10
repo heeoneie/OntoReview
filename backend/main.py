@@ -7,8 +7,10 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles
 
 # 프로젝트 루트를 path에 추가하여 core 패키지 import 가능하게
 PROJECT_ROOT = str(Path(__file__).resolve().parents[1])
@@ -128,3 +130,22 @@ app.include_router(studio.router, prefix="/api/studio", tags=["studio"])
 @app.get("/api/health")
 def health_check():
     return {"status": "ok"}
+
+
+# ── Static file serving (production) ──
+_FRONTEND_DIST = Path(__file__).resolve().parents[1] / "frontend" / "dist"
+
+if _FRONTEND_DIST.is_dir():
+    app.mount(
+        "/assets",
+        StaticFiles(directory=str(_FRONTEND_DIST / "assets")),
+        name="static-assets",
+    )
+
+    @app.get("/{full_path:path}")
+    async def _spa_fallback(request: Request, full_path: str):  # pylint: disable=unused-argument
+        """Serve index.html for all non-API routes (SPA routing)."""
+        file_path = _FRONTEND_DIST / full_path
+        if file_path.is_file():
+            return FileResponse(str(file_path))
+        return FileResponse(str(_FRONTEND_DIST / "index.html"))

@@ -1,0 +1,55 @@
+# Version control & CI
+.git
+.github
+.claude
+
+# Python virtual environments
+.venv
+venv
+__pycache__
+*.pyc
+*.pyo
+
+# Node
+node_modules
+frontend/node_modules
+frontend/dist
+
+# Database files
+*.db
+*.sqlite
+
+# Environment & secrets
+.env
+.env.*
+
+# Dev tools & docs
+*.md
+.pylintrc
+.pre-commit-config.yaml
+.gitignore
+LICENSE
+
+# Tests, evaluation & non-runtime directories
+tests/
+core/experiments/
+core/evaluation/
+backend/tests/
+data/
+docs/
+evaluation/
+infra/
+scripts/
+
+# Root-level scripts not needed at runtime
+main.py
+analyze_csv.py
+pyproject.toml
+
+# IDE & OS
+.vscode
+.idea
+*.swp
+*.swo
+.DS_Store
+Thumbs.db
