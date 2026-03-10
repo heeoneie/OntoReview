@@ -74,7 +74,7 @@ def simulate(body: SimulateRequest):
         )
         return result
     except Exception as exc:  # pylint: disable=broad-except
-        logger.error("Agent simulation failed: %s", exc)
+        logger.exception("Agent simulation failed")
         raise HTTPException(
             500, "Agent simulation failed"
         ) from exc

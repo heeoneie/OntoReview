@@ -39,7 +39,7 @@ const AUTONOMY_COLORS = [
 
 const RISK_CATEGORIES = [
   'Product Liability', 'Regulatory Risk', 'Class Action Risk',
-  'Consumer Safety', 'False Advertising', 'Food Safety',
+  'Consumer Safety', 'False Advertising',
 ];
 
 function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
@@ -141,8 +141,8 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
           type="range" min="1" max="10" step="0.5"
           value={localConfig.escalation_threshold}
           onChange={(e) => setLocalConfig({ ...localConfig, escalation_threshold: parseFloat(e.target.value) })}
-          onMouseUp={(e) => handleSave('escalation_threshold', parseFloat(e.target.value))}
-          onTouchEnd={(e) => handleSave('escalation_threshold', parseFloat(e.target.value))}
+          onMouseUp={() => handleSave('escalation_threshold', localConfig.escalation_threshold)}
+          onTouchEnd={() => handleSave('escalation_threshold', localConfig.escalation_threshold)}
           className="w-full accent-zinc-400 h-1.5"
         />
         <p className="text-xs text-zinc-600">{t('agent.escalationDesc')}</p>
@@ -321,12 +321,13 @@ export default function AgentSetup() {
   const { t, lang } = useLang();
   const [configs, setConfigs] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
   const [toast, setToast] = useState(null);
 
   useEffect(() => {
     getAgentConfigs()
       .then(({ data }) => setConfigs(data))
-      .catch(() => {})
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
   }, []);
 
@@ -345,6 +346,14 @@ export default function AgentSetup() {
         {[1, 2, 3].map((i) => (
           <div key={i} className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6 h-64 animate-pulse" />
         ))}
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="bg-red-950/30 border border-red-800/50 rounded-2xl p-8 text-center">
+        <p className="text-red-400 font-medium">{t('risk.errGeneric')}</p>
       </div>
     );
   }
