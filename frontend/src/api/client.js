@@ -86,6 +86,17 @@ export const updateAgentConfig = (agentType, config) =>
 export const simulateAgent = (body) =>
   api.post('/agent/simulate', body);
 
+// Domain Ontology Studio API
+export const uploadDomainKnowledge = (formData) =>
+  api.post('/studio/upload', formData, {
+    headers: { 'Content-Type': 'multipart/form-data' },
+  });
+export const getCustomRules = () => api.get('/studio/rules');
+export const addCustomRule = (rule) =>
+  api.post('/studio/rules', rule);
+export const deleteCustomRule = (ruleId) =>
+  api.delete(`/studio/rules/${ruleId}`);
+
 // YouTube 실데이터 분석 API
 export const analyzeYouTube = (query, brand, options = {}) =>
   api.post('/youtube/analyze', {
