@@ -8,6 +8,7 @@ Environment variables:
   GOOGLE_CSE_CX     — Custom Search Engine ID (cx)
 """
 
+import asyncio
 import logging
 import os
 import re
@@ -18,9 +19,6 @@ import httpx
 from backend.services.amazon_service import detect_risk_candidate
 
 logger = logging.getLogger(__name__)
-
-_API_KEY = os.getenv("GOOGLE_CSE_API_KEY", "")
-_CX = os.getenv("GOOGLE_CSE_CX", "")
 
 _SEARCH_SUFFIXES = [
     "complaint",
@@ -52,16 +50,29 @@ def _extract_domain(url: str) -> str:
         return url
 
 
-async def _search_google(query: str, num: int = 5) -> list[dict]:
+def _get_api_keys() -> tuple[str, str]:
+    """Read API keys at call time (not module load) for testability."""
+    return (
+        os.getenv("GOOGLE_CSE_API_KEY", ""),
+        os.getenv("GOOGLE_CSE_CX", ""),
+    )
+
+
+async def _search_google(
+    query: str, api_key: str, cx: str, num: int = 5,
+) -> list[dict]:
     """Call Google Custom Search JSON API and return items."""
     params = {
-        "key": _API_KEY,
-        "cx": _CX,
+        "key": api_key,
+        "cx": cx,
         "q": query,
         "num": min(num, 10),
     }
     async with httpx.AsyncClient(timeout=15) as client:
         resp = await client.get(_GOOGLE_CSE_URL, params=params)
+        if resp.status_code == 429:
+            logger.warning("Google CSE rate limit hit for query: %s", query)
+            return []
         resp.raise_for_status()
         data = resp.json()
     return data.get("items", [])
@@ -242,13 +253,15 @@ async def search_brand_risks(
     Returns:
         dict with keys: results, total_scanned, risks_found
     """
+    api_key, cx = _get_api_keys()
+
     # Fallback to mock if API keys are not configured
-    if not _API_KEY or not _CX:
+    if not api_key or not cx:
         logger.info("Google CSE keys not set — returning mock discovery results")
         mock = _mock_results()
         return {
             "results": mock,
-            "total_scanned": 54,
+            "total_scanned": len(mock),
             "risks_found": len(mock),
         }
 
@@ -256,22 +269,25 @@ async def search_brand_risks(
     all_items: list[dict] = []
     seen_urls: set[str] = set()
 
-    for query in queries:
-        try:
-            items = await _search_google(query, num=5)
-            for item in items:
-                url = item.get("link", "")
-                if url in seen_urls:
-                    continue
-                seen_urls.add(url)
-                all_items.append({
-                    "url": url,
-                    "title": item.get("title", ""),
-                    "snippet": item.get("snippet", ""),
-                    "source_domain": _extract_domain(url),
-                })
-        except Exception as exc:  # pylint: disable=broad-except
-            logger.warning("Google CSE query failed for '%s': %s", query, exc)
+    # Run all queries concurrently
+    tasks = [_search_google(q, api_key, cx, num=5) for q in queries]
+    results = await asyncio.gather(*tasks, return_exceptions=True)
+
+    for query, result in zip(queries, results):
+        if isinstance(result, Exception):
+            logger.warning("Google CSE query failed for '%s': %s", query, result)
+            continue
+        for item in result:
+            url = item.get("link", "")
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            all_items.append({
+                "url": url,
+                "title": item.get("title", ""),
+                "snippet": item.get("snippet", ""),
+                "source_domain": _extract_domain(url),
+            })
 
     # Filter by risk candidate detection
     risk_results = []

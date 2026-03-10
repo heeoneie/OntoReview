@@ -72,8 +72,8 @@ export const translations = {
       fullDemoStep1: 'Step 1/5: 리뷰 수집 중...',
       fullDemoStep2: 'Step 2/5: AI 리스크 분석 중...',
       fullDemoStep3: 'Step 3/5: 대시보드 갱신 중...',
-      fullDemoStep4: 'Step 5/5: 완료!',
-      fullDemoStep5: 'Step 4/5: 웹 탐색 중...',
+      fullDemoStep4: 'Step 4/5: 웹 탐색 중...',
+      fullDemoStep5: 'Step 5/5: 완료!',
     },
     discovery: {
       title: '웹 자율 탐색',
@@ -218,8 +218,8 @@ export const translations = {
       fullDemoStep1: 'Step 1/5: Ingesting reviews...',
       fullDemoStep2: 'Step 2/5: AI risk analysis...',
       fullDemoStep3: 'Step 3/5: Refreshing dashboard...',
-      fullDemoStep4: 'Step 5/5: Done!',
-      fullDemoStep5: 'Step 4/5: Web discovery...',
+      fullDemoStep4: 'Step 4/5: Web discovery...',
+      fullDemoStep5: 'Step 5/5: Done!',
     },
     discovery: {
       title: 'Web Discovery Scan',

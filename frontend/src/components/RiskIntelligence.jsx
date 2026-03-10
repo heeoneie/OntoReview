@@ -279,8 +279,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     try {
       const res = await searchBrandRisks(b, product || productName.trim() || null);
       setDiscoveryResults(res.data);
-    } catch {
-      setDiscoveryResults(null);
+    } catch (err) {
+      console.error('Discovery scan failed:', err);
+      setDiscoveryResults({ results: [], total_scanned: 0, risks_found: 0, error: true });
     } finally {
       setDiscoveryLoading(false);
     }
@@ -320,11 +321,11 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       await refreshDashboard();
 
       // Step 4: Web Discovery scan
-      setFullDemoStep(t('risk.fullDemoStep5'));
+      setFullDemoStep(t('risk.fullDemoStep4'));
       await handleDiscoveryScan(brandName.trim() || 'K-Brand', productName.trim() || null);
 
       // Step 5: Done
-      setFullDemoStep(t('risk.fullDemoStep4'));
+      setFullDemoStep(t('risk.fullDemoStep5'));
       setAmazonToastType('success');
       if (lang === 'ko') {
         setAmazonToast(`Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`);
@@ -811,8 +812,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
           {discoveryResults && discoveryResults.results.length > 0 && (
             <div className="space-y-2 max-h-80 overflow-y-auto">
-              {discoveryResults.results.map((item, idx) => (
-                <div key={idx} className="bg-red-950/30 border border-red-900/50 rounded-xl px-4 py-3">
+              {discoveryResults.results.map((item) => (
+                <div key={item.url} className="bg-red-950/30 border border-red-900/50 rounded-xl px-4 py-3">
                   <div className="flex items-start gap-3">
                     <AlertTriangle className="text-red-400 flex-shrink-0 mt-0.5" size={14} />
                     <div className="flex-1 min-w-0">
@@ -841,7 +842,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           )}
 
           {discoveryResults && discoveryResults.results.length === 0 && (
-            <p className="text-sm text-zinc-500 text-center py-6">{t('discovery.empty')}</p>
+            <p className="text-sm text-zinc-500 text-center py-6">
+              {discoveryResults.error ? t('risk.errGeneric') : t('discovery.empty')}
+            </p>
           )}
         </div>
       )}
