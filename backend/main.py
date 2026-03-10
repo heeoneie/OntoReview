@@ -1,5 +1,9 @@
+import asyncio
+import logging
 import os
 import sys
+from collections.abc import AsyncGenerator
+from contextlib import asynccontextmanager
 from pathlib import Path
 from typing import List
 
@@ -15,6 +19,7 @@ from backend.database.database import engine  # pylint: disable=wrong-import-pos
 from backend.database.models import Base  # pylint: disable=wrong-import-position
 from backend.routers import (  # pylint: disable=wrong-import-position
     analysis,
+    audit,
     data,
     evaluate,
     kpi,
@@ -22,11 +27,38 @@ from backend.routers import (  # pylint: disable=wrong-import-position
     risk,
     youtube,
 )
+from backend.services.legal_rag_service import (  # pylint: disable=wrong-import-position
+    warm_embedding_cache,
+)
 
-# Create SQLite tables on startup (no-op if already exist)
-Base.metadata.create_all(bind=engine)
+logger = logging.getLogger("ontoreview.startup")
 
-app = FastAPI(title="Review Analysis Dashboard API", version="1.0.0")
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
+    """Startup / shutdown lifecycle for the FastAPI application."""
+    # ── Startup ──
+    Base.metadata.create_all(bind=engine)
+    logger.info("Database tables ensured.")
+
+    # Pre-compute legal case embeddings (fail-open with timeout)
+    try:
+        await asyncio.wait_for(
+            asyncio.to_thread(warm_embedding_cache),
+            timeout=60,
+        )
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("Embedding cache warm-up skipped: %s", exc)
+
+    yield
+    # ── Shutdown ── (nothing to clean up)
+
+
+app = FastAPI(
+    title="Review Analysis Dashboard API",
+    version="1.0.0",
+    lifespan=lifespan,
+)
 
 
 def _get_allowed_origins() -> List[str]:
@@ -50,6 +82,7 @@ app.include_router(risk.router, prefix="/api/risk", tags=["risk"])
 app.include_router(evaluate.router, prefix="/api/evaluate", tags=["evaluate"])
 app.include_router(youtube.router, prefix="/api/youtube", tags=["youtube"])
 app.include_router(kpi.router, prefix="/api/kpi", tags=["kpi"])
+app.include_router(audit.router, prefix="/api/audit", tags=["audit"])
 
 
 @app.get("/api/health")

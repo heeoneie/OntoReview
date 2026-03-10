@@ -8,12 +8,14 @@ Pipeline: Review → detect_risk_candidate() → classify_with_llm() → match_p
 
 import logging
 import re
+import uuid
 from datetime import datetime, timezone
 from typing import Optional
 
 from sqlalchemy.orm import Session
 
-from backend.database.models import Node, Review
+from backend.database.models import AuditEventType, Node, Review
+from backend.services.audit_service import log_event
 from backend.services.legal_rag_service import match_precedent
 from core.analyzer import classify_with_llm
 
@@ -191,11 +193,20 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
         return 2.0, None
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
+def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals,too-many-statements
     """Save 10 mock Amazon reviews + risk nodes into SQLite. Return summary."""
+    scan_id = str(uuid.uuid4())
     reviews_saved = 0
     risks_created = 0
     now = datetime.now(timezone.utc)
+
+    log_event(
+        db, scan_id, AuditEventType.SCAN_STARTED,
+        details={
+            "product_url": product_url,
+            "review_count": len(MOCK_REVIEWS),
+        },
+    )
 
     for item in MOCK_REVIEWS:
         # Check for duplicate review (idempotency)
@@ -215,6 +226,15 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
         full_text = f"{item['title']} {item['body']}"
         severity, risk_label = _classify_severity(full_text)
 
+        log_event(
+            db, scan_id, AuditEventType.REVIEW_CLASSIFIED,
+            details={
+                "title": item["title"],
+                "severity": severity,
+                "risk_label": risk_label,
+            },
+        )
+
         review = Review(
             source="amazon",
             product_url=product_url,
@@ -233,8 +253,42 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
 
         # Create or update a Node for medium+ severity reviews
         if severity >= 4.0:
-            precedent_result = match_precedent(full_text, risk_category=risk_label)
-            # Dynamic Legal Exposure using confidence-weighted expected exposure
+            try:
+                precedent_result = match_precedent(
+                    full_text, risk_category=risk_label,
+                )
+            except Exception as exc:  # pylint: disable=broad-except
+                logger.warning(
+                    "Precedent matching failed for '%s': %s",
+                    item["title"], exc,
+                )
+                precedent_result = None
+            if precedent_result:
+                log_event(
+                    db, scan_id,
+                    AuditEventType.PRECEDENT_MATCHED,
+                    details={
+                        "title": item["title"],
+                        "risk_category": risk_label,
+                        "case_title": precedent_result[
+                            "primary_match"
+                        ].get("case_title"),
+                        "expected_exposure_usd": precedent_result[
+                            "expected_exposure_usd"
+                        ],
+                    },
+                )
+
+            log_event(
+                db, scan_id, AuditEventType.RISK_FLAGGED,
+                risk_category=risk_label,
+                details={
+                    "title": item["title"],
+                    "severity": severity,
+                },
+            )
+
+            # Dynamic Legal Exposure using confidence-weighted expected
             if precedent_result:
                 primary = precedent_result["primary_match"]
                 expected_exposure = precedent_result["expected_exposure_usd"]
@@ -275,9 +329,32 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
                 db.add(node)
             risks_created += 1
 
-    db.commit()
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        log_event(
+            db, scan_id, AuditEventType.SCAN_COMPLETED,
+            details={
+                "product_url": product_url,
+                "reviews_ingested": reviews_saved,
+                "risks_detected": risks_created,
+                "error": "Transaction commit failed",
+            },
+        )
+        raise
+
+    log_event(
+        db, scan_id, AuditEventType.SCAN_COMPLETED,
+        details={
+            "product_url": product_url,
+            "reviews_ingested": reviews_saved,
+            "risks_detected": risks_created,
+        },
+    )
 
     return {
+        "scan_id": scan_id,
         "product_url": product_url,
         "reviews_ingested": reviews_saved,
         "risks_detected": risks_created,
