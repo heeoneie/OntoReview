@@ -7,6 +7,7 @@ from pathlib import Path
 import pandas as pd
 from fastapi import APIRouter, Depends, File, HTTPException, Query, UploadFile
 from pydantic import BaseModel, Field
+from sqlalchemy import func
 from sqlalchemy.orm import Session
 
 from backend.database.database import get_db
@@ -299,3 +300,82 @@ def ingest_amazon_reviews(
         raise HTTPException(
             500, "Amazon review ingestion failed."
         ) from None
+
+
+@router.post("/demo")
+def run_full_demo(db: Session = Depends(get_db)):
+    """One-click full demo: ingest → ontology → KPI."""
+    try:
+        # (0) Clear stale demo data to avoid UNIQUE constraint issues
+        from backend.database.models import Edge, Node, Review
+
+        db.query(Edge).delete()
+        db.query(Node).delete()
+        db.query(Review).delete()
+        db.commit()
+
+        # (1) Amazon mock ingest
+        ingest_result = ingest_amazon_mock(
+            "https://amazon.com/dp/B0DEMO50", db,
+        )
+
+        # (2) Generate ontology from ingested risk nodes
+        from backend.services.risk_service import generate_ontology
+
+        risk_nodes = (
+            db.query(Node)
+            .filter(Node.severity_score >= 4.0)
+            .order_by(Node.severity_score.desc())
+            .limit(20)
+            .all()
+        )
+        top_issues = [
+            {"issue": n.name, "severity": n.severity_score, "case_id": n.case_id}
+            for n in risk_nodes
+        ]
+
+        ontology_generated = False
+        try:
+            generate_ontology(
+                {
+                    "top_issues": top_issues,
+                    "emerging_issues": [],
+                    "recommendations": [],
+                    "all_categories": {},
+                    "industry": "ecommerce",
+                    "lang": "en",
+                },
+                db,
+            )
+            ontology_generated = True
+        except Exception:
+            logger.warning("Ontology generation failed, skipping")
+
+        # (3) Build KPI summary
+        total_reviews = db.query(Review).count()
+        critical = (
+            db.query(Node)
+            .filter(Node.severity_score >= 8.0)
+            .count()
+        )
+        total_exposure = (
+            db.query(
+                func.coalesce(func.sum(Node.estimated_loss_usd), 0)
+            ).scalar()
+            or 0
+        )
+
+        return {
+            "scan_id": ingest_result["scan_id"],
+            "reviews_ingested": ingest_result["reviews_ingested"],
+            "risks_detected": ingest_result["risks_detected"],
+            "ontology_generated": ontology_generated,
+            "kpi": {
+                "total_scanned_reviews": total_reviews,
+                "critical_risks_detected": critical,
+                "total_legal_exposure_usd": total_exposure,
+            },
+        }
+    except Exception:
+        logger.exception("Full demo failed")
+        raise HTTPException(500, "Full demo execution failed.") from None
