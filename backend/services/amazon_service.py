@@ -6,6 +6,7 @@ so the KPI dashboard and risk timeline immediately update.
 Pipeline: Review → detect_risk_candidate() → classify_with_llm() → match_precedent()
 """
 
+import json
 import logging
 import re
 import uuid
@@ -17,6 +18,7 @@ from sqlalchemy.orm import Session
 from backend.database.models import AuditEventType, Node, Review
 from backend.services.audit_service import log_event
 from backend.services.legal_rag_service import match_precedent
+from backend.services.ontology_engine import classify_with_ontology, add_risk_instance
 from core.analyzer import classify_with_llm
 
 logger = logging.getLogger(__name__)
@@ -557,19 +559,21 @@ MOCK_REVIEWS = [
 ]
 
 
-def _classify_severity(text: str) -> tuple[float, str | None]:
-    """Return (severity_score, risk_label) using LLM classification.
+def _classify_severity(text: str) -> tuple[float, str | None, dict | None]:
+    """Return (severity_score, risk_label, ontology_result) using LLM + OWL.
 
     Pipeline:
     1. detect_risk_candidate() → Fast keyword filter
     2. classify_with_llm() → LLM-based classification (only for candidates)
-    3. Return severity and risk category
+    3. classify_with_ontology() → OWL class mapping + inference rules
+    4. add_risk_instance() → Accumulate knowledge in ontology
+    5. Return severity (OWL-adjusted) and risk category
 
     Stability: Always returns safe fallback on any failure.
     """
     # Fast path: skip LLM for non-candidate reviews
     if not detect_risk_candidate(text):
-        return 2.0, None
+        return 2.0, None, None
 
     # LLM classification for risk candidates
     try:
@@ -579,10 +583,25 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
 
         # Map risk_category to display label
         if risk_category == "Safe":
-            return severity, None
+            return severity, None, None
 
-        # Use risk_category as the label (matches legal_cases.json categories)
-        return severity, risk_category
+        # OWL ontology classification + inference
+        ontology_result = classify_with_ontology(text, {
+            "severity": severity,
+            "risk_category": risk_category,
+            "channel": "amazon",
+        })
+
+        # Use OWL-adjusted severity (may be boosted by occurrence rules)
+        adjusted_severity = ontology_result["severity"]
+
+        # Accumulate instance in ontology for future inference
+        add_risk_instance({
+            **ontology_result,
+            "channel": "amazon",
+        })
+
+        return adjusted_severity, risk_category, ontology_result
 
     except Exception as e:  # pylint: disable=broad-except
         # Fallback to simple keyword matching if LLM fails
@@ -590,8 +609,8 @@ def _classify_severity(text: str) -> tuple[float, str | None]:
         lower = text.lower()
         for keyword, label in _HIGH_RISK_KEYWORDS.items():
             if re.search(rf"\b{keyword}\b", lower):
-                return 9.0, label
-        return 2.0, None
+                return 9.0, label, None
+        return 2.0, None, None
 
 
 def _match_precedent_for_review(
@@ -620,6 +639,7 @@ def _match_precedent_for_review(
 
 def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positional-arguments,too-many-locals
     item: dict, severity: float, risk_label: str, precedent_result,
+    ontology_result: dict | None,
     seen_nodes: dict, now: datetime, db: Session,
 ) -> None:
     """Create or update a risk Node for a review."""
@@ -632,6 +652,14 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
         dynamic_exposure = 0
         case_id = None
 
+    # OWL ontology metadata
+    owl_class = ontology_result["risk_class"] if ontology_result else None
+    reasoning_json = (
+        json.dumps(ontology_result["reasoning_path"], ensure_ascii=False)
+        if ontology_result and ontology_result.get("reasoning_path")
+        else None
+    )
+
     node_title = item["title"].strip().lower()
     normalized = (risk_label or "unknown risk").strip().lower()
     node_key = f"{node_title}::{normalized}::event"
@@ -640,6 +668,10 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
         existing_node = seen_nodes[node_key]
         existing_node.severity_score = max(existing_node.severity_score or 0, severity)
         existing_node.last_seen_at = now
+        if owl_class:
+            existing_node.owl_class = owl_class
+        if reasoning_json:
+            existing_node.reasoning_path = reasoning_json
         if precedent_result:
             existing_node.case_id = case_id
             existing_node.estimated_loss_usd = max(
@@ -654,6 +686,10 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
         if existing_node:
             existing_node.severity_score = max(existing_node.severity_score or 0, severity)
             existing_node.last_seen_at = now
+            if owl_class:
+                existing_node.owl_class = owl_class
+            if reasoning_json:
+                existing_node.reasoning_path = reasoning_json
             if precedent_result:
                 existing_node.case_id = case_id
                 existing_node.estimated_loss_usd = max(
@@ -669,6 +705,8 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
                 case_id=case_id,
                 estimated_loss_usd=dynamic_exposure,
                 source="amazon",
+                owl_class=owl_class,
+                reasoning_path=reasoning_json,
                 created_at=now,
                 last_seen_at=now,
             )
@@ -707,7 +745,7 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
             continue
 
         full_text = f"{item['title']} {item['body']}"
-        severity, risk_label = _classify_severity(full_text)
+        severity, risk_label, ontology_result = _classify_severity(full_text)
 
         log_event(
             db, scan_id, AuditEventType.REVIEW_CLASSIFIED,
@@ -715,6 +753,9 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
                 "title": item["title"],
                 "severity": severity,
                 "risk_label": risk_label,
+                **({"owl_class": ontology_result["risk_class"],
+                    "reasoning_path": ontology_result["reasoning_path"]}
+                   if ontology_result else {}),
             },
         )
 
@@ -745,7 +786,7 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
 
         _upsert_event_node(
             item, severity, risk_label, precedent_result,
-            seen_nodes, now, db,
+            ontology_result, seen_nodes, now, db,
         )
         risks_created += 1
 

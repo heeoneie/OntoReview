@@ -31,6 +31,9 @@ from backend.routers import (  # pylint: disable=wrong-import-position
 from backend.services.legal_rag_service import (  # pylint: disable=wrong-import-position
     warm_embedding_cache,
 )
+from backend.services.ontology_engine import (  # pylint: disable=wrong-import-position
+    init_ontology,
+)
 
 logger = logging.getLogger("ontoreview.startup")
 
@@ -41,6 +44,24 @@ async def lifespan(_app: FastAPI) -> AsyncGenerator[None, None]:
     # ── Startup ──
     Base.metadata.create_all(bind=engine)
     logger.info("Database tables ensured.")
+
+    # Migrate: add owl_class & reasoning_path columns if missing
+    from sqlalchemy import inspect as sa_inspect, text  # pylint: disable=import-outside-toplevel
+    insp = sa_inspect(engine)
+    existing_cols = {c["name"] for c in insp.get_columns("nodes")}
+    with engine.begin() as conn:
+        if "owl_class" not in existing_cols:
+            conn.execute(text("ALTER TABLE nodes ADD COLUMN owl_class VARCHAR(128)"))
+            logger.info("Migrated: added nodes.owl_class column")
+        if "reasoning_path" not in existing_cols:
+            conn.execute(text("ALTER TABLE nodes ADD COLUMN reasoning_path TEXT"))
+            logger.info("Migrated: added nodes.reasoning_path column")
+
+    # Initialize OWL ontology schema (fail-open)
+    try:
+        init_ontology()
+    except Exception as exc:  # pylint: disable=broad-except
+        logger.warning("OWL ontology init skipped: %s", exc)
 
     # Pre-compute legal case embeddings (fail-open with timeout)
     try:

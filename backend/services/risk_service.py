@@ -15,6 +15,7 @@ from sqlalchemy.orm import Session
 
 # Ontology persistence
 from backend.database.graph_store import persist_ontology
+from backend.services.ontology_engine import owl_to_reactflow, get_ontology_stats
 from core import config as _cfg
 from core.utils.json_utils import extract_json_from_text
 from core.utils.openai_client import call_openai_json, get_client
@@ -67,9 +68,34 @@ def _get_industry(analysis_data: dict) -> dict:
 
 
 def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
-    """분석 결과를 기반으로 온톨로지 지식 그래프 생성"""
+    """분석 결과를 기반으로 온톨로지 지식 그래프 생성.
+
+    Merges OWL ontology reasoning data with LLM-generated graph.
+    OWL nodes are marked with is_owl=True and include reasoning_path.
+    """
     lang = analysis_data.get("lang", "ko")
     ind = _get_industry(analysis_data)
+
+    # Step 1: Get OWL ontology state (accumulated from prior scans)
+    owl_graph = None
+    owl_stats = None
+    try:
+        owl_graph = owl_to_reactflow(min_severity=0.0)
+        owl_stats = get_ontology_stats()
+    except Exception:  # pylint: disable=broad-except
+        logger.warning("OWL ontology export failed, falling back to LLM-only")
+
+    # Step 2: LLM-generated ontology graph (enriched with OWL context)
+    owl_context = ""
+    if owl_stats and owl_stats.get("instances", 0) > 0:
+        owl_context = f"""
+## OWL 온톨로지 현황 (자동 추론 결과)
+- 리스크 클래스: {owl_stats['classes']}개
+- 축적된 인스턴스: {owl_stats['instances']}개
+- 클래스별 분포: {json.dumps(owl_stats.get('class_breakdown', {}), ensure_ascii=False)}
+이 데이터를 반영하여 온톨로지 그래프에 OWL 추론 결과를 통합하세요.
+"""
+
     prompt = f"""다음은 {ind['name']} 산업의 멀티채널({ind['channels']}) 고객 피드백 분석 결과입니다.
 이 데이터를 기반으로 리스크 온톨로지 지식 그래프를 생성하세요.
 
@@ -78,7 +104,7 @@ def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
 - 급증 이슈: {json.dumps(analysis_data.get('emerging_issues', []), ensure_ascii=False)}
 - 개선 권고: {json.dumps(analysis_data.get('recommendations', []), ensure_ascii=False)}
 - 전체 카테고리: {json.dumps(analysis_data.get('all_categories', {}), ensure_ascii=False)}
-
+{owl_context}
 ## 산업 컨텍스트
 - 산업: {ind['name']}
 - 주요 리스크: {ind['risks']}
@@ -129,7 +155,27 @@ def generate_ontology(analysis_data: dict, db: Session | None = None) -> dict:
     result = extract_json_from_text(content)
 
     if not result or "nodes" not in result:
+        # Fall back to OWL-only graph if LLM fails
+        if owl_graph and owl_graph.get("nodes"):
+            return owl_graph
         return {"nodes": [], "links": [], "summary": "온톨로지 생성에 실패했습니다."}
+
+    # Step 3: Merge OWL nodes into LLM graph
+    if owl_graph and owl_graph.get("nodes"):
+        existing_labels = {n.get("label", "").lower() for n in result["nodes"]}
+        max_id = len(result["nodes"])
+        for owl_node in owl_graph["nodes"]:
+            if owl_node["label"].lower() not in existing_labels:
+                max_id += 1
+                owl_node["id"] = f"node_{max_id}"
+                owl_node["is_owl"] = True
+                result["nodes"].append(owl_node)
+                existing_labels.add(owl_node["label"].lower())
+
+        result["is_owl_enhanced"] = True
+        if owl_stats:
+            result["owl_stats"] = owl_stats
+
     persist_ontology(db, result, source="generate_ontology")
     return result
 

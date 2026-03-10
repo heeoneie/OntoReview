@@ -78,6 +78,8 @@ const TYPE_ICONS = {
 function CustomRiskNode({ data }) {
   const severity = data.severity_score ?? 0;
   const Icon = TYPE_ICONS[data.type] || Network;
+  const isOwl = data.is_owl || data.owl_class;
+  const hasReasoning = data.reasoning_path && data.reasoning_path.length > 0;
 
   const shadowClass =
     severity >= 8
@@ -86,9 +88,11 @@ function CustomRiskNode({ data }) {
         ? 'shadow-[0_0_10px_rgba(245,158,11,0.2)]'
         : '';
 
+  const owlGlow = isOwl ? 'ring-1 ring-purple-500/40' : '';
+
   return (
     <div
-      className={`bg-zinc-900 ${severityBorder(severity)} border text-zinc-100 ${shadowClass} rounded-lg p-3 min-w-[200px]`}
+      className={`bg-zinc-900 ${severityBorder(severity)} border text-zinc-100 ${shadowClass} ${owlGlow} rounded-lg p-3 min-w-[200px]`}
     >
       <Handle
         type="target"
@@ -104,6 +108,16 @@ function CustomRiskNode({ data }) {
       <div className="flex items-center gap-2 mb-1">
         <Icon size={14} className="text-zinc-400 flex-shrink-0" />
         <span className="text-xs text-zinc-500 capitalize">{data.type}</span>
+        {isOwl && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">
+            OWL
+          </span>
+        )}
+        {hasReasoning && (
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-medium">
+            Inferred
+          </span>
+        )}
         <span
           className={`text-[10px] px-1.5 py-0.5 rounded-full ml-auto font-medium ${severityBadge(severity)}`}
         >
@@ -117,6 +131,12 @@ function CustomRiskNode({ data }) {
       >
         {data.label}
       </div>
+
+      {data.instance_count > 0 && (
+        <div className="text-[10px] text-zinc-500 mt-1">
+          {data.instance_count} instance{data.instance_count > 1 ? 's' : ''} accumulated
+        </div>
+      )}
     </div>
   );
 }
@@ -177,7 +197,11 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
       data: {
         label: n.data?.label ?? n.label ?? n.id,
         type: n.data?.type ?? n.type ?? 'signal',
-        severity_score: toSeverityScore(n.data?.severity_score ?? n.severity),
+        severity_score: toSeverityScore(n.data?.severity_score ?? n.severity_score ?? n.severity),
+        is_owl: n.data?.is_owl ?? n.is_owl ?? false,
+        owl_class: n.data?.owl_class ?? n.owl_class ?? null,
+        reasoning_path: n.data?.reasoning_path ?? n.reasoning_path ?? null,
+        instance_count: n.data?.instance_count ?? n.instance_count ?? 0,
       },
       position: n.position ?? { x: 0, y: 0 },
     }));
@@ -192,6 +216,16 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         targetNode?.data?.severity_score ?? 0,
       );
       const isCritical = maxSeverity >= 8;
+      const isOwlEdge = sourceNode?.data?.is_owl || targetNode?.data?.is_owl;
+
+      let edgeStyle;
+      if (isCritical) {
+        edgeStyle = { stroke: '#e11d48', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #e11d48)' };
+      } else if (isOwlEdge) {
+        edgeStyle = { stroke: '#a855f7', strokeWidth: 2, filter: 'drop-shadow(0 0 3px #a855f7)' };
+      } else {
+        edgeStyle = { stroke: '#52525b', strokeWidth: 1 };
+      }
 
       return {
         id: String(e.id ?? `e-${e.source}-${e.target}-${i}`),
@@ -199,11 +233,9 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         target: String(e.target),
         label: e.label ?? e.relation ?? '',
         type: 'default',
-        style: isCritical
-          ? { stroke: '#e11d48', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #e11d48)' }
-          : { stroke: '#52525b', strokeWidth: 1 },
-        animated: isCritical,
-        labelStyle: { fill: '#a1a1aa', fontSize: 11 },
+        style: edgeStyle,
+        animated: isCritical || isOwlEdge,
+        labelStyle: { fill: isOwlEdge ? '#c084fc' : '#a1a1aa', fontSize: 11 },
         data: e.data ?? {},
       };
     });
@@ -341,11 +373,13 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
             />
             <MiniMap
               nodeColor={(n) =>
-                n.data?.severity_score >= 8
-                  ? '#e11d48'
-                  : n.data?.severity_score >= 5
-                    ? '#d97706'
-                    : '#10b981'
+                n.data?.is_owl
+                  ? '#a855f7'
+                  : n.data?.severity_score >= 8
+                    ? '#e11d48'
+                    : n.data?.severity_score >= 5
+                      ? '#d97706'
+                      : '#10b981'
               }
               maskColor="rgba(0,0,0,0.7)"
               className="!bg-zinc-900 !border-zinc-700"
@@ -445,24 +479,74 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                 </p>
               </div>
 
-              {/* Evidence placeholder */}
-              <div>
-                <h5 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
-                  Associated Risk Signals (Evidence)
-                </h5>
-                <div className="space-y-2">
-                  {[1, 2, 3].map((i) => (
-                    <div
-                      key={i}
-                      className="h-10 rounded-md bg-zinc-800/60 border border-zinc-700/40
-                        animate-pulse"
-                    />
-                  ))}
+              {/* OWL Reasoning Path */}
+              {selectedNode.data.is_owl && (
+                <div>
+                  <h5 className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider mb-2">
+                    OWL Ontology Reasoning
+                  </h5>
+                  <div className="bg-purple-950/30 border border-purple-800/40 rounded-lg p-2.5 space-y-1.5">
+                    <p className="text-[10px] text-purple-300">
+                      Detected via OWL class hierarchy inference
+                    </p>
+                    {selectedNode.data.owl_class && (
+                      <p className="text-[10px] text-zinc-400">
+                        Class: <span className="text-purple-300 font-mono">{selectedNode.data.owl_class}</span>
+                      </p>
+                    )}
+                    {selectedNode.data.instance_count > 0 && (
+                      <p className="text-[10px] text-zinc-400">
+                        Instances: <span className="text-amber-300 font-mono">{selectedNode.data.instance_count}</span>
+                      </p>
+                    )}
+                  </div>
                 </div>
-                <p className="text-[10px] text-zinc-600 mt-2 text-center">
-                  Evidence linking coming soon
-                </p>
-              </div>
+              )}
+
+              {/* Reasoning path details */}
+              {selectedNode.data.reasoning_path && selectedNode.data.reasoning_path.length > 0 && (
+                <div>
+                  <h5 className="text-[11px] font-semibold text-cyan-400 uppercase tracking-wider mb-2">
+                    Inference Chain
+                  </h5>
+                  <div className="space-y-1.5">
+                    {(typeof selectedNode.data.reasoning_path === 'string'
+                      ? JSON.parse(selectedNode.data.reasoning_path)
+                      : selectedNode.data.reasoning_path
+                    ).map((step, i) => (
+                      <div
+                        key={i}
+                        className="bg-cyan-950/20 border border-cyan-800/30 rounded-md px-2.5 py-1.5"
+                      >
+                        <p className="text-[10px] text-cyan-300 leading-relaxed">
+                          {typeof step === 'string' ? step : step.description}
+                        </p>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Evidence placeholder (non-OWL nodes) */}
+              {!selectedNode.data.is_owl && !selectedNode.data.reasoning_path && (
+                <div>
+                  <h5 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                    Associated Risk Signals (Evidence)
+                  </h5>
+                  <div className="space-y-2">
+                    {[1, 2, 3].map((i) => (
+                      <div
+                        key={i}
+                        className="h-10 rounded-md bg-zinc-800/60 border border-zinc-700/40
+                          animate-pulse"
+                      />
+                    ))}
+                  </div>
+                  <p className="text-[10px] text-zinc-600 mt-2 text-center">
+                    Evidence linking coming soon
+                  </p>
+                </div>
+              )}
 
               {/* Generate Playbook CTA */}
               {onNavigatePlaybook && (
@@ -490,6 +574,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
           { color: '#e11d48', label: 'Critical (≥8)' },
           { color: '#d97706', label: 'Warning (5–7)' },
           { color: '#10b981', label: 'Safe (<5)' },
+          { color: '#a855f7', label: 'OWL Inferred' },
         ].map((item) => (
           <div
             key={item.label}
