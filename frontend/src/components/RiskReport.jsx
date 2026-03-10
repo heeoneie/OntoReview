@@ -14,7 +14,7 @@ import { useLang } from '../contexts/LangContext';
  *   auditEvents   - Array of audit trail events
  *   amazonUrl     - Target ASIN / product URL
  */
-export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
+export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scanId }) {
   const { t } = useLang();
   const reportRef = useRef(null);
   const [generating, setGenerating] = useState(false);
@@ -75,11 +75,15 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl }) {
   // ── Data prep ──
   const topRisks = (timeline || []).slice(0, 8);
 
-  const precedentMatches = (auditEvents || [])
+  const filteredEvents = scanId
+    ? (auditEvents || []).filter((e) => e.scan_id === scanId)
+    : (auditEvents || []);
+
+  const precedentMatches = filteredEvents
     .filter((e) => e.event_type === 'precedent_matched' && e.details)
     .slice(0, 8);
 
-  const auditTrail = (auditEvents || []).slice(0, 12);
+  const auditTrail = filteredEvents.slice(0, 12);
 
   const exposureFormatted = `$${(kpi?.total_legal_exposure_usd || 0).toLocaleString()}`;
 

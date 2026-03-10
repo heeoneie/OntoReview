@@ -329,6 +329,21 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
                 db.add(node)
             risks_created += 1
 
+    try:
+        db.commit()
+    except Exception:
+        db.rollback()
+        log_event(
+            db, scan_id, AuditEventType.SCAN_COMPLETED,
+            details={
+                "product_url": product_url,
+                "reviews_ingested": reviews_saved,
+                "risks_detected": risks_created,
+                "error": "Transaction commit failed",
+            },
+        )
+        raise
+
     log_event(
         db, scan_id, AuditEventType.SCAN_COMPLETED,
         details={
@@ -338,9 +353,8 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
         },
     )
 
-    db.commit()
-
     return {
+        "scan_id": scan_id,
         "product_url": product_url,
         "reviews_ingested": reviews_saved,
         "risks_detected": risks_created,

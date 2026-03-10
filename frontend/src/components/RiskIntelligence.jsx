@@ -177,6 +177,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [amazonLoading, setAmazonLoading] = useState(false);
   const [amazonToast, setAmazonToast] = useState('');
   const [amazonToastType, setAmazonToastType] = useState('success');
+  const [scanId, setScanId] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [auditEvents, setAuditEvents] = useState([]);
 
@@ -225,6 +226,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     try {
       const res = await ingestAmazon(amazonUrl.trim());
       const d = res.data;
+      setScanId(d.scan_id ?? null);
       setAmazonToastType('success');
       if (lang === 'ko') {
         setAmazonToast(`${d.reviews_ingested}건의 리뷰를 수집하고 ${d.risks_detected}건의 리스크를 탐지했습니다.`);
@@ -621,7 +623,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 </div>
               )}
             </div>
-            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} />
+            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} scanId={scanId} />
             {analysisResult && (
               <button
                 onClick={runAll}

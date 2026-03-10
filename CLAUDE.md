@@ -108,7 +108,7 @@ Do NOT build:
 
 > **Note:** `chromadb` exists in requirements.txt and `core/experiments/rag_system.py`
 > as an experimental/research path only. It is NOT used in the demo pipeline.
-> TODO: Remove chromadb dependency and experiment code before production release.
+> Confirmed not used in March 16 demo. Remove chromadb and core/experiments/ by March 20.
 
 This is a **hackathon demo system**.
 
@@ -254,7 +254,7 @@ Example entry:
   "case_title": "Johnson & Johnson Talc Case",
   "risk_category": "Product Liability",
   "trigger_keywords": ["cancer", "talc", "toxic"],
-  "historical_settlement": {"min": 1500000000, "max": 2700000000, "avg": 2100000000}
+  "historical_settlement": {"min": 1500000, "max": 3000000, "avg": 2250000}
 }
 ```
 
@@ -270,8 +270,6 @@ Allowed techniques:
 NOT allowed:
 - External Vector databases (Pinecone, Chroma, Qdrant)
 - external RAG services
-
-external RAG services
 
 Dataset size is intentionally small.
 

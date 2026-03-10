@@ -27,8 +27,8 @@ def _safe_json_loads(raw: str | None) -> dict | None:
         return {"_raw": raw}
 
 
-def log_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments
-    db: Session,  # noqa: ARG001 — kept for call-site compatibility
+def log_event(  # pylint: disable=too-many-arguments,too-many-positional-arguments,unused-argument
+    db: Session,
     scan_id: str,
     event_type: AuditEventType,
     review_id: Optional[str] = None,
@@ -40,6 +40,7 @@ def log_event(  # pylint: disable=too-many-arguments,too-many-positional-argumen
 
     Uses an independent session so audit rows survive caller rollbacks,
     preserving the append-only guarantee for Duty of Care evidence.
+    The ``db`` parameter is kept for call-site compatibility but unused.
     """
     event = AuditEvent(
         scan_id=scan_id,
@@ -53,9 +54,10 @@ def log_event(  # pylint: disable=too-many-arguments,too-many-positional-argumen
     try:
         audit_db.add(event)
         audit_db.commit()
-    except Exception:
+    except Exception:  # pylint: disable=broad-except
         audit_db.rollback()
         logger.warning("Failed to persist audit event %s/%s", scan_id, event_type, exc_info=True)
+        raise
     finally:
         audit_db.close()
     return event
