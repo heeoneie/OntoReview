@@ -11,6 +11,7 @@ import {
   ingestAmazon,
   getAuditEvents,
   runFullDemo,
+  getOntologyGraph,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 import OntologyGraph from './OntologyGraph';
@@ -229,6 +230,19 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     };
   }, []);
 
+  // Fetch persisted ontology graph from DB
+  const fetchOntologyGraph = useCallback(async () => {
+    try {
+      const res = await getOntologyGraph(0);
+      const graph = res.data;
+      if (graph?.nodes?.length > 0) {
+        setOntology(graph);
+      }
+    } catch {
+      // Ontology graph fetch failed — ignore
+    }
+  }, []);
+
   const handleAmazonIngest = async () => {
     if (!amazonUrl.trim() || amazonLoading) return;
     setAmazonLoading(true);
@@ -259,15 +273,15 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     if (fullDemoLoading) return;
     setFullDemoLoading(true);
     try {
-      // Step 1: Ingest reviews
+      // Step 1: Ingest reviews + risk classification + precedent matching
       setFullDemoStep(t('risk.fullDemoStep1'));
       const res = await runFullDemo();
       const d = res.data;
       setScanId(d.scan_id ?? null);
 
-      // Step 2: Refresh dashboard (ontology/KPI/timeline/audit)
+      // Step 2: Refresh dashboard (KPI/timeline/audit) + fetch ontology graph
       setFullDemoStep(t('risk.fullDemoStep2'));
-      await refreshDashboard();
+      await Promise.all([refreshDashboard(), fetchOntologyGraph()]);
 
       // Step 3: Done
       setFullDemoStep(t('risk.fullDemoStep3'));
@@ -323,7 +337,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     setScanPhase(false);
     setLoading((prev) => ({ ...prev, demo: true }));
     try {
-      // ① YouTube 실데이터 우선 시도
+      // YouTube 실데이터 우선 시도
       let data = null;
       try {
         const ytRes = await analyzeYouTube(query || brand, brandName.trim() || 'Brand', { industry, lang });
@@ -410,6 +424,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const isAnyLoading = Object.values(loading).some(Boolean);
   const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
   const hasResults = ontology || compliance || meeting;
+  const hasScanned = scanId || timeline.length > 0;
 
   return (
     <div className="space-y-6">
@@ -425,7 +440,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             <span className={`text-xs font-bold uppercase tracking-widest ${kpi.total_legal_exposure_usd > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{t('risk.live')}</span>
             <span className="text-xs text-zinc-600">{t('risk.last24h')}</span>
           </div>
-          <span className="text-xs text-zinc-600">{t('risk.lastScan')}</span>
+          <div className="flex items-center gap-2">
+            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} scanId={scanId} />
+            <span className="text-xs text-zinc-600">{t('risk.lastScan')}</span>
+          </div>
         </div>
 
         {/* 4-Column Enterprise KPI Layout */}
@@ -517,8 +535,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       </div>
 
-      {/* ── Run Full Demo ── */}
-      <div className="bg-gradient-to-r from-indigo-950/60 to-purple-950/60 rounded-2xl border border-indigo-800/60 px-6 py-4">
+      {/* ── Unified Scan Action Card ── */}
+      <div className="bg-gradient-to-r from-indigo-950/60 to-purple-950/60 rounded-2xl border border-indigo-800/60 px-6 py-5">
+        {/* Primary: Full Demo */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 bg-indigo-900/60 border border-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
@@ -541,7 +560,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             )}
             <button
               onClick={handleFullDemo}
-              disabled={fullDemoLoading}
+              disabled={fullDemoLoading || amazonLoading}
               className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
             >
               {fullDemoLoading
@@ -550,15 +569,17 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             </button>
           </div>
         </div>
-      </div>
 
-      {/* ── Amazon Risk Scan ── */}
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
-        <div className="flex items-center gap-2 mb-3">
-          <ShoppingCart className="text-red-400" size={16} />
-          <span className="text-sm font-bold text-white">{t('risk.amazonTitle')}</span>
+        {/* Divider */}
+        <div className="flex items-center gap-3 my-4">
+          <div className="flex-1 border-t border-zinc-700/50" />
+          <span className="text-[11px] text-zinc-600 font-medium">
+            {lang === 'ko' ? '또는 특정 상품 URL 스캔' : 'or scan a specific product URL'}
+          </span>
+          <div className="flex-1 border-t border-zinc-700/50" />
         </div>
-        <label className="block text-xs font-medium text-zinc-400 mb-1.5">{t('risk.amazonLabel')}</label>
+
+        {/* Secondary: Amazon URL Scan */}
         <div className="flex gap-2">
           <input
             type="text"
@@ -566,25 +587,30 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             onChange={(e) => setAmazonUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAmazonIngest()}
             placeholder={t('risk.amazonPlaceholder')}
-            className="flex-1 bg-zinc-800 border border-zinc-700 hover:border-red-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-red-600 transition-all duration-200"
+            className="flex-1 bg-zinc-800/80 border border-zinc-700 hover:border-indigo-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-600 transition-all duration-200"
           />
           <button
             onClick={handleAmazonIngest}
-            disabled={amazonLoading || !amazonUrl.trim()}
-            className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 shadow-sm shadow-red-900/30 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
+            disabled={amazonLoading || !amazonUrl.trim() || fullDemoLoading}
+            className="px-5 py-2.5 bg-zinc-700 text-zinc-200 rounded-xl font-semibold hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
           >
             {amazonLoading
               ? <><Loader2 className="animate-spin" size={15} />{t('risk.amazonIngesting')}</>
               : <><ScanSearch size={15} />{t('risk.amazonBtn')}</>}
           </button>
         </div>
-        <p className="text-xs text-zinc-500 mt-1">{t('risk.amazonHelper')}</p>
+
+        {/* Toast */}
         {amazonToast && (
-          <p className={`mt-2 text-xs font-medium ${amazonToastType === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
+          <p className={`mt-3 text-xs font-medium ${amazonToastType === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
             {amazonToast}
           </p>
         )}
       </div>
+
+      {/* ══════════════════════════════════════════════════════════
+           Scan Results — shown only after a scan has been executed
+         ══════════════════════════════════════════════════════════ */}
 
       {/* ── Risk Timeline ── */}
       {timeline.length > 0 && (
@@ -652,8 +678,42 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         </div>
       )}
 
-      {/* ── Audit Trail (Duty of Care) ── */}
-      <AuditTimeline />
+      {/* ── Ontology Graph (from DB after Full Demo, or from LLM analysis) ── */}
+      {(ontology || loading.ontology) && !loading.demo && !loading.all && (
+        <OntologyGraph
+          id="ontology-graph"
+          data={ontology}
+          loading={loading.ontology}
+          error={errors.ontology}
+          onGenerate={() => runSingle('ontology')}
+          onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
+        />
+      )}
+
+      {/* ── Audit Trail (Duty of Care) — only after scan ── */}
+      {hasScanned && <AuditTimeline />}
+
+      {/* ── Compliance + Meeting (from LLM analysis) ── */}
+      {(compliance || meeting || loading.compliance || loading.meeting) && !loading.demo && !loading.all && (
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <ComplianceReport
+            data={compliance}
+            loading={loading.compliance}
+            error={errors.compliance}
+            onGenerate={() => runSingle('compliance')}
+          />
+          <MeetingAgenda
+            data={meeting}
+            loading={loading.meeting}
+            error={errors.meeting}
+            onGenerate={() => runSingle('meeting')}
+          />
+        </div>
+      )}
+
+      {/* ══════════════════════════════════════════════════════════
+           Advanced Analysis — brand/industry-specific risk scanning
+         ══════════════════════════════════════════════════════════ */}
 
       {/* Header Card */}
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
@@ -702,7 +762,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 </div>
               )}
             </div>
-            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} scanId={scanId} />
             {analysisResult && (
               <button
                 onClick={runAll}
@@ -901,51 +960,22 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
       )}
 
-      {/* Empty State */}
-      {!isAnyLoading && !hasResults && !demoResult && (
+      {/* Empty State — only when no scan and no analysis results */}
+      {!isAnyLoading && !hasResults && !demoResult && !hasScanned && (
         <div className="bg-zinc-900 rounded-2xl border border-dashed border-zinc-700 p-12 text-center">
           <Shield className="text-zinc-700 mx-auto mb-3" size={44} />
           <p className="text-zinc-500 text-sm leading-relaxed">
             <button
               type="button"
-              className="font-semibold text-red-400 hover:text-red-300 underline-offset-2 hover:underline"
-              onClick={handleDemo}
+              className="font-semibold text-indigo-400 hover:text-indigo-300 underline-offset-2 hover:underline"
+              onClick={handleFullDemo}
             >
-              {t(`risk.emptyDemo_${industry}`)}
+              {lang === 'ko' ? 'Run Full Demo를 실행' : 'Run Full Demo'}
             </button>
-            {t('risk.emptyDemoSuffix')}
-            {analysisResult && <><br />{t('risk.emptyAllSuffix')}</>}
+            {lang === 'ko'
+              ? '하여 리스크 인텔리전스 파이프라인을 체험하세요.'
+              : ' to experience the full risk intelligence pipeline.'}
           </p>
-        </div>
-      )}
-
-      {/* Ontology Graph */}
-      {(hasResults || loading.ontology) && !loading.demo && !loading.all && (
-        <OntologyGraph
-          id="ontology-graph"
-          data={ontology}
-          loading={loading.ontology}
-          error={errors.ontology}
-          onGenerate={() => runSingle('ontology')}
-          onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
-        />
-      )}
-
-      {/* Compliance + Meeting */}
-      {(compliance || meeting || loading.compliance || loading.meeting) && !loading.demo && !loading.all && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ComplianceReport
-            data={compliance}
-            loading={loading.compliance}
-            error={errors.compliance}
-            onGenerate={() => runSingle('compliance')}
-          />
-          <MeetingAgenda
-            data={meeting}
-            loading={loading.meeting}
-            error={errors.meeting}
-            onGenerate={() => runSingle('meeting')}
-          />
         </div>
       )}
 

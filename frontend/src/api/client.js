@@ -64,6 +64,8 @@ export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
 export const runFullDemo = () => api.post('/data/demo', null, { timeout: 180000 });
+export const getOntologyGraph = (minSeverity = 0) =>
+  api.get('/risk/ontology/graph', { params: { min_severity: minSeverity } });
 
 // Audit trail
 export const getAuditEvents = (limit = 50) =>
