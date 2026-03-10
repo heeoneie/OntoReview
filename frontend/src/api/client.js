@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api',
-  timeout: 180000, // 크롤링 시간 고려하여 3분
+  timeout: 120000,
 });
 
 export const uploadCSV = (file) => {
@@ -52,7 +52,7 @@ export const generateOntology = (analysisData) => api.post('/risk/ontology', ana
 export const generateComplianceReport = (analysisData) => api.post('/risk/compliance', analysisData);
 export const generateMeetingAgenda = (analysisData) => api.post('/risk/meeting', analysisData);
 export const runDemoScenario = (industry = 'ecommerce', lang = 'ko') =>
-  api.post('/risk/demo', null, { params: { industry, lang } });
+  api.post('/risk/demo', null, { params: { industry, lang }, timeout: 180000 });
 
 // 플레이북 API
 export const generatePlaybook = (body, config = {}) =>
@@ -63,6 +63,9 @@ export const getKpiSummary = () => api.get('/kpi/summary');
 export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
+export const runFullDemo = () => api.post('/data/demo', null, { timeout: 180000 });
+export const getOntologyGraph = (minSeverity = 0) =>
+  api.get('/risk/ontology/graph', { params: { min_severity: minSeverity } });
 
 // Audit trail
 export const getAuditEvents = (limit = 50) =>

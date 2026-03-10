@@ -1,5 +1,6 @@
 import { useCallback, useState } from 'react';
 import { useLang } from './contexts/LangContext';
+import ErrorBoundary from './components/ErrorBoundary';
 import RiskIntelligence from './components/RiskIntelligence';
 import RiskPlaybook from './components/RiskPlaybook';
 import './index.css';
@@ -7,7 +8,6 @@ import './index.css';
 const TABS = [
   { id: 'risk',     labelKey: 'tabs.risk',     soon: false },
   { id: 'playbook', labelKey: 'tabs.playbook', soon: false },
-  { id: 'agent',    labelKey: 'tabs.agent',    soon: true },
 ];
 
 function App() {
@@ -81,20 +81,24 @@ function App() {
       <main className="max-w-7xl mx-auto px-6 py-6">
         {/* RiskIntelligence: display:none으로 숨겨 상태 보존 */}
         <div style={{ display: activeTab === 'risk' ? undefined : 'none' }}>
-          <RiskIntelligence onNavigatePlaybook={handleNavigatePlaybook} />
+          <ErrorBoundary>
+            <RiskIntelligence onNavigatePlaybook={handleNavigatePlaybook} />
+          </ErrorBoundary>
         </div>
         {activeTab === 'playbook' && (
-          <RiskPlaybook
-            key={playbookNode}
-            nodeName={playbookNode}
-            industry={playbookIndustry}
-            onBack={() => {
-              setActiveTab('risk');
-              requestAnimationFrame(() => {
-                document.getElementById('ontology-graph')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              });
-            }}
-          />
+          <ErrorBoundary>
+            <RiskPlaybook
+              key={playbookNode}
+              nodeName={playbookNode}
+              industry={playbookIndustry}
+              onBack={() => {
+                setActiveTab('risk');
+                requestAnimationFrame(() => {
+                  document.getElementById('ontology-graph')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                });
+              }}
+            />
+          </ErrorBoundary>
         )}
       </main>
     </div>
