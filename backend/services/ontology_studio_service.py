@@ -14,6 +14,7 @@ from backend.services.ontology_engine import (
     _get_onto,
     _KEYWORD_TO_OWL_CLASS,
 )
+from core.utils.json_utils import extract_json_from_text
 from core.utils.openai_client import call_openai_json, get_client
 
 logger = logging.getLogger(__name__)
@@ -74,7 +75,7 @@ Rules:
     try:
         client = get_client()
         raw = call_openai_json(client, prompt)
-        result = _parse_json(raw)
+        result = extract_json_from_text(raw)
         if result and "rules" in result:
             return result["rules"]
     except Exception as exc:  # pylint: disable=broad-except
@@ -186,15 +187,3 @@ def _register_keyword(keyword: str, owl_class: str):
             "class may not exist in ontology",
             owl_class, keyword,
         )
-
-
-def _parse_json(text: str) -> dict | None:
-    """Extract JSON object from LLM response."""
-    import re  # pylint: disable=import-outside-toplevel
-    match = re.search(r"\{[\s\S]*\}", text)
-    if match:
-        try:
-            return json.loads(match.group())
-        except json.JSONDecodeError:
-            return None
-    return None
