@@ -594,11 +594,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             </div>
           </div>
           <div className="flex items-center gap-3">
-            {fullDemoStep && (
-              <span className="text-xs font-medium text-indigo-300 animate-pulse">
-                {fullDemoStep}
-              </span>
-            )}
             <button
               onClick={handleFullDemo}
               disabled={fullDemoLoading || amazonLoading}
@@ -656,6 +651,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       {/* Loading spinner */}
       {(loading.demo || loading.all) && (
         <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
+      )}
+      {fullDemoLoading && (
+        <RiskLoadingSpinner mode="fullDemo" />
       )}
 
       {/* 스캔 애니메이션 (handleDemo flow) */}

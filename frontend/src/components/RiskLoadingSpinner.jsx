@@ -9,6 +9,16 @@ const STEPS = [
   { label: '결과 통합 및 리스크 레벨 산정', duration: 3000 },
 ];
 
+const FULL_DEMO_STEPS = [
+  { label: '리뷰 수집 및 리스크 분류', duration: 4000 },
+  { label: 'AI 리스크 분석 (온톨로지·컴플라이언스·회의안건)', duration: 12000 },
+  { label: '대시보드 KPI 갱신', duration: 3000 },
+  { label: '웹 탐색 및 브랜드 리스크 스캔', duration: 5000 },
+  { label: '결과 통합 완료', duration: 1000 },
+];
+
+const FULL_DEMO_PARALLEL = [1, 2];
+
 const PARALLEL = [1, 2, 3];
 
 export default function RiskLoadingSpinner({ mode = 'demo' }) {
@@ -21,6 +31,8 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
         { label: 'AI 분석 실행 중', duration: 10000 },
         { label: '결과 정리 중', duration: 2000 },
       ]
+    : mode === 'fullDemo'
+    ? FULL_DEMO_STEPS
     : STEPS;
 
   useEffect(() => {
@@ -48,11 +60,15 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const isParallel = (idx) => mode === 'demo' && PARALLEL.includes(idx);
+  const isParallel = (idx) =>
+    mode === 'demo' ? PARALLEL.includes(idx)
+    : mode === 'fullDemo' ? FULL_DEMO_PARALLEL.includes(idx)
+    : false;
+  const parallelMax = mode === 'fullDemo' ? 2 : 3;
   const isActive = (idx) =>
-    isParallel(idx) ? currentStep >= 1 && currentStep <= 3 : idx === currentStep;
+    isParallel(idx) ? currentStep >= 1 && currentStep <= parallelMax : idx === currentStep;
   const isDone = (idx) =>
-    isParallel(idx) ? currentStep > 3 : idx < currentStep;
+    isParallel(idx) ? currentStep > parallelMax : idx < currentStep;
 
   return (
     <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-8">
@@ -85,6 +101,10 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
               ? currentStep <= 3
                 ? 'AI 엔진 병렬 분석 중...'
                 : '결과 통합 중...'
+              : mode === 'fullDemo'
+              ? currentStep <= parallelMax
+                ? 'Full Demo 실행 중...'
+                : (steps[currentStep]?.label || '처리 중...')
               : (steps[currentStep]?.label || '분석 중...')}
           </p>
         </div>
@@ -123,9 +143,11 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
           })}
         </div>
 
-        {mode === 'demo' && (
+        {(mode === 'demo' || mode === 'fullDemo') && (
           <p className="mt-4 text-xs text-zinc-600">
-            온톨로지 · 컴플라이언스 · 회의안건 동시 생성 중
+            {mode === 'fullDemo'
+              ? 'AI 분석 · 대시보드 갱신 병렬 처리 중'
+              : '온톨로지 · 컴플라이언스 · 회의안건 동시 생성 중'}
           </p>
         )}
       </div>
