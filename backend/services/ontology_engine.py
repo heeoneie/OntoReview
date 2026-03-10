@@ -13,8 +13,6 @@ Architecture:
 """
 
 import logging
-import os
-import re
 import threading
 from datetime import datetime, timezone
 
@@ -24,14 +22,13 @@ from owlready2 import (
     ObjectProperty,
     Thing,
     get_ontology,
-    destroy_entity,
 )
 
 logger = logging.getLogger(__name__)
 
 # Thread-safe singleton
 _lock = threading.Lock()
-_onto = None
+_onto = None  # pylint: disable=invalid-name
 
 # ──────────────────────────────────────────────
 #  OWL Schema Definition
@@ -40,11 +37,11 @@ _onto = None
 _OWL_IRI = "http://ontoreview.ai/risk-ontology#"
 
 
-def _build_schema():
+def _build_schema():  # pylint: disable=too-many-locals
     """Create OWL class hierarchy, properties, and inference rules."""
     onto = get_ontology(_OWL_IRI)
 
-    with onto:
+    with onto:  # noqa — owlready2 registers classes via metaclass; pylint sees them as unused
         # ── Top-level classes ──
         class RiskEvent(Thing):
             pass
@@ -60,6 +57,9 @@ def _build_schema():
 
         class RootCause(Thing):
             pass
+
+        # pylint: disable=unused-variable,invalid-name
+        # owlready2 registers these classes/properties via metaclass at definition time.
 
         # ── ProductLiability subtree ──
         class ProductLiability(RiskEvent):
@@ -274,7 +274,7 @@ _CLASS_TO_REGULATIONS = {
 
 def init_ontology():
     """Initialize OWL ontology schema. Call once at app startup."""
-    global _onto  # noqa: PLW0603
+    global _onto  # pylint: disable=global-statement
     with _lock:
         if _onto is not None:
             return _onto
@@ -334,7 +334,7 @@ def _count_class_instances(onto, class_name: str) -> int:
     return len(list(cls.instances()))
 
 
-def classify_with_ontology(text: str, llm_result: dict) -> dict:
+def classify_with_ontology(text: str, llm_result: dict) -> dict:  # pylint: disable=too-many-locals
     """Classify a review using OWL ontology + inference rules.
 
     Args:
@@ -372,7 +372,8 @@ def classify_with_ontology(text: str, llm_result: dict) -> dict:
         regulations.add("FDA_Cosmetics")
         departments.add("Regulatory")
         reasoning_path.append(
-            f"RULE: {owl_class_name} + severity {llm_severity:.1f} > 7 → triggers FDA_Cosmetics regulation"
+            f"RULE: {owl_class_name} + severity {llm_severity:.1f} > 7 "
+            f"→ triggers FDA_Cosmetics regulation"
         )
 
     # Rule 2: Contamination + channel == "amazon" → triggers CPSC
@@ -541,7 +542,7 @@ def get_reasoning_path(risk_class: str) -> list[dict]:
     return path
 
 
-def owl_to_reactflow(min_severity: float = 0.0) -> dict:
+def owl_to_reactflow(min_severity: float = 0.0) -> dict:  # pylint: disable=too-many-locals,too-many-branches,too-many-statements
     """Convert current OWL ontology state to ReactFlow-compatible JSON.
 
     Returns dict with 'nodes' and 'edges' arrays suitable for the

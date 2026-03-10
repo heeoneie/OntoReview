@@ -204,7 +204,7 @@ def generate_compliance_report(analysis_data: dict) -> dict:
   "report_title": "{ind['name']} 리스크 모니터링 보고서",
   "report_date": "{date.today().isoformat()}",
   "overall_risk_level": "주의",
-  "monitoring_summary": "최근 24시간 동안 {ind['channels']} 등 다수 채널에서 총 N건의 고객 피드백을 모니터링한 결과, 부정 피드백 M건이 감지되었습니다. 주요 리스크 영역은 ...",
+  "monitoring_summary": "최근 24시간 동안 {ind['channels']} 등 다수 채널에서 총 N건의 고객 피드백을 모니터링한 결과, 부정 피드백 M건이 감지되었습니다. 주요 리스크 영역은 ...",  # pylint: disable=line-too-long
   "monitored_channels": [
     {{"channel": "채널명", "feed_count": 100, "risk_count": 15, "status": "active"}}
   ],
@@ -802,7 +802,7 @@ def _demo_generate_ontology(
 ## 출력 형식
 {{
   "nodes": [
-    {{"id": "n1", "label": "노드명", "type": "category|root_cause|department|risk_type|channel|person|event|location|legal_clause", "severity": 8}}
+    {{"id": "n1", "label": "노드명", "type": "category|root_cause|department|risk_type|channel|person|event|location|legal_clause", "severity": 8}}  # pylint: disable=line-too-long
   ],
   "links": [
     {{"source": "n1", "target": "n2", "relation": "관계명"}}
@@ -842,7 +842,7 @@ def _demo_generate_compliance(
   "report_title": "OO 충전기 폭발 사건 긴급 리스크 보고서",
   "report_date": "2026-02-20",
   "overall_risk_level": "위험",
-  "monitoring_summary": "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일한 충전기 화재/폭발 사건이 동시 감지되었습니다. 개별 채널 황색 경보가 복합 발생으로 치명적(RED) 수준으로 격상되었습니다. 법적 분쟁 가능성, 집단 불매운동 징후, 기술적 결함 공개 등 3중 위기가 중첩된 상태입니다.",
+  "monitoring_summary": "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일한 충전기 화재/폭발 사건이 동시 감지되었습니다. 개별 채널 황색 경보가 복합 발생으로 치명적(RED) 수준으로 격상되었습니다.",  # pylint: disable=line-too-long
   "monitored_channels": [
     {{"channel": "쿠팡 리뷰", "feed_count": 1, "risk_count": 1, "status": "active"}},
     {{"channel": "YouTube 댓글", "feed_count": 1, "risk_count": 1, "status": "active"}},
@@ -858,19 +858,23 @@ def _demo_generate_compliance(
   "risk_events": [
     {{
       "id": 1, "severity": "critical", "category": "제품 안전 결함",
-      "channel": "쿠팡 리뷰", "description": "설명", "affected_count": 1, "recommended_action": "즉각 리콜 검토"
+      "channel": "쿠팡 리뷰", "description": "설명",
+      "affected_count": 1, "recommended_action": "즉각 리콜 검토"
     }},
     {{
       "id": 2, "severity": "high", "category": "집단 불매운동 징후",
-      "channel": "YouTube 댓글", "description": "설명", "affected_count": 156, "recommended_action": "대응 공지 게시"
+      "channel": "YouTube 댓글", "description": "설명",
+      "affected_count": 156, "recommended_action": "대응 공지 게시"
     }},
     {{
       "id": 3, "severity": "high", "category": "법적 분쟁 가능성",
-      "channel": "네이버 블로그", "description": "설명", "affected_count": 1200, "recommended_action": "법무팀 즉각 검토"
+      "channel": "네이버 블로그", "description": "설명",
+      "affected_count": 1200, "recommended_action": "법무팀 즉각 검토"
     }},
     {{
       "id": 4, "severity": "high", "category": "기술적 결함 공개 폭로",
-      "channel": "뽐뿌 커뮤니티", "description": "설명", "affected_count": 4500, "recommended_action": "제품 긴급 검수"
+      "channel": "뽐뿌 커뮤니티", "description": "설명",
+      "affected_count": 4500, "recommended_action": "제품 긴급 검수"
     }}
   ],
   "next_actions": ["즉각 조치 1", "즉각 조치 2", "즉각 조치 3"]
@@ -966,7 +970,8 @@ def _real_generate_ontology(  # pylint: disable=too-many-arguments,too-many-posi
 ## 출력 형식
 {{
   "nodes": [
-    {{"id": "n1", "label": "노드명 (영문)", "type": "signal|event|impact|response", "layer": 0, "severity": 7}}
+    {{"id": "n1", "label": "노드명 (영문)", "type": "signal|event|impact|response",
+      "layer": 0, "severity": 7}}
   ],
   "links": [
     {{"source": "n1", "target": "n2", "relation": "관계명"}}
