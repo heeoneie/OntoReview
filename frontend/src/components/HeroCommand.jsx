@@ -110,7 +110,7 @@ export default function HeroCommand({
         {/* Brand + Product + CTA — labels on top, button aligned right */}
         <div className="flex items-end gap-3">
           <div className="space-y-1.5">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{t('hero.brand')}</label>
+            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{brandLabel}</label>
             <input
               type="text"
               value={brandName}
@@ -123,7 +123,7 @@ export default function HeroCommand({
           </div>
 
           <div className="flex-1 space-y-1.5">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{t('hero.product')}</label>
+            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{productLabel}</label>
             <input
               type="text"
               value={productName}
