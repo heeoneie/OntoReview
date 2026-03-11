@@ -107,32 +107,42 @@ export default function HeroCommand({
           ))}
         </div>
 
-        {/* Brand + Product inputs + CTA — single row */}
-        <div className="flex items-center gap-3">
-          <input
-            type="text"
-            value={brandName}
-            onChange={(e) => onBrandChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
-            placeholder={brandLabel}
-            disabled={analysisLoading}
-            className="w-40 bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
-          />
+        {/* Brand + Product inputs + CTA */}
+        <div className="flex items-end gap-3">
+          <div className="space-y-1">
+            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
+              {t('hero.brand')}
+            </label>
+            <input
+              type="text"
+              value={brandName}
+              onChange={(e) => onBrandChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+              placeholder={brandLabel}
+              disabled={analysisLoading}
+              className="w-40 bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+            />
+          </div>
 
-          <input
-            type="text"
-            value={productName}
-            onChange={(e) => onProductChange(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
-            placeholder={productLabel}
-            disabled={analysisLoading}
-            className="flex-1 min-w-[120px] bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
-          />
+          <div className="flex-1 space-y-1">
+            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
+              {t('hero.product')}
+            </label>
+            <input
+              type="text"
+              value={productName}
+              onChange={(e) => onProductChange(e.target.value)}
+              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+              placeholder={productLabel}
+              disabled={analysisLoading}
+              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+            />
+          </div>
 
           <button
             onClick={onRunAnalysis}
             disabled={analysisLoading}
-            className="px-6 py-3 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:opacity-50 flex items-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)] flex-shrink-0"
+            className="px-6 py-2.5 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:opacity-50 flex items-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)] flex-shrink-0"
           >
             {analysisLoading ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
             {t('hero.runAnalysis')}
