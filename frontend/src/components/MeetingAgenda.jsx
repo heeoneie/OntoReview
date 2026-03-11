@@ -10,8 +10,8 @@ const URGENCY_STYLES = {
 
 const PRIORITY_BORDER = {
   critical: 'border-l-amber-500',
-  high:     'border-l-amber-700',
-  medium:   'border-l-amber-600',
+  high:     'border-l-amber-600',
+  medium:   'border-l-amber-700',
   low:      'border-l-zinc-600',
 };
 

@@ -395,9 +395,11 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
                     {timeline.map((item) => {
                       const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
                       const dotColor = sev === 'critical' ? 'bg-amber-400' : sev === 'high' ? 'bg-amber-500' : 'bg-zinc-500';
-                      const badgeStyle = sev === 'medium'
-                        ? 'bg-zinc-700 text-zinc-400'
-                        : 'bg-amber-400/10 text-amber-400';
+                      const badgeStyle = sev === 'critical'
+                        ? 'bg-amber-500/15 text-amber-300'
+                        : sev === 'high'
+                          ? 'bg-amber-400/10 text-amber-400'
+                          : 'bg-zinc-700 text-zinc-400';
 
                       return (
                         <div key={item.id} className="group flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
