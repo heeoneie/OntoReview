@@ -1,7 +1,10 @@
 import { Component } from 'react';
 import { AlertTriangle, RefreshCw } from 'lucide-react';
+import { LangContext } from '../contexts/LangContext';
 
 export default class ErrorBoundary extends Component {
+  static contextType = LangContext;
+
   constructor(props) {
     super(props);
     this.state = { hasError: false };
@@ -17,18 +20,19 @@ export default class ErrorBoundary extends Component {
 
   render() {
     if (this.state.hasError) {
+      const { t } = this.context;
       return (
-        <div className="bg-zinc-900 rounded-2xl border border-red-900/60 p-8 text-center">
-          <AlertTriangle className="text-red-400 mx-auto mb-3" size={36} />
+        <div className="bg-zinc-900 rounded-2xl border border-amber-900/60 p-8 text-center">
+          <AlertTriangle className="text-amber-400 mx-auto mb-3" size={36} />
           <p className="text-sm text-zinc-300 mb-4">
-            {this.props.message || '일시적인 문제가 발생했습니다. 다시 시도해주세요.'}
+            {t('error.message')}
           </p>
           <button
             onClick={this.handleRetry}
             className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-sm font-medium hover:bg-zinc-700 transition-colors border border-zinc-700 inline-flex items-center gap-2"
           >
             <RefreshCw size={14} />
-            다시 시도
+            {t('error.retry')}
           </button>
         </div>
       );

@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { Loader2, ScanSearch, AlertTriangle, Clock, Globe, ExternalLink } from 'lucide-react';
 import {
   generateOntology,
@@ -23,7 +23,6 @@ import RiskLoadingSpinner from './RiskLoadingSpinner';
 import DataSources from './DataSources';
 import GraphPreview from './GraphPreview';
 import RiskBreakdown from './RiskBreakdown';
-const DevModelQuality = import.meta.env.DEV ? lazy(() => import('./ModelQuality')) : null;
 
 // ── Constants ──
 
@@ -514,12 +513,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
         />
       )}
 
-      {/* Dev-only model quality panel */}
-      {import.meta.env.DEV && DevModelQuality && (
-        <Suspense fallback={null}>
-          <DevModelQuality />
-        </Suspense>
-      )}
     </div>
   );
 }

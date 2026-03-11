@@ -1,5 +1,9 @@
 export const translations = {
   ko: {
+    error: {
+      message: '일시적인 문제가 발생했습니다. 다시 시도해주세요.',
+      retry: '다시 시도',
+    },
     tabs: {
       analysis: '분석 대시보드', reply: '리뷰 답변', risk: '리스크 인텔리전스',
       playbook: '리스크 대응 시뮬레이션', agent: '에이전트 자율 협상 설정',
@@ -246,6 +250,7 @@ export const translations = {
       empty: '보고서를 생성하려면 버튼을 클릭하세요',
       safe: '안전', caution: '주의', warning: '경고', danger: '위험',
       auditLog: 'AUDIT LOG', auditLastRecord: '마지막 기록: 방금 전', auditTotal: '총 847건 누적',
+      runScanHint: 'Intelligence 탭에서 스캔을 실행하면 상세 리포트가 여기에 표시됩니다',
     },
     meeting: {
       title: '회의 안건', generate: '안건 생성', generating: '회의 안건 생성 중...',
@@ -291,6 +296,10 @@ export const translations = {
   },
 
   en: {
+    error: {
+      message: 'Something went wrong. Please try again.',
+      retry: 'Retry',
+    },
     tabs: {
       analysis: 'Analytics', reply: 'Review Reply', risk: 'Risk Intelligence',
       playbook: 'Risk Response Playbook', agent: 'Agent Communication Setup',
@@ -537,6 +546,7 @@ export const translations = {
       empty: 'Click the button to generate a compliance report',
       safe: 'Safe', caution: 'Caution', warning: 'Warning', danger: 'Danger',
       auditLog: 'AUDIT LOG', auditLastRecord: 'Last record: just now', auditTotal: '847 entries logged',
+      runScanHint: 'Run a scan in the Intelligence tab to see detailed reports here',
     },
     meeting: {
       title: 'Meeting Agenda', generate: 'Generate Agenda', generating: 'Generating agenda...',

@@ -71,9 +71,6 @@ export const getOntologyGraph = (minSeverity = 0) =>
 export const getAuditEvents = (limit = 50) =>
   api.get('/audit/events', { params: { limit } });
 
-// AI 모델 평가 API
-export const getEvaluationMetrics = () => api.get('/evaluate/metrics');
-export const getDatasetInfo = () => api.get('/evaluate/dataset/info');
 
 // Web Discovery API
 export const searchBrandRisks = (brand, product) =>

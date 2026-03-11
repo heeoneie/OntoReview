@@ -81,12 +81,9 @@ function App() {
                 />
               </ErrorBoundary>
 
-              {/* Strategy | Execution — 2-column layout */}
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <ErrorBoundary>
-                  <AgentSetup />
-                </ErrorBoundary>
-              </div>
+              <ErrorBoundary>
+                <AgentSetup />
+              </ErrorBoundary>
             </div>
           )}
 
@@ -97,7 +94,7 @@ function App() {
               </ErrorBoundary>
 
               {/* Reports from Intelligence scan */}
-              {(complianceData || meetingData) && (
+              {(complianceData || meetingData) ? (
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                   {complianceData && (
                     <ErrorBoundary>
@@ -109,6 +106,10 @@ function App() {
                       <MeetingAgenda data={meetingData} />
                     </ErrorBoundary>
                   )}
+                </div>
+              ) : (
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-8 text-center">
+                  <p className="text-sm text-zinc-500">{t('compliance.runScanHint')}</p>
                 </div>
               )}
 
