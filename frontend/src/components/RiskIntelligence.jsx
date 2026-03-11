@@ -116,7 +116,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
     }
   }, []);
 
-  useEffect(() => { refreshDashboard(); }, [refreshDashboard]);
+  // NOTE: Do NOT auto-fetch on mount — data should only appear after user runs analysis
   useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
 
   const fetchOntologyGraph = useCallback(async () => {

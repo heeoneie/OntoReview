@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { getDatasetInfo, getEvaluationMetrics } from '../api/client';
+import { getEvaluationMetrics } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 
 const CATEGORY_LABELS = {
@@ -49,19 +49,13 @@ function ScoreBadge({ value = 0 }) {
 export default function ModelQuality() {
   const { lang } = useLang();
   const [metrics, setMetrics] = useState(null);
-  const [datasetInfo, setDatasetInfo] = useState(null);
   const [loading, setLoading] = useState(true);
   const [expanded, setExpanded] = useState(false);
 
   useEffect(() => {
-    Promise.all([
-      getEvaluationMetrics().then((r) => r.data).catch(() => null),
-      getDatasetInfo().then((r) => r.data).catch(() => null),
-    ])
-      .then(([m, d]) => {
-        setMetrics(m);
-        setDatasetInfo(d);
-      })
+    getEvaluationMetrics()
+      .then((r) => setMetrics(r.data))
+      .catch(() => null)
       .finally(() => setLoading(false));
   }, []);
 
@@ -95,11 +89,6 @@ export default function ModelQuality() {
           </span>
         </div>
         <div className="flex items-center gap-3">
-          {datasetInfo && (
-            <span className="text-xs text-zinc-500">
-              n={datasetInfo.total_samples} · {Object.keys(datasetInfo.label_distribution || {}).length} classes
-            </span>
-          )}
           <button
             onClick={() => setExpanded((v) => !v)}
             className="text-xs text-zinc-500 hover:text-zinc-300 transition-colors"
