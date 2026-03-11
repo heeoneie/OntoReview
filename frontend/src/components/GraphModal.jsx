@@ -138,7 +138,10 @@ function processOntologyForModal(ontology) {
       label: e.label ?? e.relation ?? '',
       type: 'default',
       style: { stroke: '#52525b', strokeWidth: 1.5 },
-      labelStyle: { fill: '#71717a', fontSize: 10 },
+      labelStyle: { fill: '#d4d4d8', fontSize: 10, fontWeight: 500 },
+      labelBgStyle: { fill: '#27272a', fillOpacity: 0.9 },
+      labelBgPadding: [4, 6],
+      labelBgBorderRadius: 4,
     }));
 
   return layoutGraph(processedNodes, processedEdges);
@@ -226,7 +229,10 @@ export default function GraphModal({ ontology, subgraph, onClose, onNavigatePlay
               defaultEdgeOptions={{
                 type: 'default',
                 style: { stroke: '#52525b', strokeWidth: 1.5 },
-                labelStyle: { fill: '#71717a', fontSize: 10 },
+                labelStyle: { fill: '#d4d4d8', fontSize: 10, fontWeight: 500 },
+      labelBgStyle: { fill: '#27272a', fillOpacity: 0.9 },
+      labelBgPadding: [4, 6],
+      labelBgBorderRadius: 4,
               }}
             >
               <Background color="#27272a" gap={20} />

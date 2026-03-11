@@ -148,7 +148,10 @@ const nodeTypes = { reasoning: ReasoningNode };
 const defaultEdgeOptions = {
   type: 'default',
   style: { stroke: '#52525b', strokeWidth: 1.5 },
-  labelStyle: { fill: '#71717a', fontSize: 9 },
+  labelStyle: { fill: '#d4d4d8', fontSize: 9, fontWeight: 500 },
+  labelBgStyle: { fill: '#27272a', fillOpacity: 0.9 },
+  labelBgPadding: [4, 6],
+  labelBgBorderRadius: 4,
 };
 
 /* ── Main Component ── */
