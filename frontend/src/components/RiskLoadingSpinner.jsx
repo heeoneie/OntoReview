@@ -79,7 +79,7 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
             <circle cx="48" cy="48" r="40" stroke="#1e293b" strokeWidth="8" fill="none" />
             <circle
               cx="48" cy="48" r="40"
-              stroke="#6366f1"
+              stroke="#0ea5e9"
               strokeWidth="8"
               fill="none"
               strokeDasharray={251.2}
@@ -89,13 +89,13 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-indigo-400">{progress}%</span>
+            <span className="text-2xl font-bold text-sky-400">{progress}%</span>
           </div>
         </div>
 
         {/* 현재 작업 */}
         <div className="flex items-center gap-2 mb-6">
-          <Radio className="text-indigo-400 animate-pulse" size={16} />
+          <Radio className="text-sky-400 animate-pulse" size={16} />
           <p className="text-sm font-medium text-zinc-300">
             {mode === 'demo'
               ? currentStep <= 3
@@ -121,22 +121,22 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
                 key={idx}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm ${
                   done
-                    ? 'bg-emerald-950/50 text-emerald-400 border border-emerald-900'
+                    ? 'bg-sky-950/50 text-sky-400 border border-sky-900'
                     : active
-                      ? 'bg-indigo-950/50 text-indigo-300 border border-indigo-900'
+                      ? 'bg-sky-950/50 text-sky-300 border border-sky-900'
                       : 'bg-zinc-800/50 text-zinc-600 border border-zinc-800'
                 }`}
               >
                 {done ? (
-                  <CheckCircle size={15} className="text-emerald-400 flex-shrink-0" />
+                  <CheckCircle size={15} className="text-sky-400 flex-shrink-0" />
                 ) : active ? (
-                  <Loader2 size={15} className="animate-spin text-indigo-400 flex-shrink-0" />
+                  <Loader2 size={15} className="animate-spin text-sky-400 flex-shrink-0" />
                 ) : (
                   <div className="w-[15px] h-[15px] rounded-full border border-zinc-700 flex-shrink-0" />
                 )}
                 <span className="font-medium">{step.label}</span>
                 {parallel && (
-                  <span className="ml-auto text-[10px] text-indigo-500 font-semibold border border-indigo-900 px-1.5 rounded">병렬</span>
+                  <span className="ml-auto text-[10px] text-sky-500 font-semibold border border-sky-900 px-1.5 rounded">병렬</span>
                 )}
               </div>
             );

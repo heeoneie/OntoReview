@@ -25,10 +25,10 @@ import RiskReport from './RiskReport';
 const DevModelQuality = import.meta.env.DEV ? lazy(() => import('./ModelQuality')) : null;
 
 const INDUSTRIES = [
-  { id: 'ecommerce', labelKey: 'risk.ecommerce', icon: '🛒' },
-  { id: 'hospital',  labelKey: 'risk.hospital',  icon: '🏥' },
-  { id: 'finance',   labelKey: 'risk.finance',   icon: '🏦' },
-  { id: 'gaming',    labelKey: 'risk.gaming',    icon: '🎮' },
+  { id: 'ecommerce', labelKey: 'risk.ecommerce' },
+  { id: 'hospital',  labelKey: 'risk.hospital' },
+  { id: 'finance',   labelKey: 'risk.finance' },
+  { id: 'gaming',    labelKey: 'risk.gaming' },
 ];
 
 const INDUSTRY_INPUT_CFG = {
@@ -97,10 +97,10 @@ const EXTRA_CHANNELS_BY_INDUSTRY = {
 };
 
 const RISK_LEVEL_CONFIG = {
-  GREEN:  { labelKey: 'risk.safe',     dot: 'bg-emerald-400', text: 'text-emerald-400', banner: 'bg-emerald-950/40 border-emerald-800' },
+  GREEN:  { labelKey: 'risk.safe',     dot: 'bg-zinc-400', text: 'text-zinc-400', banner: 'bg-zinc-900/40 border-zinc-700' },
   YELLOW: { labelKey: 'risk.caution',  dot: 'bg-amber-400',   text: 'text-amber-400',   banner: 'bg-amber-950/40 border-amber-800' },
-  ORANGE: { labelKey: 'risk.warning',  dot: 'bg-orange-400',  text: 'text-orange-400',  banner: 'bg-orange-950/40 border-orange-800' },
-  RED:    { labelKey: 'risk.critical', dot: 'bg-red-500',     text: 'text-red-400',     banner: 'bg-red-950/40 border-red-800' },
+  ORANGE: { labelKey: 'risk.warning',  dot: 'bg-amber-400',  text: 'text-amber-400',  banner: 'bg-amber-950/40 border-amber-800' },
+  RED:    { labelKey: 'risk.critical', dot: 'bg-amber-500',     text: 'text-amber-400',     banner: 'bg-amber-950/40 border-amber-800' },
 };
 
 function RiskLevelBanner({ level }) {
@@ -475,10 +475,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${kpi.total_legal_exposure_usd > 0 ? 'bg-red-400' : 'bg-emerald-400'} opacity-50`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${kpi.total_legal_exposure_usd > 0 ? 'bg-red-400' : 'bg-emerald-400'}`} />
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${kpi.total_legal_exposure_usd > 0 ? 'bg-amber-400' : 'bg-sky-400'} opacity-50`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${kpi.total_legal_exposure_usd > 0 ? 'bg-amber-400' : 'bg-sky-400'}`} />
             </span>
-            <span className={`text-xs font-bold uppercase tracking-widest ${kpi.total_legal_exposure_usd > 0 ? 'text-red-400' : 'text-emerald-400'}`}>{t('risk.live')}</span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-sky-400'}`}>{t('risk.live')}</span>
             <span className="text-xs text-zinc-600">{t('risk.last24h')}</span>
           </div>
           <div className="flex items-center gap-2">
@@ -492,43 +492,43 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           {/* Card A: Legal Exposure (Primary - Alarming) */}
           <div className={`rounded-xl px-4 py-4 border ${
             kpi.total_legal_exposure_usd > 0
-              ? 'bg-red-950/50 border-red-800/80'
+              ? 'bg-amber-950/50 border-amber-800/80'
               : 'bg-zinc-800/60 border-zinc-700/60'
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.total_legal_exposure_usd > 0 ? 'bg-red-900/60' : 'bg-zinc-700/60'
+                kpi.total_legal_exposure_usd > 0 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
               }`}>
-                <Scale className={kpi.total_legal_exposure_usd > 0 ? 'text-red-400' : 'text-zinc-400'} size={14} />
+                <Scale className={kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
               </div>
               <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiLegalExposure')}</p>
             </div>
             <p className={`text-2xl font-bold leading-none ${
-              kpi.total_legal_exposure_usd > 0 ? 'text-red-400' : 'text-zinc-400'
+              kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-zinc-400'
             }`}>
               {formatLegalExposure(kpi.total_legal_exposure_usd)}
             </p>
             {kpi.total_legal_exposure_usd > 0 && (
-              <p className="text-[10px] text-red-500/80 mt-1.5 leading-tight">{t('risk.legalExposureTooltip')}</p>
+              <p className="text-[10px] text-amber-500/80 mt-1.5 leading-tight">{t('risk.legalExposureTooltip')}</p>
             )}
           </div>
 
           {/* Card B: Overall Risk Score */}
           <div className={`rounded-xl px-4 py-4 border ${
             kpi.overall_risk_score >= 10
-              ? 'bg-orange-950/40 border-orange-800/60'
+              ? 'bg-amber-950/40 border-amber-800/60'
               : 'bg-zinc-800/60 border-zinc-700/60'
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.overall_risk_score >= 10 ? 'bg-orange-900/60' : 'bg-zinc-700/60'
+                kpi.overall_risk_score >= 10 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
               }`}>
-                <TrendingUp className={kpi.overall_risk_score >= 10 ? 'text-orange-400' : 'text-zinc-400'} size={14} />
+                <TrendingUp className={kpi.overall_risk_score >= 10 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
               </div>
               <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiRiskScore')}</p>
             </div>
             <p className={`text-2xl font-bold leading-none ${
-              kpi.overall_risk_score >= 10 ? 'text-orange-400' : 'text-white'
+              kpi.overall_risk_score >= 10 ? 'text-amber-400' : 'text-white'
             }`}>
               {kpi.overall_risk_score.toLocaleString()}
             </p>
@@ -537,24 +537,24 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           {/* Card C: Critical Risks */}
           <div className={`rounded-xl px-4 py-4 border ${
             kpi.critical_risks_detected > 0
-              ? 'bg-red-950/40 border-red-900/60'
-              : 'bg-emerald-950/30 border-emerald-900/50'
+              ? 'bg-amber-950/40 border-amber-900/60'
+              : 'bg-zinc-800/60 border-zinc-700/60'
           }`}>
             <div className="flex items-center gap-2 mb-2">
               <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.critical_risks_detected > 0 ? 'bg-red-900/60' : 'bg-emerald-900/40'
+                kpi.critical_risks_detected > 0 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
               }`}>
-                <AlertTriangle className={kpi.critical_risks_detected > 0 ? 'text-red-400' : 'text-emerald-400'} size={14} />
+                <AlertTriangle className={kpi.critical_risks_detected > 0 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
               </div>
               <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiRisks')}</p>
             </div>
             <p className={`text-2xl font-bold leading-none ${
-              kpi.critical_risks_detected > 0 ? 'text-red-400' : 'text-emerald-400'
+              kpi.critical_risks_detected > 0 ? 'text-amber-400' : 'text-zinc-400'
             }`}>
               {kpi.critical_risks_detected}
             </p>
             {kpi.critical_risks_detected === 0 && (
-              <p className="text-[10px] text-emerald-500/80 mt-1.5">{t('risk.safeState')}</p>
+              <p className="text-[10px] text-zinc-500/80 mt-1.5">{t('risk.safeState')}</p>
             )}
           </div>
 
@@ -577,12 +577,12 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       </div>
 
       {/* ── Unified Scan Action Card ── */}
-      <div className="bg-gradient-to-r from-indigo-950/60 to-purple-950/60 rounded-2xl border border-indigo-800/60 px-6 py-5">
+      <div className="bg-gradient-to-r from-sky-950/60 to-zinc-900/60 rounded-2xl border border-sky-800/60 px-6 py-5">
         {/* Primary: Full Demo */}
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-indigo-900/60 border border-indigo-700 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Rocket className="text-indigo-400" size={18} />
+            <div className="w-9 h-9 bg-sky-900/60 border border-sky-700 rounded-xl flex items-center justify-center flex-shrink-0">
+              <Rocket className="text-sky-400" size={18} />
             </div>
             <div>
               <p className="text-sm font-bold text-white">{t('risk.fullDemoBtn')}</p>
@@ -597,7 +597,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             <button
               onClick={handleFullDemo}
               disabled={fullDemoLoading || amazonLoading}
-              className="px-5 py-2.5 bg-indigo-600 text-white rounded-xl font-semibold hover:bg-indigo-700 shadow-sm shadow-indigo-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
+              className="px-5 py-2.5 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 shadow-sm shadow-sky-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
             >
               {fullDemoLoading
                 ? <><Loader2 className="animate-spin" size={15} />{t('risk.fullDemoRunning')}</>
@@ -623,7 +623,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             onChange={(e) => setAmazonUrl(e.target.value)}
             onKeyDown={(e) => e.key === 'Enter' && handleAmazonIngest()}
             placeholder={t('risk.amazonPlaceholder')}
-            className="flex-1 bg-zinc-800/80 border border-zinc-700 hover:border-indigo-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-indigo-600 transition-all duration-200"
+            className="flex-1 bg-zinc-800/80 border border-zinc-700 hover:border-sky-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-sky-600 transition-all duration-200"
           />
           <button
             onClick={handleAmazonIngest}
@@ -638,7 +638,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
         {/* Toast */}
         {amazonToast && (
-          <p className={`mt-3 text-xs font-medium ${amazonToastType === 'error' ? 'text-red-400' : 'text-emerald-400'}`}>
+          <p className={`mt-3 text-xs font-medium ${amazonToastType === 'error' ? 'text-amber-400' : 'text-sky-400'}`}>
             {amazonToast}
           </p>
         )}
@@ -658,14 +658,14 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
       {/* 스캔 애니메이션 (handleDemo flow) */}
       {scanPhase && (
-        <div className="bg-zinc-900 rounded-2xl border border-indigo-900 p-6 flex items-center gap-4">
-          <div className="w-10 h-10 bg-indigo-950 border border-indigo-800 rounded-xl flex items-center justify-center flex-shrink-0">
-            <ScanSearch className="text-indigo-400 animate-pulse" size={20} />
+        <div className="bg-zinc-900 rounded-2xl border border-sky-900 p-6 flex items-center gap-4">
+          <div className="w-10 h-10 bg-sky-950 border border-sky-800 rounded-xl flex items-center justify-center flex-shrink-0">
+            <ScanSearch className="text-sky-400 animate-pulse" size={20} />
           </div>
           <div>
             <p className="text-sm font-semibold text-white">{t('risk.scanPhaseTitle')}</p>
             <p className="text-xs text-zinc-500 mt-0.5">
-              <span className="text-indigo-400 font-medium">
+              <span className="text-sky-400 font-medium">
                 {[brandName, productName].filter(Boolean).join(' ')}
               </span>
               {t('risk.scanPhaseHint')}
@@ -675,7 +675,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             {[0, 1, 2, 3].map((i) => (
               <div
                 key={i}
-                className="w-1.5 h-1.5 bg-indigo-400 rounded-full animate-bounce"
+                className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce"
                 style={{ animationDelay: `${i * 0.15}s` }}
               />
             ))}
@@ -685,7 +685,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
       {/* Error */}
       {errors.demo && (
-        <div className="bg-red-950 border border-red-800 text-red-400 rounded-xl px-4 py-3 text-sm">{errors.demo}</div>
+        <div className="bg-amber-950 border border-amber-800 text-amber-400 rounded-xl px-4 py-3 text-sm">{errors.demo}</div>
       )}
 
       {/* Risk Level Banner */}
@@ -695,8 +695,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       {demoResult && dataSource && (
         <div className="flex items-center gap-2">
           {dataSource === 'youtube' ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-red-950/50 border border-red-800/60 text-xs font-medium text-red-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-red-400 animate-pulse" />
+            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-300">
+              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
               {t('risk.youtube_live_data')}
             </span>
           ) : (
@@ -715,7 +715,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       {timeline.length > 0 && (
         <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
           <div className="flex items-center gap-2 mb-4">
-            <Clock className="text-red-400" size={16} />
+            <Clock className="text-amber-400" size={16} />
             <span className="text-sm font-bold text-white">{t('risk.timelineTitle')}</span>
             <span className="text-xs text-zinc-600 ml-auto">
               {lang === 'ko' ? `${timeline.length}건 탐지` : `${timeline.length} detections`}
@@ -725,14 +725,14 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
             {timeline.map((item) => {
               const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
               const colors = {
-                critical: 'bg-red-950/60 border-red-800 text-red-400',
-                high: 'bg-orange-950/60 border-orange-800 text-orange-400',
-                medium: 'bg-amber-950/60 border-amber-800 text-amber-400',
+                critical: 'bg-amber-950/60 border-amber-800 text-amber-400',
+                high: 'bg-amber-950/60 border-amber-800 text-amber-400',
+                medium: 'bg-zinc-800/60 border-zinc-700 text-zinc-400',
               };
               const badgeColors = {
-                critical: 'bg-red-600 text-white',
-                high: 'bg-orange-600 text-white',
-                medium: 'bg-amber-600 text-white',
+                critical: 'bg-amber-600 text-white',
+                high: 'bg-amber-600 text-white',
+                medium: 'bg-zinc-600 text-white',
               };
               const getCaseLabel = (caseId) => {
                 if (!caseId) return null;
@@ -759,7 +759,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                   </div>
                   {item.case_id && (
                     <div className="flex items-center gap-2 ml-7">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-indigo-950/70 border border-indigo-800/60 text-[10px] font-medium text-indigo-300">
+                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950/70 border border-sky-800/60 text-[10px] font-medium text-sky-300">
                         <Scale size={10} />
                         {caseLabel}
                       </span>
@@ -811,9 +811,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           {discoveryResults && discoveryResults.results.length > 0 && (
             <div className="space-y-2 max-h-80 overflow-y-auto">
               {discoveryResults.results.map((item) => (
-                <div key={item.url} className="bg-red-950/30 border border-red-900/50 rounded-xl px-4 py-3">
+                <div key={item.url} className="bg-amber-950/30 border border-amber-900/50 rounded-xl px-4 py-3">
                   <div className="flex items-start gap-3">
-                    <AlertTriangle className="text-red-400 flex-shrink-0 mt-0.5" size={14} />
+                    <AlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={14} />
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
                       <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
@@ -935,7 +935,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               <button
                 onClick={runAll}
                 disabled={isAnyLoading}
-                className="px-3 py-2 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm"
+                className="px-3 py-2 bg-sky-600 text-white rounded-xl font-medium hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm"
               >
                 {loading.all ? <><Loader2 className="animate-spin" size={15} />{t('risk.analyzing')}</> : t('risk.runAllBtn')}
               </button>
@@ -959,7 +959,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 value={brandName}
                 onChange={(e) => setBrandName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !isAnyLoading && handleDemo()}
-                className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-colors"
               />
             </div>
             <div className="flex flex-col gap-1 flex-1">
@@ -971,7 +971,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 value={productName}
                 onChange={(e) => setProductName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && !isAnyLoading && handleDemo()}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-purple-500 focus:border-purple-500 transition-colors"
+                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-colors"
               />
             </div>
             <div className="flex flex-col gap-1 flex-shrink-0">
@@ -979,7 +979,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               <button
                 onClick={handleDemo}
                 disabled={isAnyLoading || (!brandName.trim() && !productName.trim())}
-                className="px-5 py-2.5 bg-red-600 text-white rounded-xl font-semibold hover:bg-red-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm h-[42px]"
+                className="px-5 py-2.5 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm h-[42px]"
               >
                 {(scanPhase || loading.demo)
                   ? <><Loader2 className="animate-spin" size={15} />{t('risk.scanning')}</>
@@ -997,7 +997,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               <Building2 size={12} />{t('risk.industryContext')}
             </div>
             <div className="flex gap-2 flex-wrap">
-              {INDUSTRIES.map(({ id, labelKey, icon }) => (
+              {INDUSTRIES.map(({ id, labelKey }) => (
                 <button key={id} onClick={() => {
                   setIndustry(id);
                   const cfg = INDUSTRY_INPUT_CFG[id];
@@ -1014,10 +1014,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                 }}
                   className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                     industry === id
-                      ? 'bg-indigo-950 text-indigo-300 border-indigo-700'
+                      ? 'bg-sky-950 text-sky-300 border-sky-700'
                       : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-zinc-300'
                   }`}>
-                  {icon} {t(labelKey)}
+                  {t(labelKey)}
                 </button>
               ))}
             </div>
@@ -1036,10 +1036,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
               {channels.map((ch) => (
                 <div key={ch.nameKey} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border ${
                   ch.status === 'active'
-                    ? 'bg-emerald-950/50 text-emerald-400 border-emerald-900'
+                    ? 'bg-zinc-800/80 text-zinc-300 border-zinc-700'
                     : 'bg-zinc-800 text-zinc-500 border-zinc-700'
                 }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${ch.status === 'active' ? 'bg-emerald-400' : 'bg-zinc-600'}`} />
+                  <span className={`w-1.5 h-1.5 rounded-full ${ch.status === 'active' ? 'bg-sky-400' : 'bg-zinc-600'}`} />
                   {t(ch.nameKey)}
                   {ch.count != null && <span className="font-semibold">{ch.count.toLocaleString()}</span>}
                 </div>
@@ -1056,7 +1056,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
                     onClick={() => toggleExtra(id)}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs border transition-colors ${
                       on
-                        ? 'bg-indigo-950/60 text-indigo-300 border-indigo-700'
+                        ? 'bg-sky-950/60 text-sky-300 border-sky-700'
                         : 'bg-zinc-800/60 text-zinc-600 border-zinc-700/60 hover:text-zinc-400 hover:border-zinc-600'
                     }`}
                   >
@@ -1076,7 +1076,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           <p className="text-zinc-500 text-sm leading-relaxed">
             <button
               type="button"
-              className="font-semibold text-indigo-400 hover:text-indigo-300 underline-offset-2 hover:underline"
+              className="font-semibold text-sky-400 hover:text-sky-300 underline-offset-2 hover:underline"
               onClick={handleFullDemo}
             >
               {lang === 'ko' ? 'Run Full Demo를 실행' : 'Run Full Demo'}

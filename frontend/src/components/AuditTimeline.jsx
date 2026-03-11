@@ -7,8 +7,8 @@ const EVENT_CONFIG = {
   scan_started:       { icon: Radio,         accent: 'text-sky-400',    border: 'border-sky-500/30',  bg: 'bg-sky-950/20',    badge: 'bg-sky-500/20 text-sky-300 ring-sky-500/30' },
   review_classified:  { icon: FileText,      accent: 'text-zinc-400',   border: 'border-zinc-700/50', bg: 'bg-zinc-800/30',   badge: 'bg-zinc-700/30 text-zinc-400 ring-zinc-600/30' },
   precedent_matched:  { icon: Scale,         accent: 'text-amber-400',  border: 'border-amber-500/30',bg: 'bg-amber-950/20',  badge: 'bg-amber-500/20 text-amber-300 ring-amber-500/30' },
-  risk_flagged:       { icon: ShieldAlert,   accent: 'text-red-400',    border: 'border-red-500/40',  bg: 'bg-red-950/20',    badge: 'bg-red-500/20 text-red-300 ring-red-500/30' },
-  scan_completed:     { icon: CheckCircle2,  accent: 'text-emerald-400',border: 'border-emerald-500/30',bg:'bg-emerald-950/20',badge: 'bg-emerald-500/20 text-emerald-300 ring-emerald-500/30' },
+  risk_flagged:       { icon: ShieldAlert,   accent: 'text-amber-400',  border: 'border-amber-500/40',bg: 'bg-amber-950/20',  badge: 'bg-amber-500/20 text-amber-300 ring-amber-500/30' },
+  scan_completed:     { icon: CheckCircle2,  accent: 'text-sky-400',    border: 'border-sky-500/30',  bg: 'bg-sky-950/20',    badge: 'bg-sky-500/20 text-sky-300 ring-sky-500/30' },
 };
 
 const EVENT_LABELS = {
@@ -39,7 +39,7 @@ function formatDate(iso) {
 function SeverityDot({ severity }) {
   if (severity == null) return null;
   const s = Number(severity);
-  const color = s >= 9 ? 'bg-red-500 shadow-red-500/60' : s >= 7 ? 'bg-orange-400 shadow-orange-400/50' : s >= 4 ? 'bg-amber-400 shadow-amber-400/40' : 'bg-zinc-500';
+  const color = s >= 9 ? 'bg-amber-500 shadow-amber-500/60' : s >= 7 ? 'bg-amber-400 shadow-amber-400/50' : s >= 4 ? 'bg-amber-400 shadow-amber-400/40' : 'bg-zinc-500';
   return (
     <span className={`inline-block w-2 h-2 rounded-full shadow-[0_0_6px] ${color}`} title={`Severity: ${s}`} />
   );
@@ -198,11 +198,11 @@ export default function AuditTimeline() {
                       {(evt.risk_category || details.risk_category) ? (
                         <span className="inline-flex items-center gap-1.5">
                           {isRisk && <SeverityDot severity={severity} />}
-                          <span className={isRisk ? 'text-red-300 font-medium' : 'text-zinc-400'}>
+                          <span className={isRisk ? 'text-amber-300 font-medium' : 'text-zinc-400'}>
                             {evt.risk_category || details.risk_category}
                           </span>
                           {isRisk && severity != null && (
-                            <span className="text-red-400/80 font-mono font-bold">{Number(severity).toFixed(1)}</span>
+                            <span className="text-amber-400/80 font-mono font-bold">{Number(severity).toFixed(1)}</span>
                           )}
                         </span>
                       ) : (

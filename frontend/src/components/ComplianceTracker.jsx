@@ -18,28 +18,28 @@ const RISK_CATEGORIES = [
 ];
 
 const CATEGORY_COLORS = {
-  'cosmetics/food': 'bg-pink-950 text-pink-300 border-pink-800',
-  cosmetics: 'bg-purple-950 text-purple-300 border-purple-800',
+  'cosmetics/food': 'bg-zinc-800 text-zinc-300 border-zinc-700',
+  cosmetics: 'bg-zinc-800 text-zinc-300 border-zinc-700',
   food: 'bg-amber-950 text-amber-300 border-amber-800',
   general: 'bg-zinc-800 text-zinc-300 border-zinc-700',
 };
 
 function violationBadge(level) {
-  if (level === 'high') return 'bg-red-950 text-red-300 border-red-800';
+  if (level === 'high') return 'bg-amber-950 text-amber-300 border-amber-800';
   if (level === 'medium') return 'bg-amber-950 text-amber-300 border-amber-800';
-  return 'bg-emerald-950 text-emerald-300 border-emerald-800';
+  return 'bg-sky-950 text-sky-300 border-sky-800';
 }
 
 function scoreColor(pct) {
-  if (pct >= 80) return 'text-emerald-400';
+  if (pct >= 80) return 'text-sky-400';
   if (pct >= 60) return 'text-amber-400';
-  return 'text-red-400';
+  return 'text-amber-400';
 }
 
 function scoreBarColor(pct) {
-  if (pct >= 80) return 'bg-emerald-500';
+  if (pct >= 80) return 'bg-sky-500';
   if (pct >= 60) return 'bg-amber-500';
-  return 'bg-red-500';
+  return 'bg-amber-500';
 }
 
 export default function ComplianceTracker() {
@@ -280,7 +280,7 @@ export default function ComplianceTracker() {
 
             {(!checkResult.violations || checkResult.violations.length === 0) ? (
               <div className="text-center py-8">
-                <Check className="w-8 h-8 mx-auto text-emerald-500 mb-2" />
+                <Check className="w-8 h-8 mx-auto text-sky-500 mb-2" />
                 <p className="text-sm text-zinc-400">
                   {t('complianceTracker.noViolations')}
                 </p>
@@ -370,7 +370,7 @@ export default function ComplianceTracker() {
                       </div>
                       <div className="text-[10px] text-zinc-600 mt-1.5">
                         {jData.violations_high > 0 && (
-                          <span className="text-red-400 mr-2">
+                          <span className="text-amber-400 mr-2">
                             {jData.violations_high} high
                           </span>
                         )}
@@ -380,14 +380,14 @@ export default function ComplianceTracker() {
                           </span>
                         )}
                         {jData.violations_low > 0 && (
-                          <span className="text-emerald-400">
+                          <span className="text-sky-400">
                             {jData.violations_low} low
                           </span>
                         )}
                         {jData.violations_high === 0
                           && jData.violations_medium === 0
                           && jData.violations_low === 0 && (
-                          <span className="text-emerald-400">
+                          <span className="text-sky-400">
                             {t('complianceTracker.compliant')}
                           </span>
                         )}
@@ -415,7 +415,7 @@ export default function ComplianceTracker() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-red-900 border border-red-700 text-red-200 px-4 py-2.5 rounded-lg text-sm shadow-lg z-50">
+        <div className="fixed bottom-6 right-6 bg-amber-900 border border-amber-700 text-amber-200 px-4 py-2.5 rounded-lg text-sm shadow-lg z-50">
           {toast}
         </div>
       )}

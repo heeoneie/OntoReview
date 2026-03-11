@@ -5,12 +5,12 @@ import { KO_URGENCY_KEY } from '../i18n';
 const URGENCY_STYLES = {
   normal:   'bg-zinc-800 text-zinc-300 border border-zinc-700',
   urgent:   'bg-amber-950 text-amber-400 border border-amber-800',
-  critical: 'bg-red-950 text-red-400 border border-red-800',
+  critical: 'bg-amber-950 text-amber-400 border border-amber-800',
 };
 
 const PRIORITY_BORDER = {
-  critical: 'border-l-red-500',
-  high:     'border-l-red-700',
+  critical: 'border-l-amber-500',
+  high:     'border-l-amber-700',
   medium:   'border-l-amber-600',
   low:      'border-l-zinc-600',
 };
@@ -43,7 +43,7 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
       </div>
 
       {error && (
-        <div className="bg-red-950 text-red-400 border border-red-800 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
+        <div className="bg-amber-950 text-amber-400 border border-amber-800 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
       )}
 
       {loading ? (
@@ -78,7 +78,7 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
               {DEFAULT_ATTENDEE_KEYS.map((key, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-1 bg-amber-950/50 border border-amber-800/60 rounded-lg text-xs text-amber-300"
+                  className="px-2 py-1 bg-zinc-800/50 border border-zinc-700/60 rounded-lg text-xs text-zinc-300"
                 >
                   {t(key)}
                 </span>

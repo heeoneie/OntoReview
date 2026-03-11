@@ -83,12 +83,12 @@ function CustomRiskNode({ data }) {
 
   const shadowClass =
     severity >= 8
-      ? 'shadow-[0_0_15px_rgba(225,29,72,0.3)]'
+      ? 'shadow-[0_0_15px_rgba(245,158,11,0.3)]'
       : severity >= 5
         ? 'shadow-[0_0_10px_rgba(245,158,11,0.2)]'
         : '';
 
-  const owlGlow = isOwl ? 'ring-1 ring-purple-500/40' : '';
+  const owlGlow = isOwl ? 'ring-1 ring-sky-500/40' : '';
 
   return (
     <div
@@ -109,17 +109,17 @@ function CustomRiskNode({ data }) {
         <Icon size={14} className="text-zinc-400 flex-shrink-0" />
         <span className="text-xs text-zinc-500 capitalize">{data.type}</span>
         {isOwl && data.owl_class && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium truncate max-w-[90px]" title={data.owl_class}>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium truncate max-w-[90px]" title={data.owl_class}>
             {data.owl_class}
           </span>
         )}
         {isOwl && !data.owl_class && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-purple-500/20 text-purple-300 font-medium">
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium">
             OWL
           </span>
         )}
         {hasReasoning && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-cyan-500/20 text-cyan-300 font-medium">
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium">
             Inferred
           </span>
         )}
@@ -157,15 +157,15 @@ function toSeverityScore(value) {
 }
 
 function severityBorder(score) {
-  if (score >= 8) return 'border-rose-500';
+  if (score >= 8) return 'border-amber-500';
   if (score >= 5) return 'border-amber-500';
-  return 'border-emerald-600';
+  return 'border-sky-600';
 }
 
 function severityBadge(score) {
-  if (score >= 8) return 'bg-rose-500/20 text-rose-400';
+  if (score >= 8) return 'bg-amber-500/20 text-amber-400';
   if (score >= 5) return 'bg-amber-500/20 text-amber-400';
-  return 'bg-emerald-500/20 text-emerald-400';
+  return 'bg-sky-500/20 text-sky-400';
 }
 
 function severityLabel(score) {
@@ -225,9 +225,9 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
 
       let edgeStyle;
       if (isCritical) {
-        edgeStyle = { stroke: '#e11d48', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #e11d48)' };
+        edgeStyle = { stroke: '#f59e0b', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #f59e0b)' };
       } else if (isOwlEdge) {
-        edgeStyle = { stroke: '#a855f7', strokeWidth: 2, filter: 'drop-shadow(0 0 3px #a855f7)' };
+        edgeStyle = { stroke: '#0ea5e9', strokeWidth: 2, filter: 'drop-shadow(0 0 3px #0ea5e9)' };
       } else {
         edgeStyle = { stroke: '#52525b', strokeWidth: 1 };
       }
@@ -240,7 +240,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         type: 'default',
         style: edgeStyle,
         animated: isCritical || isOwlEdge,
-        labelStyle: { fill: isOwlEdge ? '#c084fc' : '#a1a1aa', fontSize: 11 },
+        labelStyle: { fill: isOwlEdge ? '#7dd3fc' : '#a1a1aa', fontSize: 11 },
         data: e.data ?? {},
       };
     });
@@ -340,7 +340,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
 
       {/* Error banner */}
       {displayError && (
-        <div className="bg-red-950 text-red-400 border border-red-800 rounded-lg px-4 py-2 text-sm mb-4">
+        <div className="bg-amber-950 text-amber-400 border border-amber-800 rounded-lg px-4 py-2 text-sm mb-4">
           {displayError}
         </div>
       )}
@@ -379,12 +379,12 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
             <MiniMap
               nodeColor={(n) =>
                 n.data?.is_owl
-                  ? '#a855f7'
+                  ? '#0ea5e9'
                   : n.data?.severity_score >= 8
-                    ? '#e11d48'
+                    ? '#f59e0b'
                     : n.data?.severity_score >= 5
                       ? '#d97706'
-                      : '#10b981'
+                      : '#0ea5e9'
               }
               maskColor="rgba(0,0,0,0.7)"
               className="!bg-zinc-900 !border-zinc-700"
@@ -487,19 +487,19 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               {/* OWL Reasoning Path */}
               {selectedNode.data.is_owl && (
                 <div>
-                  <h5 className="text-[11px] font-semibold text-purple-400 uppercase tracking-wider mb-2">
+                  <h5 className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider mb-2">
                     OWL Ontology Classification
                   </h5>
-                  <div className="bg-purple-950/30 border border-purple-800/40 rounded-lg p-3 space-y-2">
+                  <div className="bg-sky-950/30 border border-sky-800/40 rounded-lg p-3 space-y-2">
                     {selectedNode.data.owl_class && (
                       <div className="flex items-center gap-2">
                         <span className="text-[10px] text-zinc-500">Class</span>
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-purple-500/20 border border-purple-700/50 text-purple-200 font-mono font-semibold">
+                        <span className="text-xs px-2 py-0.5 rounded-md bg-sky-500/20 border border-sky-700/50 text-sky-200 font-mono font-semibold">
                           {selectedNode.data.owl_class}
                         </span>
                       </div>
                     )}
-                    <p className="text-[10px] text-purple-300/70">
+                    <p className="text-[10px] text-sky-300/70">
                       Detected via OWL class hierarchy inference
                     </p>
                     {selectedNode.data.instance_count > 0 && (
@@ -516,7 +516,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               {/* Reasoning path details */}
               {selectedNode.data.reasoning_path && selectedNode.data.reasoning_path.length > 0 && (
                 <div>
-                  <h5 className="text-[11px] font-semibold text-cyan-400 uppercase tracking-wider mb-2">
+                  <h5 className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider mb-2">
                     Inference Chain
                   </h5>
                   <div className="space-y-1.5">
@@ -526,9 +526,9 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                     ).map((step, i) => (
                       <div
                         key={i}
-                        className="bg-cyan-950/20 border border-cyan-800/30 rounded-md px-2.5 py-1.5"
+                        className="bg-sky-950/20 border border-sky-800/30 rounded-md px-2.5 py-1.5"
                       >
-                        <p className="text-[10px] text-cyan-300 leading-relaxed">
+                        <p className="text-[10px] text-sky-300 leading-relaxed">
                           {typeof step === 'string' ? step : step.description}
                         </p>
                       </div>
@@ -581,10 +581,10 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 px-1">
         {[
-          { color: '#e11d48', label: 'Critical (≥8)' },
+          { color: '#f59e0b', label: 'Critical (≥8)' },
           { color: '#d97706', label: 'Warning (5–7)' },
-          { color: '#10b981', label: 'Safe (<5)' },
-          { color: '#a855f7', label: 'OWL Inferred' },
+          { color: '#0ea5e9', label: 'Safe (<5)' },
+          { color: '#0ea5e9', label: 'OWL Inferred' },
         ].map((item) => (
           <div
             key={item.label}
@@ -600,7 +600,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         <div className="flex items-center gap-1.5 text-xs text-zinc-500 ml-2 border-l border-zinc-700 pl-3">
           <span
             className="inline-block w-5 h-0.5 flex-shrink-0"
-            style={{ background: '#e11d48' }}
+            style={{ background: '#f59e0b' }}
           />
           {t('ontology.escalation')}
         </div>
