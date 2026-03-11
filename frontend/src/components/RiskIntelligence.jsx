@@ -1,14 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Loader2, ScanSearch, AlertTriangle, Clock, Globe, ExternalLink } from 'lucide-react';
+import { Loader2, AlertTriangle, Clock, Globe, ExternalLink } from 'lucide-react';
 import {
-  generateOntology,
-  generateComplianceReport,
-  generateMeetingAgenda,
   runDemoScenario,
-  analyzeYouTube,
   getKpiSummary,
   getRiskTimeline,
-  ingestAmazon,
   getAuditEvents,
   runFullDemo,
   getOntologyGraph,
@@ -19,7 +14,6 @@ import HeroCommand from './HeroCommand';
 import InvestigationWorkspace from './InvestigationWorkspace';
 import ExposureHero from './ExposureHero';
 import ReasoningChain from './ReasoningChain';
-import RiskLoadingSpinner from './RiskLoadingSpinner';
 import DataSources from './DataSources';
 import GraphPreview from './GraphPreview';
 import RiskBreakdown from './RiskBreakdown';
@@ -49,7 +43,7 @@ function getErrorMessage(err, t) {
 
 // ── Component ──
 
-export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, onComplianceData, onMeetingData }) {
+export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData, onMeetingData }) {
   const { t, lang } = useLang();
 
   // Analysis state
@@ -57,14 +51,15 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
   const [ontology, setOntology] = useState(null);
   const [compliance, setCompliance] = useState(null);
   const [meeting, setMeeting] = useState(null);
-  const [loading, setLoading] = useState({ demo: false, all: false, ontology: false, compliance: false, meeting: false });
   const [errors, setErrors] = useState({});
   const [industry, setIndustry] = useState('ecommerce');
   const [brandName, setBrandName] = useState(INDUSTRY_INPUT_CFG.ecommerce.default1);
   const [productName, setProductName] = useState(INDUSTRY_INPUT_CFG.ecommerce.default2);
-  const [scanPhase, setScanPhase] = useState(false);
-  const [dataSource, setDataSource] = useState(null);
   const toastTimerRef = useRef(null);
+
+  // Unified analysis state
+  const [analysisLoading, setAnalysisLoading] = useState(false);
+  const [analysisStep, setAnalysisStep] = useState(0); // 0=idle, 1~4=steps
 
   // KPI live data
   const [kpi, setKpi] = useState({
@@ -74,15 +69,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
     overall_risk_score: 0,
     total_legal_exposure_usd: 0,
   });
-  const [amazonUrl, setAmazonUrl] = useState('');
-  const [amazonLoading, setAmazonLoading] = useState(false);
-  const [amazonToast, setAmazonToast] = useState('');
-  const [amazonToastType, setAmazonToastType] = useState('success');
   const [scanId, setScanId] = useState(null);
   const [timeline, setTimeline] = useState([]);
   const [auditEvents, setAuditEvents] = useState([]);
-  const [fullDemoLoading, setFullDemoLoading] = useState(false);
-  const [fullDemoStep, setFullDemoStep] = useState('');
   const [discoveryResults, setDiscoveryResults] = useState(null);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
 
@@ -118,13 +107,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
   // NOTE: Do NOT auto-fetch on mount — data should only appear after user runs analysis
   useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
 
-  const fetchOntologyGraph = useCallback(async () => {
-    try {
-      const res = await getOntologyGraph(0);
-      if (res.data?.nodes?.length > 0) setOntology(res.data);
-    } catch (err) { console.debug('Ontology graph fetch failed:', err); }
-  }, []);
-
   // ── Handlers ──
 
   const handleIndustryChange = (id) => {
@@ -136,158 +118,86 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
     setOntology(null);
     setCompliance(null);
     setMeeting(null);
-    setDataSource(null);
     setErrors({});
-  };
-
-  const handleAmazonIngest = async () => {
-    if (!amazonUrl.trim() || amazonLoading) return;
-    setAmazonLoading(true);
-    setAmazonToast('');
-    try {
-      const res = await ingestAmazon(amazonUrl.trim());
-      const d = res.data;
-      setScanId(d.scan_id ?? null);
-      setAmazonToastType('success');
-      setAmazonToast(lang === 'ko'
-        ? `${d.reviews_ingested}건의 리뷰를 수집하고 ${d.risks_detected}건의 리스크를 탐지했습니다.`
-        : `Ingested ${d.reviews_ingested} reviews and detected ${d.risks_detected} risks.`);
-      setAmazonUrl('');
-      await refreshDashboard();
-    } catch (err) {
-      setAmazonToastType('error');
-      setAmazonToast(getErrorMessage(err, t));
-    } finally {
-      setAmazonLoading(false);
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = setTimeout(() => setAmazonToast(''), 4000);
-    }
   };
 
   const handleDiscoveryScan = async (brand, product) => {
     const b = brand || brandName.trim();
-    if (!b || discoveryLoading) return;
-    setDiscoveryLoading(true);
+    if (!b) return;
     try {
       const res = await searchBrandRisks(b, product || productName.trim() || null);
       setDiscoveryResults(res.data);
     } catch (err) {
       console.error('Discovery scan failed:', err);
       setDiscoveryResults({ results: [], total_scanned: 0, risks_found: 0, error: true });
-    } finally {
-      setDiscoveryLoading(false);
     }
   };
 
-  const handleFullDemo = async () => {
-    if (fullDemoLoading) return;
-    setFullDemoLoading(true);
+  /**
+   * Unified analysis pipeline — single button triggers everything:
+   * Step 1: Ingest mock reviews + Web Discovery (parallel)
+   * Step 2: AI risk classification (demo scenario)
+   * Step 3: Legal precedent matching (ontology graph fetch)
+   * Step 4: KPI/Timeline/Audit refresh → done
+   */
+  const handleAnalysis = async () => {
+    if (analysisLoading) return;
+    const brand = brandName.trim() || INDUSTRY_INPUT_CFG[industry].default1;
+    const product = productName.trim() || INDUSTRY_INPUT_CFG[industry].default2;
+
+    setAnalysisLoading(true);
+    setAnalysisStep(1);
     setDemoResult(null);
     setOntology(null);
     setCompliance(null);
     setMeeting(null);
-    setDataSource(null);
+    setDiscoveryResults(null);
     setErrors({});
+
     try {
-      setFullDemoStep(t('risk.fullDemoStep1'));
-      const res = await runFullDemo();
-      const d = res.data;
+      // Step 1: Ingest mock reviews + Web discovery (parallel)
+      const [ingestRes] = await Promise.all([
+        runFullDemo(),
+        handleDiscoveryScan(brand, product),
+      ]);
+      const d = ingestRes.data;
       setScanId(d.scan_id ?? null);
 
-      setFullDemoStep(t('risk.fullDemoStep2'));
+      // Step 2: AI risk classification (demo scenario with brand context)
+      setAnalysisStep(2);
       const demoRes = await runDemoScenario(industry, lang);
-      const demoData = injectBrand(demoRes.data, brandName.trim() || 'K-Brand');
+      const demoData = injectBrand(demoRes.data, brand);
       setDemoResult(demoData);
-      if (demoData.ontology) setOntology(demoData.ontology);
       if (demoData.compliance) setCompliance(demoData.compliance);
       if (demoData.meeting) setMeeting(demoData.meeting);
-      setDataSource('mock');
 
-      setFullDemoStep(t('risk.fullDemoStep3'));
+      // Step 3: Precedent matching — fetch ontology graph
+      setAnalysisStep(3);
+      if (demoData.ontology) {
+        setOntology(demoData.ontology);
+      } else {
+        try {
+          const graphRes = await getOntologyGraph(0);
+          if (graphRes.data?.nodes?.length > 0) setOntology(graphRes.data);
+        } catch { /* ontology graph optional */ }
+      }
+
+      // Step 4: Refresh KPI/Timeline/Audit
+      setAnalysisStep(4);
       await refreshDashboard();
 
-      setFullDemoStep(t('risk.fullDemoStep4'));
-      await handleDiscoveryScan(brandName.trim() || 'K-Brand', productName.trim() || null);
-
-      setFullDemoStep(t('risk.fullDemoStep5'));
-      setAmazonToastType('success');
-      setAmazonToast(lang === 'ko'
-        ? `Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`
-        : `Full Demo complete — ${d.reviews_ingested} reviews, ${d.risks_detected} risks detected`);
-      await new Promise((r) => setTimeout(r, 800));
+      // Brief pause to show completion state
+      await new Promise((r) => setTimeout(r, 600));
     } catch (err) {
-      setAmazonToastType('error');
-      setAmazonToast(getErrorMessage(err, t));
+      setErrors({ analysis: getErrorMessage(err, t) });
     } finally {
-      setFullDemoLoading(false);
-      setFullDemoStep('');
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-      toastTimerRef.current = setTimeout(() => setAmazonToast(''), 5000);
-    }
-  };
-
-  const handleDemo = async () => {
-    const brand = [brandName.trim(), productName.trim()].filter(Boolean).join(' ') || 'OO';
-    const query = [brandName.trim(), productName.trim()].filter(Boolean).join(' ');
-    setScanPhase(true);
-    setErrors({});
-    setDemoResult(null);
-    setOntology(null);
-    setCompliance(null);
-    setMeeting(null);
-    setDataSource(null);
-    await new Promise((r) => setTimeout(r, 1500));
-    setScanPhase(false);
-    setLoading((prev) => ({ ...prev, demo: true }));
-    try {
-      let data = null;
-      try {
-        const ytRes = await analyzeYouTube(query || brand, brandName.trim() || 'Brand', { industry, lang });
-        data = ytRes.data;
-        setDataSource('youtube');
-      } catch {
-        const res = await runDemoScenario(industry, lang);
-        data = injectBrand(res.data, brand);
-        setDataSource('mock');
-      }
-      setDemoResult(data);
-      if (data.ontology) setOntology(data.ontology);
-      if (data.compliance) setCompliance(data.compliance);
-      if (data.meeting) setMeeting(data.meeting);
-    } catch (err) {
-      setErrors({ demo: getErrorMessage(err, t) });
-    } finally {
-      setLoading((prev) => ({ ...prev, demo: false }));
-    }
-  };
-
-  const analysisData = {
-    top_issues: analysisResult?.top_issues || [],
-    emerging_issues: analysisResult?.emerging_issues || [],
-    recommendations: analysisResult?.recommendations || [],
-    all_categories: analysisResult?.all_categories || {},
-    stats: analysisResult?.stats || {},
-    industry,
-    lang,
-  };
-
-  const runSingle = async (type) => {
-    setLoading((prev) => ({ ...prev, [type]: true }));
-    setErrors((prev) => ({ ...prev, [type]: null }));
-    try {
-      if (type === 'ontology') { const res = await generateOntology(analysisData); setOntology(res.data); }
-      else if (type === 'compliance') { const res = await generateComplianceReport(analysisData); setCompliance(res.data); }
-      else if (type === 'meeting') { const res = await generateMeetingAgenda(analysisData); setMeeting(res.data); }
-    } catch (err) {
-      setErrors((prev) => ({ ...prev, [type]: getErrorMessage(err, t) }));
-    } finally {
-      setLoading((prev) => ({ ...prev, [type]: false }));
+      setAnalysisLoading(false);
+      setAnalysisStep(0);
     }
   };
 
   // ── Computed ──
 
-  const isAnyLoading = Object.values(loading).some(Boolean) || fullDemoLoading || discoveryLoading;
   const hasScanned = scanId || timeline.length > 0;
   const hasData = !!(demoResult || ontology || compliance || meeting || timeline.length > 0 || hasScanned);
 
@@ -307,63 +217,24 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
         productName={productName}
         onProductChange={setProductName}
         productLabel={t(INDUSTRY_INPUT_CFG[industry]?.labelKey2 ?? 'risk.label2_ecommerce')}
-        amazonUrl={amazonUrl}
-        onAmazonUrlChange={setAmazonUrl}
-        onRunFullDemo={handleFullDemo}
-        onAmazonIngest={handleAmazonIngest}
-        onBrandSearch={handleDemo}
-        fullDemoLoading={fullDemoLoading}
-        amazonLoading={amazonLoading}
-        brandSearchLoading={scanPhase || loading.demo}
-        amazonToast={amazonToast}
-        amazonToastType={amazonToastType}
+        onRunAnalysis={handleAnalysis}
+        analysisLoading={analysisLoading}
+        analysisStep={analysisStep}
       />
 
-      {/* ═══ 2. Loading States ═══ */}
-      {(loading.demo || loading.all) && (
-        <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
-      )}
-      {fullDemoLoading && (
-        <RiskLoadingSpinner mode="fullDemo" />
-      )}
-
-      {/* Scan phase animation */}
-      {scanPhase && (
-        <div className="bg-zinc-900 rounded-2xl border border-sky-900/50 p-6 flex items-center gap-4">
-          <div className="w-10 h-10 bg-sky-950 border border-sky-800 rounded-xl flex items-center justify-center flex-shrink-0">
-            <ScanSearch className="text-sky-400 animate-pulse" size={20} />
-          </div>
-          <div>
-            <p className="text-sm font-semibold text-white">{t('risk.scanPhaseTitle')}</p>
-            <p className="text-xs text-zinc-500 mt-0.5">
-              <span className="text-sky-400 font-medium">
-                {[brandName, productName].filter(Boolean).join(' ')}
-              </span>
-              {t('risk.scanPhaseHint')}
-            </p>
-          </div>
-          <div className="ml-auto flex gap-1">
-            {[0, 1, 2, 3].map((i) => (
-              <div key={i} className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Error */}
-      {errors.demo && (
+      {/* ═══ 2. Error ═══ */}
+      {errors.analysis && (
         <div className="bg-amber-950/50 border border-amber-800/60 text-amber-400 rounded-xl px-4 py-3 text-sm">
-          {errors.demo}
+          {errors.analysis}
         </div>
       )}
 
-      {/* ═══ 3. Exposure Hero (replaces KPI Strip) ═══ */}
+      {/* ═══ 3. Exposure Hero ═══ */}
       {hasData && (
         <ExposureHero
           kpi={kpi}
           timeline={timeline}
           auditEvents={auditEvents}
-          amazonUrl={amazonUrl}
           scanId={scanId}
           discoveryResults={discoveryResults}
         />
@@ -502,7 +373,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
                 ontology={ontology}
                 timeline={timeline}
                 kpi={kpi}
-                loading={loading.ontology}
                 onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
               />
               {timeline.length > 0 && (
