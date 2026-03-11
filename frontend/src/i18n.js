@@ -46,8 +46,8 @@ export const translations = {
     },
     hero: {
       eyebrow: '리스크 인텔리전스 엔진',
-      headline1: '소송 리스크를 탐지하세요',
-      headline2: '소송이 되기 전에.',
+      headline1: '소송 리스크를 탐지하세요.',
+      headline2: 'AI가 판례까지 매칭합니다.',
       pipeline: '리뷰 수집 → AI 리스크 분류 → 판례 매칭 → 법적 노출 산정',
       runBtn: '전체 분석 실행',
       runAnalysis: '분석 실행',
@@ -352,8 +352,8 @@ export const translations = {
     },
     hero: {
       eyebrow: 'Risk Intelligence Engine',
-      headline1: 'Detect litigation risk',
-      headline2: 'before it becomes a lawsuit.',
+      headline1: 'Detect litigation risk.',
+      headline2: 'AI matches legal precedents.',
       pipeline: 'Reviews → AI classification → precedent matching → financial exposure',
       runBtn: 'Run Full Analysis',
       runAnalysis: 'Run Analysis',
