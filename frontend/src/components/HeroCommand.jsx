@@ -109,8 +109,8 @@ export default function HeroCommand({
 
         {/* Brand + Product + CTA — labels on top, button aligned right */}
         <div className="flex items-end gap-3">
-          <div className="space-y-1.5">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{brandLabel}</label>
+          <div>
+            <label className="block text-[10px] text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{brandLabel}</label>
             <input
               type="text"
               value={brandName}
@@ -118,12 +118,12 @@ export default function HeroCommand({
               onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
               placeholder={brandLabel}
               disabled={analysisLoading}
-              className="w-36 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
             />
           </div>
 
-          <div className="flex-1 space-y-1.5">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">{productLabel}</label>
+          <div className="flex-1">
+            <label className="block text-[10px] text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{productLabel}</label>
             <input
               type="text"
               value={productName}
