@@ -123,7 +123,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
     try {
       const res = await getOntologyGraph(0);
       if (res.data?.nodes?.length > 0) setOntology(res.data);
-    } catch { /* ignore */ }
+    } catch (err) { console.debug('Ontology graph fetch failed:', err); }
   }, []);
 
   // ── Handlers ──
@@ -172,7 +172,8 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
     try {
       const res = await searchBrandRisks(b, product || productName.trim() || null);
       setDiscoveryResults(res.data);
-    } catch {
+    } catch (err) {
+      console.error('Discovery scan failed:', err);
       setDiscoveryResults({ results: [], total_scanned: 0, risks_found: 0, error: true });
     } finally {
       setDiscoveryLoading(false);

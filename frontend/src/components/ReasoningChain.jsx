@@ -30,7 +30,7 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
 
   if (!visible || !timeline || timeline.length === 0) return null;
 
-  const item = timeline.find((i) => i.severity >= 7) || timeline[0];
+  const item = timeline.reduce((best, cur) => (cur.severity > best.severity ? cur : best), timeline[0]);
   if (!item) return null;
 
   const owlClass = classifyItem(item);

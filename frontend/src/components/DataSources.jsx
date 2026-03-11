@@ -13,12 +13,19 @@ const SOURCES = [
 export default function DataSources({ kpi, discoveryResults, hasScanned }) {
   const { t } = useLang();
   const [elapsed, setElapsed] = useState(0);
-  const mountRef = useRef(Date.now());
+  const lastSyncRef = useRef(Date.now());
+
+  // Reset timer when data changes
+  useEffect(() => {
+    if (!hasScanned) return;
+    lastSyncRef.current = Date.now();
+    setElapsed(0);
+  }, [hasScanned, kpi?.total_scanned_reviews, discoveryResults?.total_scanned]);
 
   useEffect(() => {
     const iv = setInterval(() => {
-      setElapsed(Math.floor((Date.now() - mountRef.current) / 1000));
-    }, 5000);
+      setElapsed(Math.floor((Date.now() - lastSyncRef.current) / 1000));
+    }, 1000);
     return () => clearInterval(iv);
   }, []);
 
@@ -35,7 +42,7 @@ export default function DataSources({ kpi, discoveryResults, hasScanned }) {
           </span>
         </div>
         <span className="text-[11px] text-zinc-600 tabular-nums">
-          {t('sources.lastSync')}: {elapsed || 14}{t('sources.secondsAgo')}
+          {t('sources.lastSync')}: {elapsed}{t('sources.secondsAgo')}
         </span>
       </div>
 

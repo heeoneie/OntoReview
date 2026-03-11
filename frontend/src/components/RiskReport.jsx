@@ -374,7 +374,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
                 <tbody>
                   {auditTrail.map((evt, i) => {
                     const d = evt.details || {};
-                    const detail = d.case_title || d.risk_category || d.severity ? `sev: ${d.severity}` : '';
+                    const detail = [d.case_title, d.risk_category, d.severity ? `sev: ${d.severity}` : null].filter(Boolean).join(' · ');
                     return (
                       <tr key={evt.id || i}>
                         <td style={S.tdMono}>

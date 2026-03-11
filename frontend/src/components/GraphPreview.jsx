@@ -28,7 +28,7 @@ function classifyByCase(caseId) {
 function buildReasoningSubgraph(ontology, timeline, kpi) {
   if (!timeline || timeline.length === 0) return null;
 
-  const topRisk = timeline.find((i) => i.severity >= 7) || timeline[0];
+  const topRisk = timeline.reduce((best, cur) => (cur.severity > best.severity ? cur : best), timeline[0]);
   if (!topRisk) return null;
 
   const riskClass = classifyByCase(topRisk.case_id);
