@@ -53,7 +53,15 @@ export const translations = {
       rescan: '새 분석',
       evidenceFeed: '증거 피드',
       knowledgeGraph: '지식 그래프',
+      contextPanel: '상황 인식',
       graphSubtitle: '리스크 개체 간 연결 관계를 시각화합니다',
+    },
+    graph: {
+      title: '리스크 추론 그래프',
+      expand: '전체 그래프 보기',
+      modalTitle: '리스크 추론 그래프',
+      empty: '그래프 데이터 없음',
+      breakdown: '리스크 분류',
     },
     risk: {
       live: 'LIVE 모니터링', last24h: '· 최근 24시간', lastScan: '마지막 스캔: 방금 전',
@@ -336,7 +344,15 @@ export const translations = {
       rescan: 'New Analysis',
       evidenceFeed: 'Evidence Feed',
       knowledgeGraph: 'Knowledge Graph',
+      contextPanel: 'Context',
       graphSubtitle: 'How risk entities connect',
+    },
+    graph: {
+      title: 'Risk Reasoning Graph',
+      expand: 'Expand Graph',
+      modalTitle: 'Investigation Graph',
+      empty: 'No graph data',
+      breakdown: 'Risk Breakdown',
     },
     risk: {
       live: 'LIVE Monitoring', last24h: '· Last 24h', lastScan: 'Last scan: just now',

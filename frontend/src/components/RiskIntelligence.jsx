@@ -17,11 +17,12 @@ import {
 import { useLang } from '../contexts/LangContext';
 import HeroCommand from './HeroCommand';
 import InvestigationWorkspace from './InvestigationWorkspace';
-import OntologyGraph from './OntologyGraph';
 import ExposureHero from './ExposureHero';
 import ReasoningChain from './ReasoningChain';
 import RiskLoadingSpinner from './RiskLoadingSpinner';
 import DataSources from './DataSources';
+import GraphPreview from './GraphPreview';
+import RiskBreakdown from './RiskBreakdown';
 const DevModelQuality = import.meta.env.DEV ? lazy(() => import('./ModelQuality')) : null;
 
 // ── Constants ──
@@ -368,17 +369,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
         />
       )}
 
-      {/* ═══ 3b. Data Sources ═══ */}
-      {hasData && hasScanned && (
-        <DataSources kpi={kpi} discoveryResults={discoveryResults} hasScanned={hasScanned} />
-      )}
-
       {/* ═══ 4. Investigation Workspace (2-column) ═══ */}
       {hasData && (demoResult || timeline.length > 0 || discoveryResults || ontology) && (
         <InvestigationWorkspace
           leftCount={timeline.length + (discoveryResults?.results?.length || 0)}
-          rightCount={ontology?.nodes?.length}
-          graphSubtitle={t('hero.graphSubtitle')}
           left={
             <>
               {/* AI Reasoning Chain — TOP of evidence feed */}
@@ -497,17 +491,22 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, o
               )}
             </>
           }
-          right={
-            (ontology || loading.ontology) && !loading.demo && !loading.all ? (
-              <OntologyGraph
-                id="ontology-graph"
-                data={ontology}
+          contextPanel={
+            <>
+              {hasScanned && (
+                <DataSources kpi={kpi} discoveryResults={discoveryResults} hasScanned={hasScanned} />
+              )}
+              <GraphPreview
+                ontology={ontology}
+                timeline={timeline}
+                kpi={kpi}
                 loading={loading.ontology}
-                error={errors.ontology}
-                onGenerate={() => runSingle('ontology')}
                 onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
               />
-            ) : null
+              {timeline.length > 0 && (
+                <RiskBreakdown timeline={timeline} />
+              )}
+            </>
           }
         />
       )}

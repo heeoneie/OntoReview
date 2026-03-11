@@ -17,10 +17,8 @@ function SectionHeader({ label, count }) {
 
 export default function InvestigationWorkspace({
   left,
-  right,
+  contextPanel,
   leftCount,
-  rightCount,
-  graphSubtitle,
 }) {
   const { t } = useLang();
 
@@ -32,16 +30,13 @@ export default function InvestigationWorkspace({
         {left}
       </div>
 
-      {/* Right column — Knowledge Graph (2/5) */}
+      {/* Right column — Context Panel (2/5) */}
       <div className="lg:col-span-2">
         <div className="mb-3">
-          <SectionHeader label={t('hero.knowledgeGraph')} count={rightCount} />
-          {graphSubtitle && (
-            <p className="text-[11px] text-zinc-600 -mt-1.5 ml-3">{graphSubtitle}</p>
-          )}
+          <SectionHeader label={t('hero.contextPanel')} />
         </div>
-        <div className="lg:sticky lg:top-20">
-          {right}
+        <div className="lg:sticky lg:top-20 space-y-4">
+          {contextPanel}
         </div>
       </div>
     </div>
