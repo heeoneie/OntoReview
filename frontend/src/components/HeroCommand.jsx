@@ -1,4 +1,4 @@
-import { Loader2, Rocket, CheckCircle } from 'lucide-react';
+import { Loader2, Rocket } from 'lucide-react';
 import { useLang } from '../contexts/LangContext';
 
 const INDUSTRIES = [
@@ -7,8 +7,6 @@ const INDUSTRIES = [
   { id: 'finance',   labelKey: 'risk.finance' },
   { id: 'gaming',    labelKey: 'risk.gaming' },
 ];
-
-const STEP_KEYS = ['analysis.step1', 'analysis.step2', 'analysis.step3', 'analysis.step4'];
 
 export default function HeroCommand({
   expanded = true,
@@ -25,7 +23,6 @@ export default function HeroCommand({
   onRunAnalysis,
   // Loading
   analysisLoading,
-  analysisStep,
 }) {
   const { t } = useLang();
 
@@ -47,7 +44,7 @@ export default function HeroCommand({
           <span className="font-medium text-white">{brandName}</span>
           {productName && (
             <>
-              <span className="text-zinc-600">·</span>
+              <span className="text-zinc-600">&middot;</span>
               <span className="text-zinc-400">{productName}</span>
             </>
           )}
@@ -110,78 +107,37 @@ export default function HeroCommand({
           ))}
         </div>
 
-        {/* Brand + Product inputs */}
-        <div className="flex items-end gap-3 mb-6">
-          <div className="space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
-              {t('hero.brand')}
-            </label>
-            <input
-              type="text"
-              value={brandName}
-              onChange={(e) => onBrandChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
-              placeholder={brandLabel}
-              disabled={analysisLoading}
-              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
-            />
-          </div>
+        {/* Brand + Product inputs + CTA — single row */}
+        <div className="flex items-center gap-3">
+          <input
+            type="text"
+            value={brandName}
+            onChange={(e) => onBrandChange(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+            placeholder={brandLabel}
+            disabled={analysisLoading}
+            className="w-40 bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+          />
 
-          <div className="flex-1 space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
-              {t('hero.product')}
-            </label>
-            <input
-              type="text"
-              value={productName}
-              onChange={(e) => onProductChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
-              placeholder={productLabel}
-              disabled={analysisLoading}
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
-            />
-          </div>
+          <input
+            type="text"
+            value={productName}
+            onChange={(e) => onProductChange(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+            placeholder={productLabel}
+            disabled={analysisLoading}
+            className="flex-1 min-w-[120px] bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-3 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+          />
+
+          <button
+            onClick={onRunAnalysis}
+            disabled={analysisLoading}
+            className="px-6 py-3 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:opacity-50 flex items-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)] flex-shrink-0"
+          >
+            {analysisLoading ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
+            {t('hero.runAnalysis')}
+          </button>
         </div>
-
-        {/* Main CTA Button */}
-        <button
-          onClick={onRunAnalysis}
-          disabled={analysisLoading}
-          className="w-full py-3.5 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:bg-zinc-700 disabled:text-zinc-400 flex items-center justify-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)]"
-        >
-          {analysisLoading ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
-          {analysisLoading ? t('risk.analyzing') : t('hero.runAnalysis')}
-        </button>
-
-        {/* Step progress — visible during analysis */}
-        {analysisLoading && analysisStep > 0 && (
-          <div className="mt-5 flex items-center gap-2">
-            {STEP_KEYS.map((key, i) => {
-              const stepNum = i + 1;
-              const done = analysisStep > stepNum;
-              const active = analysisStep === stepNum;
-              return (
-                <div key={key} className="flex items-center gap-1.5 flex-1">
-                  {done ? (
-                    <CheckCircle size={13} className="text-sky-400 flex-shrink-0" />
-                  ) : active ? (
-                    <Loader2 size={13} className="animate-spin text-sky-400 flex-shrink-0" />
-                  ) : (
-                    <div className="w-[13px] h-[13px] rounded-full border border-zinc-700 flex-shrink-0" />
-                  )}
-                  <span className={`text-[11px] font-medium truncate ${
-                    done ? 'text-sky-400' : active ? 'text-zinc-300' : 'text-zinc-600'
-                  }`}>
-                    {t(key)}
-                  </span>
-                  {i < STEP_KEYS.length - 1 && (
-                    <div className={`flex-1 h-px ${done ? 'bg-sky-800' : 'bg-zinc-800'}`} />
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        )}
       </div>
     </div>
   );

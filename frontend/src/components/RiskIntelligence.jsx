@@ -14,6 +14,7 @@ import HeroCommand from './HeroCommand';
 import InvestigationWorkspace from './InvestigationWorkspace';
 import ExposureHero from './ExposureHero';
 import ReasoningChain from './ReasoningChain';
+import RiskLoadingSpinner from './RiskLoadingSpinner';
 import DataSources from './DataSources';
 import GraphPreview from './GraphPreview';
 import RiskBreakdown from './RiskBreakdown';
@@ -59,7 +60,6 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
 
   // Unified analysis state
   const [analysisLoading, setAnalysisLoading] = useState(false);
-  const [analysisStep, setAnalysisStep] = useState(0); // 0=idle, 1~4=steps
 
   // KPI live data
   const [kpi, setKpi] = useState({
@@ -146,7 +146,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
     const product = productName.trim() || INDUSTRY_INPUT_CFG[industry].default2;
 
     setAnalysisLoading(true);
-    setAnalysisStep(1);
+
     setDemoResult(null);
     setOntology(null);
     setCompliance(null);
@@ -164,7 +164,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       setScanId(d.scan_id ?? null);
 
       // Step 2: AI risk classification (demo scenario with brand context)
-      setAnalysisStep(2);
+
       const demoRes = await runDemoScenario(industry, lang);
       const demoData = injectBrand(demoRes.data, brand);
       setDemoResult(demoData);
@@ -172,7 +172,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       if (demoData.meeting) setMeeting(demoData.meeting);
 
       // Step 3: Precedent matching — fetch ontology graph
-      setAnalysisStep(3);
+
       if (demoData.ontology) {
         setOntology(demoData.ontology);
       } else {
@@ -183,7 +183,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       }
 
       // Step 4: Refresh KPI/Timeline/Audit
-      setAnalysisStep(4);
+
       await refreshDashboard();
 
       // Brief pause to show completion state
@@ -192,7 +192,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       setErrors({ analysis: getErrorMessage(err, t) });
     } finally {
       setAnalysisLoading(false);
-      setAnalysisStep(0);
+
     }
   };
 
@@ -219,10 +219,14 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         productLabel={t(INDUSTRY_INPUT_CFG[industry]?.labelKey2 ?? 'risk.label2_ecommerce')}
         onRunAnalysis={handleAnalysis}
         analysisLoading={analysisLoading}
-        analysisStep={analysisStep}
       />
 
-      {/* ═══ 2. Error ═══ */}
+      {/* ═══ 2. Loading ═══ */}
+      {analysisLoading && (
+        <RiskLoadingSpinner mode="fullDemo" />
+      )}
+
+      {/* Error */}
       {errors.analysis && (
         <div className="bg-amber-950/50 border border-amber-800/60 text-amber-400 rounded-xl px-4 py-3 text-sm">
           {errors.analysis}
