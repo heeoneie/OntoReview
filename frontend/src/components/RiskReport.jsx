@@ -144,11 +144,11 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
             </h2>
             <div className="grid grid-cols-3 gap-4">
               {/* Legal Exposure */}
-              <div className="border border-red-200 bg-red-50 rounded-lg px-5 py-4">
-                <p className="text-[10px] font-bold text-red-800 uppercase tracking-wide mb-1">
+              <div className="border border-amber-200 bg-amber-50 rounded-lg px-5 py-4">
+                <p className="text-[10px] font-bold text-amber-800 uppercase tracking-wide mb-1">
                   Total Legal Exposure
                 </p>
-                <p className="text-2xl font-black text-red-700">{exposureFormatted}</p>
+                <p className="text-2xl font-black text-amber-700">{exposureFormatted}</p>
               </div>
               {/* Risk Score */}
               <div className="border border-gray-200 bg-gray-50 rounded-lg px-5 py-4">
@@ -195,7 +195,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
                 <tbody>
                   {topRisks.map((item, i) => {
                     const sev = item.severity || 0;
-                    const sevColor = sev >= 9 ? 'text-red-700 font-black' : sev >= 7 ? 'text-orange-600 font-bold' : 'text-amber-600 font-medium';
+                    const sevColor = sev >= 9 ? 'text-amber-800 font-black' : sev >= 7 ? 'text-amber-600 font-bold' : 'text-amber-500 font-medium';
                     return (
                       <tr key={item.id || i} className="border-b border-gray-100">
                         <td className="py-2 pr-3 text-gray-500 font-mono whitespace-nowrap">
@@ -285,7 +285,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
             <p className="text-[10px] text-gray-500">
               OntoReview v1.0 — Risk Intelligence & Compliance Audit System
             </p>
-            <p className="text-xs font-black text-red-700 uppercase tracking-widest">
+            <p className="text-xs font-black text-amber-700 uppercase tracking-widest">
               Confidential — Internal Risk Audit Only
             </p>
           </div>

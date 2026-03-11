@@ -179,6 +179,7 @@ export const translations = {
       trendInterval: '추이 (5분 간격)', reaction: '반응',
       criticalRisk: '치명적', warningRisk: '경고', cautionRisk: '주의',
       mlSimilarReview: '유사 민원 리뷰', mlReplies: '대댓글', mlVisitors: '방문자', mlReactions: '추천·공감',
+      likes: '좋아요', visitors: '방문자', views: '조회수',
     },
     compliance: {
       title: '컴플라이언스 보고서', generate: '보고서 생성', generating: '보고서 생성 중...',
@@ -413,6 +414,7 @@ export const translations = {
       trendInterval: 'Trend (5-min)', reaction: 'Reactions',
       criticalRisk: 'Critical', warningRisk: 'Warning', cautionRisk: 'Caution',
       mlSimilarReview: 'Similar Reviews', mlReplies: 'Replies', mlVisitors: 'Visitors', mlReactions: 'Reactions',
+      likes: 'Likes', visitors: 'Visitors', views: 'Views',
     },
     compliance: {
       title: 'Compliance Report', generate: 'Generate Report', generating: 'Generating report...',

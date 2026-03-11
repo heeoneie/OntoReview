@@ -3,21 +3,21 @@ import { useLang } from '../contexts/LangContext';
 import { KO_RISK_KEY, KO_ASSESSMENT_KEY } from '../i18n';
 
 const RISK_LEVEL_STYLES = {
-  '안전': 'bg-emerald-950 text-emerald-400 border border-emerald-800',
+  '안전': 'bg-zinc-800 text-zinc-300 border border-zinc-700',
   '주의': 'bg-amber-950 text-amber-400 border border-amber-800',
-  '경고': 'bg-orange-950 text-orange-400 border border-orange-800',
-  '위험': 'bg-red-950 text-red-400 border border-red-800',
+  '경고': 'bg-amber-950 text-amber-400 border border-amber-800',
+  '위험': 'bg-amber-900 text-amber-300 border border-amber-700',
 };
 
 const ASSESSMENT_LEVEL_STYLES = {
-  low:    'bg-emerald-950 text-emerald-400',
+  low:    'bg-zinc-800 text-zinc-400',
   medium: 'bg-amber-950 text-amber-400',
-  high:   'bg-red-950 text-red-400',
+  high:   'bg-amber-900 text-amber-300',
 };
 
 const SEVERITY_BORDER = {
-  critical: 'border-l-red-500',
-  high:     'border-l-red-700',
+  critical: 'border-l-amber-500',
+  high:     'border-l-amber-700',
   medium:   'border-l-amber-600',
   low:      'border-l-zinc-600',
 };
@@ -43,7 +43,7 @@ export default function ComplianceReport({ data, loading, error, onGenerate }) {
       </div>
 
       {error && (
-        <div className="bg-red-950 text-red-400 border border-red-800 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
+        <div className="bg-amber-950 text-amber-400 border border-amber-800 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
       )}
 
       {loading ? (
@@ -83,7 +83,7 @@ export default function ComplianceReport({ data, loading, error, onGenerate }) {
                   <div className="flex items-center gap-3 text-xs">
                     <span className="text-zinc-500">{ch.feed_count?.toLocaleString()}{t('compliance.count')}</span>
                     {ch.risk_count > 0 && (
-                      <span className="text-red-400 font-medium">{t('compliance.riskCount')} {ch.risk_count}{t('compliance.count')}</span>
+                      <span className="text-amber-400 font-medium">{t('compliance.riskCount')} {ch.risk_count}{t('compliance.count')}</span>
                     )}
                   </div>
                 </div>
@@ -161,7 +161,7 @@ export default function ComplianceReport({ data, loading, error, onGenerate }) {
                 <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-40" />
                 <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
               </span>
-              <span className="text-[11px] font-semibold text-emerald-500 uppercase tracking-widest">{t('compliance.auditLog')}</span>
+              <span className="text-[11px] font-semibold text-zinc-400 uppercase tracking-widest">{t('compliance.auditLog')}</span>
             </div>
             <div className="flex items-center gap-3 text-[11px] text-zinc-600">
               <span>{t('compliance.auditLastRecord')}</span>

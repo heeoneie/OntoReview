@@ -21,7 +21,7 @@ function ViralRiskBadge({ risk }) {
   const { t } = useLang();
   const key = VIRAL_KEY[risk] || 'low';
   const STYLE = {
-    high:   { cls: 'bg-red-950 text-red-400 border border-red-800',     dot: 'bg-red-500',   pulse: true },
+    high:   { cls: 'bg-amber-950 text-amber-400 border border-amber-800',     dot: 'bg-amber-500',   pulse: true },
     medium: { cls: 'bg-amber-950 text-amber-400 border border-amber-800', dot: 'bg-amber-400', pulse: false },
     low:    { cls: 'bg-zinc-800 text-zinc-400 border border-zinc-700',   dot: 'bg-zinc-500',  pulse: false },
   };
@@ -51,7 +51,7 @@ function CommentGrowthChart({ growth, metricLabel }) {
   const ratio = last / (first || 1);
   const trend =
     ratio >= 3
-      ? { label: t('mock.surging'),    cls: 'text-red-400 font-bold' }
+      ? { label: t('mock.surging'),    cls: 'text-amber-400 font-bold' }
       : ratio >= 1.8
       ? { label: t('mock.increasing'), cls: 'text-amber-400 font-semibold' }
       : { label: t('mock.steady'),     cls: 'text-zinc-500' };
@@ -71,11 +71,11 @@ function CommentGrowthChart({ growth, metricLabel }) {
           const isLast = i === growth.length - 1;
           return (
             <div key={i} className="flex flex-col items-center gap-0.5">
-              <span className={`text-[11px] font-bold ${isLast ? 'text-red-400' : 'text-zinc-400'}`}>
+              <span className={`text-[11px] font-bold ${isLast ? 'text-amber-400' : 'text-zinc-400'}`}>
                 +{point.delta.toLocaleString()}
               </span>
               <div
-                className={`w-5 rounded-t ${isLast ? 'bg-red-600' : 'bg-zinc-600'}`}
+                className={`w-5 rounded-t ${isLast ? 'bg-amber-600' : 'bg-zinc-600'}`}
                 style={{ height: `${barH}px` }}
               />
               <span className="text-[10px] text-zinc-600 mt-0.5">{point.t}</span>
@@ -94,8 +94,8 @@ export default function MockScenario({ data }) {
   const { risk_level, incident_title, incident_summary, clustering_reason, channel_signals } = data;
 
   const alertBorder =
-    risk_level === 'RED' ? 'border-red-800 bg-red-950/40' :
-    risk_level === 'ORANGE' ? 'border-orange-800 bg-orange-950/40' :
+    risk_level === 'RED' ? 'border-amber-800 bg-amber-950/40' :
+    risk_level === 'ORANGE' ? 'border-amber-800 bg-amber-950/40' :
     'border-amber-800 bg-amber-950/40';
 
   const riskLabel =
@@ -109,19 +109,17 @@ export default function MockScenario({ data }) {
       <div className={`rounded-2xl border ${alertBorder} p-5`}>
         <div className="flex items-start gap-3">
           <AlertTriangle
-            className={`mt-0.5 flex-shrink-0 ${risk_level === 'RED' ? 'text-red-400' : 'text-amber-400'}`}
+            className={`mt-0.5 flex-shrink-0 text-amber-400`}
             size={20}
           />
           <div>
             <div className="flex items-center gap-2 mb-1.5">
               <h3 className="font-bold text-white">{incident_title}</h3>
-              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold ${
-                risk_level === 'RED' ? 'bg-red-900 text-red-300' : 'bg-amber-900 text-amber-300'
-              }`}>
+              <span className={`inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-900 text-amber-300`}>
                 {risk_level === 'RED' && (
                   <span className="relative flex h-1.5 w-1.5">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-60" />
-                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-red-400" />
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-60" />
+                    <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-amber-400" />
                   </span>
                 )}
                 {riskLabel}
@@ -130,7 +128,7 @@ export default function MockScenario({ data }) {
             <p className="text-sm text-zinc-300 leading-relaxed">{incident_summary}</p>
             {clustering_reason && (
               <p className="text-xs text-zinc-500 mt-2 bg-zinc-900/60 rounded-lg px-3 py-1.5 border border-zinc-800">
-                🔗 {clustering_reason}
+                {clustering_reason}
               </p>
             )}
           </div>
@@ -185,7 +183,7 @@ export default function MockScenario({ data }) {
                       {signal.risk_indicators?.map((ind, i) => (
                         <span
                           key={i}
-                          className="text-xs px-2 py-0.5 bg-red-950 text-red-400 border border-red-800 rounded-full font-medium"
+                          className="text-xs px-2 py-0.5 bg-amber-950 text-amber-400 border border-amber-800 rounded-full font-medium"
                         >
                           △ {ind}
                         </span>
@@ -193,10 +191,10 @@ export default function MockScenario({ data }) {
                     </div>
                     {signal.metadata && (
                       <p className="text-[11px] text-zinc-600 mt-2">
-                        {signal.metadata.rating != null && `★ ${signal.metadata.rating}/5 · `}
-                        {signal.metadata.likes != null && `👍 ${signal.metadata.likes} · `}
-                        {signal.metadata.visitor_count != null && `👁 ${signal.metadata.visitor_count.toLocaleString()} · `}
-                        {signal.metadata.view_count != null && `👁 ${signal.metadata.view_count.toLocaleString()} · `}
+                        {signal.metadata.rating != null && `${signal.metadata.rating}/5 · `}
+                        {signal.metadata.likes != null && `${t('mock.likes')} ${signal.metadata.likes} · `}
+                        {signal.metadata.visitor_count != null && `${t('mock.visitors')} ${signal.metadata.visitor_count.toLocaleString()} · `}
+                        {signal.metadata.view_count != null && `${t('mock.views')} ${signal.metadata.view_count.toLocaleString()} · `}
                         {signal.metadata.timestamp && !isNaN(new Date(signal.metadata.timestamp))
                           ? new Date(signal.metadata.timestamp).toLocaleDateString('ko-KR')
                           : ''}

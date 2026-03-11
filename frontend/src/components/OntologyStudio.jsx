@@ -17,35 +17,35 @@ const OWL_CLASSES = [
 ];
 
 const OWL_CLASS_COLORS = {
-  ProductLiability: 'bg-red-950 text-red-300 border-red-800',
-  SkinReaction: 'bg-pink-950 text-pink-300 border-pink-800',
-  ChemicalBurn: 'bg-orange-950 text-orange-300 border-orange-800',
+  ProductLiability: 'bg-amber-950 text-amber-300 border-amber-800',
+  SkinReaction: 'bg-amber-950 text-amber-300 border-amber-800',
+  ChemicalBurn: 'bg-amber-950 text-amber-300 border-amber-800',
   Ingestion: 'bg-amber-950 text-amber-300 border-amber-800',
-  Choking: 'bg-yellow-950 text-yellow-300 border-yellow-800',
-  RegulatoryRisk: 'bg-violet-950 text-violet-300 border-violet-800',
-  FDAViolation: 'bg-purple-950 text-purple-300 border-purple-800',
-  RecallEvent: 'bg-rose-950 text-rose-300 border-rose-800',
-  ClassAction: 'bg-red-950 text-red-300 border-red-800',
-  ConsumerFraud: 'bg-emerald-950 text-emerald-300 border-emerald-800',
-  Counterfeit: 'bg-teal-950 text-teal-300 border-teal-800',
-  MisleadingLabel: 'bg-cyan-950 text-cyan-300 border-cyan-800',
-  FoodSafety: 'bg-lime-950 text-lime-300 border-lime-800',
-  Contamination: 'bg-green-950 text-green-300 border-green-800',
-  Expiration: 'bg-sky-950 text-sky-300 border-sky-800',
-  Allergen: 'bg-indigo-950 text-indigo-300 border-indigo-800',
+  Choking: 'bg-amber-950 text-amber-300 border-amber-800',
+  RegulatoryRisk: 'bg-sky-950 text-sky-300 border-sky-800',
+  FDAViolation: 'bg-sky-950 text-sky-300 border-sky-800',
+  RecallEvent: 'bg-amber-950 text-amber-300 border-amber-800',
+  ClassAction: 'bg-amber-950 text-amber-300 border-amber-800',
+  ConsumerFraud: 'bg-sky-950 text-sky-300 border-sky-800',
+  Counterfeit: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+  MisleadingLabel: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+  FoodSafety: 'bg-sky-950 text-sky-300 border-sky-800',
+  Contamination: 'bg-amber-950 text-amber-300 border-amber-800',
+  Expiration: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+  Allergen: 'bg-sky-950 text-sky-300 border-sky-800',
 };
 
 function severityColor(s) {
-  if (s >= 9) return 'text-red-400';
-  if (s >= 7) return 'text-orange-400';
-  if (s >= 4) return 'text-amber-400';
+  if (s >= 9) return 'text-amber-300';
+  if (s >= 7) return 'text-amber-500';
+  if (s >= 4) return 'text-sky-400';
   return 'text-zinc-400';
 }
 
 function severityBar(s) {
-  if (s >= 9) return 'bg-red-500';
-  if (s >= 7) return 'bg-orange-500';
-  if (s >= 4) return 'bg-amber-500';
+  if (s >= 9) return 'bg-amber-400';
+  if (s >= 7) return 'bg-amber-600';
+  if (s >= 4) return 'bg-sky-500';
   return 'bg-zinc-500';
 }
 
@@ -179,7 +179,7 @@ export default function OntologyStudio() {
       {/* Header */}
       <div>
         <h1 className="text-xl font-bold text-white flex items-center gap-2">
-          <Database className="w-5 h-5 text-emerald-400" />
+          <Database className="w-5 h-5 text-sky-400" />
           {t('studio.title')}
         </h1>
         <p className="text-sm text-zinc-500 mt-1">{t('studio.subtitle')}</p>
@@ -188,7 +188,7 @@ export default function OntologyStudio() {
       {/* Upload Section */}
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <h2 className="text-sm font-semibold text-white flex items-center gap-2 mb-4">
-          <BookOpen className="w-4 h-4 text-emerald-400" />
+          <BookOpen className="w-4 h-4 text-sky-400" />
           {t('studio.uploadTitle')}
         </h2>
         <p className="text-xs text-zinc-500 mb-4">{t('studio.uploadDesc')}</p>
@@ -199,7 +199,7 @@ export default function OntologyStudio() {
             onClick={() => setUploadMode('file')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
               uploadMode === 'file'
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-700'
+                ? 'bg-sky-950 text-sky-300 border-sky-700'
                 : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
             }`}
           >
@@ -210,7 +210,7 @@ export default function OntologyStudio() {
             onClick={() => setUploadMode('text')}
             className={`px-3 py-1.5 text-xs font-medium rounded-md border transition-colors ${
               uploadMode === 'text'
-                ? 'bg-emerald-950 text-emerald-300 border-emerald-700'
+                ? 'bg-sky-950 text-sky-300 border-sky-700'
                 : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:text-zinc-200'
             }`}
           >
@@ -229,14 +229,14 @@ export default function OntologyStudio() {
             value={domainName}
             onChange={(e) => setDomainName(e.target.value)}
             placeholder={t('studio.domainPlaceholder')}
-            className="w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+            className="w-full max-w-sm bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500/50"
           />
         </div>
 
         {/* File upload or text area */}
         {uploadMode === 'file' ? (
           <div className="mb-4">
-            <label className="block w-full max-w-lg border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-emerald-700/50 transition-colors">
+            <label className="block w-full max-w-lg border-2 border-dashed border-zinc-700 rounded-xl p-8 text-center cursor-pointer hover:border-sky-700/50 transition-colors">
               <Upload className="w-8 h-8 mx-auto text-zinc-600 mb-2" />
               <p className="text-sm text-zinc-400">
                 {file ? file.name : 'Click to upload (.txt, .md, .pdf)'}
@@ -256,7 +256,7 @@ export default function OntologyStudio() {
               onChange={(e) => setTextContent(e.target.value)}
               placeholder={t('studio.textPlaceholder')}
               rows={6}
-              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50 resize-y"
+              className="w-full bg-zinc-800 border border-zinc-700 rounded-lg px-3 py-2 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500/50 resize-y"
             />
           </div>
         )}
@@ -265,7 +265,7 @@ export default function OntologyStudio() {
         <button
           onClick={handleExtract}
           disabled={extracting || (uploadMode === 'file' ? !file : !textContent.trim())}
-          className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
+          className="px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors flex items-center gap-2"
         >
           {extracting ? (
             <Loader2 className="w-4 h-4 animate-spin" />
@@ -288,13 +288,13 @@ export default function OntologyStudio() {
                   onClick={() => toggleExtractedSelection(idx)}
                   className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors ${
                     selectedExtracted.has(idx)
-                      ? 'bg-emerald-950/30 border-emerald-800/50'
+                      ? 'bg-sky-950/30 border-sky-800/50'
                       : 'bg-zinc-800/50 border-zinc-700/50 opacity-60'
                   }`}
                 >
                   <div className={`w-5 h-5 rounded border flex items-center justify-center flex-shrink-0 ${
                     selectedExtracted.has(idx)
-                      ? 'bg-emerald-600 border-emerald-500'
+                      ? 'bg-sky-600 border-sky-500'
                       : 'border-zinc-600'
                   }`}>
                     {selectedExtracted.has(idx) && <Check className="w-3 h-3 text-white" />}
@@ -329,7 +329,7 @@ export default function OntologyStudio() {
             <button
               onClick={handleSaveExtracted}
               disabled={selectedExtracted.size === 0}
-              className="mt-4 px-4 py-2 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+              className="mt-4 px-4 py-2 bg-sky-600 hover:bg-sky-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {t('studio.saveSelected')} ({selectedExtracted.size})
             </button>
@@ -345,7 +345,7 @@ export default function OntologyStudio() {
       <div className="bg-zinc-900 border border-zinc-800 rounded-xl p-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-sm font-semibold text-white flex items-center gap-2">
-            <Database className="w-4 h-4 text-emerald-400" />
+            <Database className="w-4 h-4 text-sky-400" />
             {t('studio.rulesTitle')}
             {rules.length > 0 && (
               <span className="text-xs text-zinc-500 ml-1">({rules.length})</span>
@@ -371,7 +371,7 @@ export default function OntologyStudio() {
                   value={newKeyword}
                   onChange={(e) => setNewKeyword(e.target.value)}
                   placeholder="e.g., peeling"
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500/50"
                 />
               </div>
               <div>
@@ -379,7 +379,7 @@ export default function OntologyStudio() {
                 <select
                   value={newOwlClass}
                   onChange={(e) => setNewOwlClass(e.target.value)}
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 focus:outline-none focus:ring-1 focus:ring-sky-500/50"
                 >
                   {OWL_CLASSES.map((cls) => (
                     <option key={cls} value={cls}>{cls}</option>
@@ -397,7 +397,7 @@ export default function OntologyStudio() {
                   step={0.5}
                   value={newSeverity}
                   onChange={(e) => setNewSeverity(parseFloat(e.target.value))}
-                  className="w-full accent-emerald-500"
+                  className="w-full accent-sky-500"
                 />
               </div>
               <div>
@@ -407,14 +407,14 @@ export default function OntologyStudio() {
                   value={newDomain}
                   onChange={(e) => setNewDomain(e.target.value)}
                   placeholder="custom"
-                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-emerald-500/50"
+                  className="w-full bg-zinc-900 border border-zinc-700 rounded-md px-3 py-1.5 text-sm text-zinc-200 placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500/50"
                 />
               </div>
             </div>
             <button
               onClick={handleAddRule}
               disabled={!newKeyword.trim()}
-              className="mt-3 px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
+              className="mt-3 px-4 py-1.5 bg-sky-600 hover:bg-sky-500 disabled:bg-zinc-700 disabled:text-zinc-500 text-white text-sm font-medium rounded-lg transition-colors"
             >
               {t('studio.addRule')}
             </button>
@@ -473,7 +473,7 @@ export default function OntologyStudio() {
                     <td className="py-2.5 px-3 text-right">
                       <button
                         onClick={() => handleDelete(rule.id)}
-                        className="p-1.5 text-zinc-600 hover:text-red-400 transition-colors rounded-md hover:bg-red-950/30"
+                        className="p-1.5 text-zinc-600 hover:text-amber-400 transition-colors rounded-md hover:bg-amber-950/30"
                         title={t('studio.deleteConfirm')}
                       >
                         <Trash2 className="w-3.5 h-3.5" />
@@ -489,7 +489,7 @@ export default function OntologyStudio() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-emerald-900 border border-emerald-700 text-emerald-200 px-4 py-2.5 rounded-lg text-sm shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2">
+        <div className="fixed bottom-6 right-6 bg-sky-900 border border-sky-700 text-sky-200 px-4 py-2.5 rounded-lg text-sm shadow-lg z-50 animate-in fade-in slide-in-from-bottom-2">
           {toast}
         </div>
       )}

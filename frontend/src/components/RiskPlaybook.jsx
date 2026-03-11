@@ -6,10 +6,10 @@ import { useLang } from '../contexts/LangContext';
 const STRATEGY_CONFIG = {
   Conservative: {
     icon: ShieldCheck,
-    border: 'border-emerald-700/60',
-    glow: 'shadow-[0_0_20px_rgba(16,185,129,0.08)]',
-    badge: 'bg-emerald-500/15 text-emerald-400 border-emerald-700/50',
-    accent: 'text-emerald-400',
+    border: 'border-sky-700/60',
+    glow: 'shadow-[0_0_20px_rgba(14,165,233,0.08)]',
+    badge: 'bg-sky-500/15 text-sky-400 border-sky-700/50',
+    accent: 'text-sky-400',
     labelKey: 'playbook.conservative',
     descKey: 'playbook.conservativeDesc',
   },
@@ -24,10 +24,10 @@ const STRATEGY_CONFIG = {
   },
   Aggressive: {
     icon: Scale,
-    border: 'border-rose-700/60',
-    glow: 'shadow-[0_0_20px_rgba(225,29,72,0.08)]',
-    badge: 'bg-rose-500/15 text-rose-400 border-rose-700/50',
-    accent: 'text-rose-400',
+    border: 'border-amber-600/70',
+    glow: 'shadow-[0_0_24px_rgba(245,158,11,0.12)]',
+    badge: 'bg-amber-500/20 text-amber-300 border-amber-600/60',
+    accent: 'text-amber-300',
     labelKey: 'playbook.aggressive',
     descKey: 'playbook.aggressiveDesc',
   },
@@ -181,7 +181,7 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
       {isLoading && (
         <div className="space-y-4">
           <div className="flex items-center gap-3 bg-zinc-900 rounded-xl border border-zinc-800 px-5 py-4">
-            <Loader2 className="animate-spin text-indigo-400" size={20} />
+            <Loader2 className="animate-spin text-sky-400" size={20} />
             <div>
               <p className="text-sm font-medium text-white">{t('playbook.loading')}</p>
               <p className="text-xs text-zinc-500 mt-0.5">{t('playbook.loadingHint')}</p>
@@ -197,15 +197,15 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
       {/* Error state */}
       {error && !isLoading && (
-        <div className="bg-red-950/40 border border-red-800/60 rounded-xl px-5 py-4 flex items-center justify-between">
+        <div className="bg-amber-950/40 border border-amber-800/60 rounded-xl px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-red-400" size={18} />
-            <p className="text-sm text-red-400">{error}</p>
+            <AlertTriangle className="text-amber-400" size={18} />
+            <p className="text-sm text-amber-400">{error}</p>
           </div>
           <button
             type="button"
             onClick={handleRetry}
-            className="px-3 py-1.5 text-xs font-semibold text-red-400 bg-red-950 border border-red-800 rounded-lg hover:bg-red-900 transition-colors"
+            className="px-3 py-1.5 text-xs font-semibold text-amber-400 bg-amber-950 border border-amber-800 rounded-lg hover:bg-amber-900 transition-colors"
           >
             {t('playbook.retry')}
           </button>
