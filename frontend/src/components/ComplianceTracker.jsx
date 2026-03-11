@@ -33,13 +33,13 @@ function violationBadge(level) {
 function scoreColor(pct) {
   if (pct >= 80) return 'text-sky-400';
   if (pct >= 60) return 'text-amber-400';
-  return 'text-amber-400';
+  return 'text-amber-500';
 }
 
 function scoreBarColor(pct) {
   if (pct >= 80) return 'bg-sky-500';
   if (pct >= 60) return 'bg-amber-500';
-  return 'bg-amber-500';
+  return 'bg-amber-600';
 }
 
 export default function ComplianceTracker() {

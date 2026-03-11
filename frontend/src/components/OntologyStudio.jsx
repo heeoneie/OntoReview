@@ -36,15 +36,15 @@ const OWL_CLASS_COLORS = {
 };
 
 function severityColor(s) {
-  if (s >= 9) return 'text-amber-400';
-  if (s >= 7) return 'text-amber-400';
+  if (s >= 9) return 'text-amber-300';
+  if (s >= 7) return 'text-amber-500';
   if (s >= 4) return 'text-sky-400';
   return 'text-zinc-400';
 }
 
 function severityBar(s) {
-  if (s >= 9) return 'bg-amber-500';
-  if (s >= 7) return 'bg-amber-500';
+  if (s >= 9) return 'bg-amber-400';
+  if (s >= 7) return 'bg-amber-600';
   if (s >= 4) return 'bg-sky-500';
   return 'bg-zinc-500';
 }

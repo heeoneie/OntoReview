@@ -6,13 +6,13 @@ const RISK_LEVEL_STYLES = {
   '안전': 'bg-zinc-800 text-zinc-300 border border-zinc-700',
   '주의': 'bg-amber-950 text-amber-400 border border-amber-800',
   '경고': 'bg-amber-950 text-amber-400 border border-amber-800',
-  '위험': 'bg-amber-950 text-amber-400 border border-amber-800',
+  '위험': 'bg-amber-900 text-amber-300 border border-amber-700',
 };
 
 const ASSESSMENT_LEVEL_STYLES = {
   low:    'bg-zinc-800 text-zinc-400',
   medium: 'bg-amber-950 text-amber-400',
-  high:   'bg-amber-950 text-amber-400',
+  high:   'bg-amber-900 text-amber-300',
 };
 
 const SEVERITY_BORDER = {

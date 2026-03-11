@@ -195,7 +195,7 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
                 <tbody>
                   {topRisks.map((item, i) => {
                     const sev = item.severity || 0;
-                    const sevColor = sev >= 9 ? 'text-amber-700 font-black' : sev >= 7 ? 'text-amber-600 font-bold' : 'text-amber-600 font-medium';
+                    const sevColor = sev >= 9 ? 'text-amber-800 font-black' : sev >= 7 ? 'text-amber-600 font-bold' : 'text-amber-500 font-medium';
                     return (
                       <tr key={item.id || i} className="border-b border-gray-100">
                         <td className="py-2 pr-3 text-gray-500 font-mono whitespace-nowrap">

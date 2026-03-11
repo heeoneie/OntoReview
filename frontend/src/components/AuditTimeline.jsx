@@ -39,7 +39,7 @@ function formatDate(iso) {
 function SeverityDot({ severity }) {
   if (severity == null) return null;
   const s = Number(severity);
-  const color = s >= 9 ? 'bg-amber-500 shadow-amber-500/60' : s >= 7 ? 'bg-amber-400 shadow-amber-400/50' : s >= 4 ? 'bg-amber-400 shadow-amber-400/40' : 'bg-zinc-500';
+  const color = s >= 9 ? 'bg-amber-400 shadow-amber-400/60' : s >= 7 ? 'bg-amber-500 shadow-amber-500/50' : s >= 4 ? 'bg-sky-400 shadow-sky-400/40' : 'bg-zinc-500';
   return (
     <span className={`inline-block w-2 h-2 rounded-full shadow-[0_0_6px] ${color}`} title={`Severity: ${s}`} />
   );

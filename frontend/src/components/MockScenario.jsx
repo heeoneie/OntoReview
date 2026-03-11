@@ -192,9 +192,9 @@ export default function MockScenario({ data }) {
                     {signal.metadata && (
                       <p className="text-[11px] text-zinc-600 mt-2">
                         {signal.metadata.rating != null && `${signal.metadata.rating}/5 · `}
-                        {signal.metadata.likes != null && `Likes ${signal.metadata.likes} · `}
-                        {signal.metadata.visitor_count != null && `Views ${signal.metadata.visitor_count.toLocaleString()} · `}
-                        {signal.metadata.view_count != null && `Views ${signal.metadata.view_count.toLocaleString()} · `}
+                        {signal.metadata.likes != null && `${t('mock.likes')} ${signal.metadata.likes} · `}
+                        {signal.metadata.visitor_count != null && `${t('mock.visitors')} ${signal.metadata.visitor_count.toLocaleString()} · `}
+                        {signal.metadata.view_count != null && `${t('mock.views')} ${signal.metadata.view_count.toLocaleString()} · `}
                         {signal.metadata.timestamp && !isNaN(new Date(signal.metadata.timestamp))
                           ? new Date(signal.metadata.timestamp).toLocaleDateString('ko-KR')
                           : ''}

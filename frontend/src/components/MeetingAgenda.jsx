@@ -5,7 +5,7 @@ import { KO_URGENCY_KEY } from '../i18n';
 const URGENCY_STYLES = {
   normal:   'bg-zinc-800 text-zinc-300 border border-zinc-700',
   urgent:   'bg-amber-950 text-amber-400 border border-amber-800',
-  critical: 'bg-amber-950 text-amber-400 border border-amber-800',
+  critical: 'bg-amber-900 text-amber-300 border border-amber-700 ring-1 ring-amber-500/30',
 };
 
 const PRIORITY_BORDER = {

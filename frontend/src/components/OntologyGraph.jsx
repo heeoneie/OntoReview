@@ -157,14 +157,14 @@ function toSeverityScore(value) {
 }
 
 function severityBorder(score) {
-  if (score >= 8) return 'border-amber-500';
-  if (score >= 5) return 'border-amber-500';
+  if (score >= 8) return 'border-amber-400';
+  if (score >= 5) return 'border-amber-600';
   return 'border-sky-600';
 }
 
 function severityBadge(score) {
-  if (score >= 8) return 'bg-amber-500/20 text-amber-400';
-  if (score >= 5) return 'bg-amber-500/20 text-amber-400';
+  if (score >= 8) return 'bg-amber-400/20 text-amber-300';
+  if (score >= 5) return 'bg-amber-600/20 text-amber-400';
   return 'bg-sky-500/20 text-sky-400';
 }
 
@@ -379,7 +379,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
             <MiniMap
               nodeColor={(n) =>
                 n.data?.is_owl
-                  ? '#0ea5e9'
+                  ? '#8b5cf6'
                   : n.data?.severity_score >= 8
                     ? '#f59e0b'
                     : n.data?.severity_score >= 5
@@ -584,7 +584,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
           { color: '#f59e0b', label: 'Critical (≥8)' },
           { color: '#d97706', label: 'Warning (5–7)' },
           { color: '#0ea5e9', label: 'Safe (<5)' },
-          { color: '#0ea5e9', label: 'OWL Inferred' },
+          { color: '#8b5cf6', label: 'OWL Inferred' },
         ].map((item) => (
           <div
             key={item.label}

@@ -466,6 +466,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
   const hasResults = ontology || compliance || meeting;
   const hasScanned = scanId || timeline.length > 0;
+  const hasElevatedKpi = kpi.total_legal_exposure_usd > 0 || kpi.critical_risks_detected > 0 || kpi.overall_risk_score >= 10;
 
   return (
     <div className="space-y-6">
@@ -475,10 +476,10 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         <div className="flex items-center justify-between mb-4">
           <div className="flex items-center gap-2">
             <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${kpi.total_legal_exposure_usd > 0 ? 'bg-amber-400' : 'bg-sky-400'} opacity-50`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${kpi.total_legal_exposure_usd > 0 ? 'bg-amber-400' : 'bg-sky-400'}`} />
+              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${hasElevatedKpi ? 'bg-amber-400' : 'bg-sky-400'} opacity-50`} />
+              <span className={`relative inline-flex rounded-full h-2 w-2 ${hasElevatedKpi ? 'bg-amber-400' : 'bg-sky-400'}`} />
             </span>
-            <span className={`text-xs font-bold uppercase tracking-widest ${kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-sky-400'}`}>{t('risk.live')}</span>
+            <span className={`text-xs font-bold uppercase tracking-widest ${hasElevatedKpi ? 'text-amber-400' : 'text-sky-400'}`}>{t('risk.live')}</span>
             <span className="text-xs text-zinc-600">{t('risk.last24h')}</span>
           </div>
           <div className="flex items-center gap-2">
