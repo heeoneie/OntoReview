@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, lazy, Suspense } from 'react';
-import { Shield, Loader2, Radio, Building2, Zap, Share2, Search, ScanSearch, AlertTriangle, ShoppingCart, Clock, DollarSign, TrendingUp, Scale, Rocket, Globe, ExternalLink } from 'lucide-react';
+import { Loader2, ScanSearch, AlertTriangle, Clock, Globe, ExternalLink } from 'lucide-react';
 import {
   generateOntology,
   generateComplianceReport,
@@ -15,137 +15,29 @@ import {
   searchBrandRisks,
 } from '../api/client';
 import { useLang } from '../contexts/LangContext';
+import HeroCommand from './HeroCommand';
+import InvestigationWorkspace from './InvestigationWorkspace';
 import OntologyGraph from './OntologyGraph';
-import ComplianceReport from './ComplianceReport';
-import MeetingAgenda from './MeetingAgenda';
-import MockScenario from './MockScenario';
+import ExposureHero from './ExposureHero';
+import ReasoningChain from './ReasoningChain';
 import RiskLoadingSpinner from './RiskLoadingSpinner';
-import AuditTimeline from './AuditTimeline';
-import RiskReport from './RiskReport';
+import DataSources from './DataSources';
 const DevModelQuality = import.meta.env.DEV ? lazy(() => import('./ModelQuality')) : null;
 
-const INDUSTRIES = [
-  { id: 'ecommerce', labelKey: 'risk.ecommerce' },
-  { id: 'hospital',  labelKey: 'risk.hospital' },
-  { id: 'finance',   labelKey: 'risk.finance' },
-  { id: 'gaming',    labelKey: 'risk.gaming' },
-];
+// ── Constants ──
 
 const INDUSTRY_INPUT_CFG = {
   ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: '넥서스',       labelKey2: 'risk.label2_ecommerce', default2: '파워 충전기 65W' },
   hospital:  { labelKey1: 'risk.label1_hospital',  default1: '한빛의료재단', labelKey2: 'risk.label2_hospital',  default2: '무릎 인공관절 수술' },
   finance:   { labelKey1: 'risk.label1_finance',   default1: '페이트러스트', labelKey2: 'risk.label2_finance',   default2: '간편결제 앱 v3.0' },
-  gaming:    { labelKey1: 'risk.label1_gaming',    default1: '크로노게임즈', labelKey2: 'risk.label2_gaming',    default2: '크로노워 모바일' },
+  gaming:    { labelKey1: 'risk.label1_gaming',     default1: '크로노게임즈', labelKey2: 'risk.label2_gaming',    default2: '크로노워 모바일' },
 };
 
-const CHANNELS_BY_INDUSTRY = {
-  ecommerce: [
-    { nameKey: 'risk.chEcommerce',  status: 'active' },
-    { nameKey: 'risk.chNaver',      status: 'active' },
-    { nameKey: 'risk.chYoutube',    status: 'active' },
-    { nameKey: 'risk.chCommunity',  status: 'active' },
-  ],
-  hospital: [
-    { nameKey: 'risk.chHospitalReview', status: 'active' },
-    { nameKey: 'risk.chNaver',          status: 'active' },
-    { nameKey: 'risk.chYoutube',        status: 'active' },
-    { nameKey: 'risk.chCommunity',      status: 'active' },
-  ],
-  finance: [
-    { nameKey: 'risk.chFinanceReview', status: 'active' },
-    { nameKey: 'risk.chNaver',         status: 'active' },
-    { nameKey: 'risk.chYoutube',       status: 'active' },
-    { nameKey: 'risk.chCommunity',     status: 'active' },
-  ],
-  gaming: [
-    { nameKey: 'risk.chGamingReview', status: 'active' },
-    { nameKey: 'risk.chYoutube',      status: 'active' },
-    { nameKey: 'risk.chCommunity',    status: 'active' },
-    { nameKey: 'risk.chNaver',        status: 'active' },
-  ],
-};
+// ── Helpers ──
 
-const EXTRA_CHANNELS_BY_INDUSTRY = {
-  ecommerce: [
-    { id: 'amazon',    nameKey: 'risk.chAmazon' },
-    { id: 'reddit',    nameKey: 'risk.chReddit' },
-    { id: 'walmart',   nameKey: 'risk.chWalmart' },
-    { id: 'twitter',   nameKey: 'risk.chTwitter' },
-    { id: 'instagram', nameKey: 'risk.chInstagram' },
-  ],
-  hospital: [
-    { id: 'healthgrades', nameKey: 'risk.chHealthgrades' },
-    { id: 'redditmed',    nameKey: 'risk.chRedditMed' },
-    { id: 'zocdoc',       nameKey: 'risk.chZocdoc' },
-    { id: 'twitter',      nameKey: 'risk.chTwitter' },
-    { id: 'instagram',    nameKey: 'risk.chInstagram' },
-  ],
-  finance: [
-    { id: 'trustpilot',  nameKey: 'risk.chTrustpilot' },
-    { id: 'redditfin',   nameKey: 'risk.chRedditFin' },
-    { id: 'googleplay',  nameKey: 'risk.chGooglePlay' },
-    { id: 'twitter',     nameKey: 'risk.chTwitter' },
-    { id: 'instagram',   nameKey: 'risk.chInstagram' },
-  ],
-  gaming: [
-    { id: 'steam',       nameKey: 'risk.chSteam' },
-    { id: 'metacritic',  nameKey: 'risk.chMetacritic' },
-    { id: 'twitch',      nameKey: 'risk.chTwitch' },
-    { id: 'redditgame',  nameKey: 'risk.chRedditGame' },
-    { id: 'twitter',     nameKey: 'risk.chTwitter' },
-  ],
-};
-
-const RISK_LEVEL_CONFIG = {
-  GREEN:  { labelKey: 'risk.safe',     dot: 'bg-zinc-400', text: 'text-zinc-400', banner: 'bg-zinc-900/40 border-zinc-700' },
-  YELLOW: { labelKey: 'risk.caution',  dot: 'bg-amber-400',   text: 'text-amber-400',   banner: 'bg-amber-950/40 border-amber-800' },
-  ORANGE: { labelKey: 'risk.warning',  dot: 'bg-amber-400',  text: 'text-amber-400',  banner: 'bg-amber-950/40 border-amber-800' },
-  RED:    { labelKey: 'risk.critical', dot: 'bg-amber-500',     text: 'text-amber-400',     banner: 'bg-amber-950/40 border-amber-800' },
-};
-
-function RiskLevelBanner({ level }) {
-  const { t } = useLang();
-  if (!level) return null;
-  const cfg = RISK_LEVEL_CONFIG[level] || RISK_LEVEL_CONFIG.GREEN;
-  const label = t(cfg.labelKey);
-  return (
-    <div className={`flex items-center gap-3 px-4 py-3 rounded-xl border ${cfg.banner}`}>
-      <span className="relative flex h-3 w-3 flex-shrink-0">
-        {(level === 'RED' || level === 'ORANGE') && (
-          <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${cfg.dot} opacity-50`} />
-        )}
-        <span className={`relative inline-flex rounded-full h-3 w-3 ${cfg.dot}`} />
-      </span>
-      <span className={`text-sm font-semibold ${cfg.text}`}>
-        {t('risk.currentRisk')} {label}
-        {level === 'RED' && ` — ${t('risk.redAlert')}`}
-        {level === 'ORANGE' && ` — ${t('risk.orangeAlert')}`}
-      </span>
-      <span className={`ml-auto text-xs font-bold px-3 py-1 rounded-full border ${cfg.banner} ${cfg.text}`}>
-        {label}
-      </span>
-    </div>
-  );
-}
-
-// "OO" 플레이스홀더를 브랜드명으로 교체
 function injectBrand(obj, brand) {
   if (!brand || !obj) return obj;
   return JSON.parse(JSON.stringify(obj).replace(/OO/g, brand));
-}
-
-// Format USD amount for enterprise display (e.g., $6.64M or $1.2B)
-function formatLegalExposure(amount) {
-  if (amount >= 1_000_000_000) {
-    return `$${(amount / 1_000_000_000).toFixed(2)}B`;
-  }
-  if (amount >= 1_000_000) {
-    return `$${(amount / 1_000_000).toFixed(2)}M`;
-  }
-  if (amount >= 1_000) {
-    return `$${(amount / 1_000).toFixed(1)}K`;
-  }
-  return `$${amount.toLocaleString()}`;
 }
 
 function getErrorMessage(err, t) {
@@ -155,24 +47,23 @@ function getErrorMessage(err, t) {
   return err?.response?.data?.detail || t('risk.errGeneric');
 }
 
-export default function RiskIntelligence({ analysisResult, onNavigatePlaybook }) {
+// ── Component ──
+
+export default function RiskIntelligence({ analysisResult, onNavigatePlaybook, onComplianceData, onMeetingData }) {
   const { t, lang } = useLang();
+
+  // Analysis state
   const [demoResult, setDemoResult] = useState(null);
   const [ontology, setOntology] = useState(null);
   const [compliance, setCompliance] = useState(null);
   const [meeting, setMeeting] = useState(null);
-  const [riskLevel, setRiskLevel] = useState(null);
   const [loading, setLoading] = useState({ demo: false, all: false, ontology: false, compliance: false, meeting: false });
   const [errors, setErrors] = useState({});
   const [industry, setIndustry] = useState('ecommerce');
-  const [shareDropdown, setShareDropdown] = useState(false);
-  const [shareToast, setShareToast] = useState('');
   const [brandName, setBrandName] = useState(INDUSTRY_INPUT_CFG.ecommerce.default1);
   const [productName, setProductName] = useState(INDUSTRY_INPUT_CFG.ecommerce.default2);
   const [scanPhase, setScanPhase] = useState(false);
-  const [selectedExtra, setSelectedExtra] = useState(new Set());
-  const [dataSource, setDataSource] = useState(null); // 'youtube' | 'mock'
-  const inputRef = useRef(null);
+  const [dataSource, setDataSource] = useState(null);
   const toastTimerRef = useRef(null);
 
   // KPI live data
@@ -195,6 +86,13 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const [discoveryResults, setDiscoveryResults] = useState(null);
   const [discoveryLoading, setDiscoveryLoading] = useState(false);
 
+  // ── Lift compliance/meeting data to parent ──
+
+  useEffect(() => { onComplianceData?.(compliance); }, [compliance, onComplianceData]);
+  useEffect(() => { onMeetingData?.(meeting); }, [meeting, onMeetingData]);
+
+  // ── Effects ──
+
   const refreshDashboard = useCallback(async () => {
     try {
       const [kpiRes, tlRes, auditRes] = await Promise.all([
@@ -211,40 +109,36 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       setTimeline(Array.isArray(tlRes.data) ? tlRes.data : []);
       setAuditEvents(Array.isArray(auditRes.data) ? auditRes.data : []);
     } catch {
-      // Reset to zero on fetch failure
-      setKpi({
-        total_scanned_reviews: 0,
-        critical_risks_detected: 0,
-        today_new_ingestions: 0,
-        overall_risk_score: 0,
-        total_legal_exposure_usd: 0,
-      });
+      setKpi({ total_scanned_reviews: 0, critical_risks_detected: 0, today_new_ingestions: 0, overall_risk_score: 0, total_legal_exposure_usd: 0 });
       setTimeline([]);
       setAuditEvents([]);
     }
   }, []);
 
   useEffect(() => { refreshDashboard(); }, [refreshDashboard]);
+  useEffect(() => () => { if (toastTimerRef.current) clearTimeout(toastTimerRef.current); }, []);
 
-  // Cleanup toast timer on unmount
-  useEffect(() => {
-    return () => {
-      if (toastTimerRef.current) clearTimeout(toastTimerRef.current);
-    };
-  }, []);
-
-  // Fetch persisted ontology graph from DB
   const fetchOntologyGraph = useCallback(async () => {
     try {
       const res = await getOntologyGraph(0);
-      const graph = res.data;
-      if (graph?.nodes?.length > 0) {
-        setOntology(graph);
-      }
-    } catch {
-      // Ontology graph fetch failed — ignore
-    }
+      if (res.data?.nodes?.length > 0) setOntology(res.data);
+    } catch { /* ignore */ }
   }, []);
+
+  // ── Handlers ──
+
+  const handleIndustryChange = (id) => {
+    setIndustry(id);
+    const cfg = INDUSTRY_INPUT_CFG[id];
+    setBrandName(cfg.default1);
+    setProductName(cfg.default2);
+    setDemoResult(null);
+    setOntology(null);
+    setCompliance(null);
+    setMeeting(null);
+    setDataSource(null);
+    setErrors({});
+  };
 
   const handleAmazonIngest = async () => {
     if (!amazonUrl.trim() || amazonLoading) return;
@@ -255,11 +149,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
       const d = res.data;
       setScanId(d.scan_id ?? null);
       setAmazonToastType('success');
-      if (lang === 'ko') {
-        setAmazonToast(`${d.reviews_ingested}건의 리뷰를 수집하고 ${d.risks_detected}건의 리스크를 탐지했습니다.`);
-      } else {
-        setAmazonToast(`Ingested ${d.reviews_ingested} reviews and detected ${d.risks_detected} risks.`);
-      }
+      setAmazonToast(lang === 'ko'
+        ? `${d.reviews_ingested}건의 리뷰를 수집하고 ${d.risks_detected}건의 리스크를 탐지했습니다.`
+        : `Ingested ${d.reviews_ingested} reviews and detected ${d.risks_detected} risks.`);
       setAmazonUrl('');
       await refreshDashboard();
     } catch (err) {
@@ -279,8 +171,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     try {
       const res = await searchBrandRisks(b, product || productName.trim() || null);
       setDiscoveryResults(res.data);
-    } catch (err) {
-      console.error('Discovery scan failed:', err);
+    } catch {
       setDiscoveryResults({ results: [], total_scanned: 0, risks_found: 0, error: true });
     } finally {
       setDiscoveryLoading(false);
@@ -290,48 +181,38 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
   const handleFullDemo = async () => {
     if (fullDemoLoading) return;
     setFullDemoLoading(true);
-    // Reset analysis states for fresh results
     setDemoResult(null);
     setOntology(null);
     setCompliance(null);
     setMeeting(null);
-    setRiskLevel(null);
     setDataSource(null);
     setErrors({});
     try {
-      // Step 1: Ingest reviews + risk classification + precedent matching
       setFullDemoStep(t('risk.fullDemoStep1'));
       const res = await runFullDemo();
       const d = res.data;
       setScanId(d.scan_id ?? null);
 
-      // Step 2: AI analysis — generate ontology, compliance, meeting via LLM
       setFullDemoStep(t('risk.fullDemoStep2'));
       const demoRes = await runDemoScenario(industry, lang);
       const demoData = injectBrand(demoRes.data, brandName.trim() || 'K-Brand');
       setDemoResult(demoData);
-      setRiskLevel(demoData.risk_level);
       if (demoData.ontology) setOntology(demoData.ontology);
       if (demoData.compliance) setCompliance(demoData.compliance);
       if (demoData.meeting) setMeeting(demoData.meeting);
       setDataSource('mock');
 
-      // Step 3: Refresh dashboard (KPI/timeline/audit)
       setFullDemoStep(t('risk.fullDemoStep3'));
       await refreshDashboard();
 
-      // Step 4: Web Discovery scan
       setFullDemoStep(t('risk.fullDemoStep4'));
       await handleDiscoveryScan(brandName.trim() || 'K-Brand', productName.trim() || null);
 
-      // Step 5: Done
       setFullDemoStep(t('risk.fullDemoStep5'));
       setAmazonToastType('success');
-      if (lang === 'ko') {
-        setAmazonToast(`Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`);
-      } else {
-        setAmazonToast(`Full Demo complete — ${d.reviews_ingested} reviews, ${d.risks_detected} risks detected`);
-      }
+      setAmazonToast(lang === 'ko'
+        ? `Full Demo 완료 — ${d.reviews_ingested}건 수집, ${d.risks_detected}건 리스크 탐지`
+        : `Full Demo complete — ${d.reviews_ingested} reviews, ${d.risks_detected} risks detected`);
       await new Promise((r) => setTimeout(r, 800));
     } catch (err) {
       setAmazonToastType('error');
@@ -344,25 +225,6 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     }
   };
 
-  const toggleExtra = (id) => {
-    setSelectedExtra((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) next.delete(id);
-      else if (next.size < 5) next.add(id);
-      return next;
-    });
-  };
-
-  const analysisData = {
-    top_issues: analysisResult?.top_issues || [],
-    emerging_issues: analysisResult?.emerging_issues || [],
-    recommendations: analysisResult?.recommendations || [],
-    all_categories: analysisResult?.all_categories || {},
-    stats: analysisResult?.stats || {},
-    industry,
-    lang,
-  };
-
   const handleDemo = async () => {
     const brand = [brandName.trim(), productName.trim()].filter(Boolean).join(' ') || 'OO';
     const query = [brandName.trim(), productName.trim()].filter(Boolean).join(' ');
@@ -372,26 +234,22 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     setOntology(null);
     setCompliance(null);
     setMeeting(null);
-    setRiskLevel(null);
     setDataSource(null);
     await new Promise((r) => setTimeout(r, 1500));
     setScanPhase(false);
     setLoading((prev) => ({ ...prev, demo: true }));
     try {
-      // YouTube 실데이터 우선 시도
       let data = null;
       try {
         const ytRes = await analyzeYouTube(query || brand, brandName.trim() || 'Brand', { industry, lang });
         data = ytRes.data;
         setDataSource('youtube');
       } catch {
-        // API 키 없거나 quota 초과 시 mock으로 폴백
         const res = await runDemoScenario(industry, lang);
         data = injectBrand(res.data, brand);
         setDataSource('mock');
       }
       setDemoResult(data);
-      setRiskLevel(data.risk_level);
       if (data.ontology) setOntology(data.ontology);
       if (data.compliance) setCompliance(data.compliance);
       if (data.meeting) setMeeting(data.meeting);
@@ -402,35 +260,14 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     }
   };
 
-  const runAll = async () => {
-    setLoading((prev) => ({ ...prev, all: true }));
-    setErrors({});
-    setDemoResult(null);
-    setOntology(null);
-    setCompliance(null);
-    setMeeting(null);
-    setRiskLevel(null);
-    try {
-      const [ontRes, compRes, meetRes] = await Promise.allSettled([
-        generateOntology(analysisData),
-        generateComplianceReport(analysisData),
-        generateMeetingAgenda(analysisData),
-      ]);
-      if (ontRes.status === 'fulfilled') setOntology(ontRes.value.data);
-      else setErrors((prev) => ({ ...prev, ontology: getErrorMessage(ontRes.reason, t) }));
-      if (compRes.status === 'fulfilled') {
-        setCompliance(compRes.value.data);
-        const lvl = compRes.value.data?.overall_risk_level;
-        if (lvl === '위험') setRiskLevel('RED');
-        else if (lvl === '경고') setRiskLevel('ORANGE');
-        else if (lvl === '주의') setRiskLevel('YELLOW');
-        else setRiskLevel('GREEN');
-      } else setErrors((prev) => ({ ...prev, compliance: getErrorMessage(compRes.reason, t) }));
-      if (meetRes.status === 'fulfilled') setMeeting(meetRes.value.data);
-      else setErrors((prev) => ({ ...prev, meeting: getErrorMessage(meetRes.reason, t) }));
-    } finally {
-      setLoading((prev) => ({ ...prev, all: false }));
-    }
+  const analysisData = {
+    top_issues: analysisResult?.top_issues || [],
+    emerging_issues: analysisResult?.emerging_issues || [],
+    recommendations: analysisResult?.recommendations || [],
+    all_categories: analysisResult?.all_categories || {},
+    stats: analysisResult?.stats || {},
+    industry,
+    lang,
   };
 
   const runSingle = async (type) => {
@@ -447,209 +284,41 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
     }
   };
 
-  const SHARE_TARGETS = [
-    { id: 'legal',     labelKey: 'risk.shareLegal',     toastKey: 'risk.shareToastLegal' },
-    { id: 'marketing', labelKey: 'risk.shareMarketing', toastKey: 'risk.shareToastMarketing' },
-    { id: 'clevel',    labelKey: 'risk.shareClevel',    toastKey: 'risk.shareToastClevel' },
-    { id: 'all',       labelKey: 'risk.shareAll',       toastKey: 'risk.shareToastAll' },
-  ];
-
-  const handleShare = (target) => {
-    setShareDropdown(false);
-    setShareToast(t(target.toastKey));
-    setTimeout(() => setShareToast(''), 2500);
-  };
-
-  // PDF download handled by RiskReport component
+  // ── Computed ──
 
   const isAnyLoading = Object.values(loading).some(Boolean) || fullDemoLoading || discoveryLoading;
-  const channels = CHANNELS_BY_INDUSTRY[industry] || CHANNELS_BY_INDUSTRY.ecommerce;
-  const hasResults = ontology || compliance || meeting;
   const hasScanned = scanId || timeline.length > 0;
-  const hasElevatedKpi = kpi.total_legal_exposure_usd > 0 || kpi.critical_risks_detected > 0 || kpi.overall_risk_score >= 10;
+  const hasData = !!(demoResult || ontology || compliance || meeting || timeline.length > 0 || hasScanned);
+
+  // ── Render ──
 
   return (
     <div className="space-y-6">
 
-      {/* ── Live KPI Dashboard (real data from SQLite) ── */}
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-5">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center gap-2">
-            <span className="relative flex h-2 w-2 flex-shrink-0">
-              <span className={`animate-ping absolute inline-flex h-full w-full rounded-full ${hasElevatedKpi ? 'bg-amber-400' : 'bg-sky-400'} opacity-50`} />
-              <span className={`relative inline-flex rounded-full h-2 w-2 ${hasElevatedKpi ? 'bg-amber-400' : 'bg-sky-400'}`} />
-            </span>
-            <span className={`text-xs font-bold uppercase tracking-widest ${hasElevatedKpi ? 'text-amber-400' : 'text-sky-400'}`}>{t('risk.live')}</span>
-            <span className="text-xs text-zinc-600">{t('risk.last24h')}</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <RiskReport kpi={kpi} timeline={timeline} auditEvents={auditEvents} amazonUrl={amazonUrl} scanId={scanId} />
-            <span className="text-xs text-zinc-600">{t('risk.lastScan')}</span>
-          </div>
-        </div>
+      {/* ═══ 1. Hero Command ═══ */}
+      <HeroCommand
+        expanded={!hasData}
+        industry={industry}
+        onIndustryChange={handleIndustryChange}
+        brandName={brandName}
+        onBrandChange={setBrandName}
+        brandLabel={t(INDUSTRY_INPUT_CFG[industry]?.labelKey1 ?? 'risk.label1_ecommerce')}
+        productName={productName}
+        onProductChange={setProductName}
+        productLabel={t(INDUSTRY_INPUT_CFG[industry]?.labelKey2 ?? 'risk.label2_ecommerce')}
+        amazonUrl={amazonUrl}
+        onAmazonUrlChange={setAmazonUrl}
+        onRunFullDemo={handleFullDemo}
+        onAmazonIngest={handleAmazonIngest}
+        onBrandSearch={handleDemo}
+        fullDemoLoading={fullDemoLoading}
+        amazonLoading={amazonLoading}
+        brandSearchLoading={scanPhase || loading.demo}
+        amazonToast={amazonToast}
+        amazonToastType={amazonToastType}
+      />
 
-        {/* 4-Column Enterprise KPI Layout */}
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          {/* Card A: Legal Exposure (Primary - Alarming) */}
-          <div className={`rounded-xl px-4 py-4 border ${
-            kpi.total_legal_exposure_usd > 0
-              ? 'bg-amber-950/50 border-amber-800/80'
-              : 'bg-zinc-800/60 border-zinc-700/60'
-          }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.total_legal_exposure_usd > 0 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
-              }`}>
-                <Scale className={kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
-              </div>
-              <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiLegalExposure')}</p>
-            </div>
-            <p className={`text-2xl font-bold leading-none ${
-              kpi.total_legal_exposure_usd > 0 ? 'text-amber-400' : 'text-zinc-400'
-            }`}>
-              {formatLegalExposure(kpi.total_legal_exposure_usd)}
-            </p>
-            {kpi.total_legal_exposure_usd > 0 && (
-              <p className="text-[10px] text-amber-500/80 mt-1.5 leading-tight">{t('risk.legalExposureTooltip')}</p>
-            )}
-          </div>
-
-          {/* Card B: Overall Risk Score */}
-          <div className={`rounded-xl px-4 py-4 border ${
-            kpi.overall_risk_score >= 10
-              ? 'bg-amber-950/40 border-amber-800/60'
-              : 'bg-zinc-800/60 border-zinc-700/60'
-          }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.overall_risk_score >= 10 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
-              }`}>
-                <TrendingUp className={kpi.overall_risk_score >= 10 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
-              </div>
-              <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiRiskScore')}</p>
-            </div>
-            <p className={`text-2xl font-bold leading-none ${
-              kpi.overall_risk_score >= 10 ? 'text-amber-400' : 'text-white'
-            }`}>
-              {kpi.overall_risk_score.toLocaleString()}
-            </p>
-          </div>
-
-          {/* Card C: Critical Risks */}
-          <div className={`rounded-xl px-4 py-4 border ${
-            kpi.critical_risks_detected > 0
-              ? 'bg-amber-950/40 border-amber-900/60'
-              : 'bg-zinc-800/60 border-zinc-700/60'
-          }`}>
-            <div className="flex items-center gap-2 mb-2">
-              <div className={`w-7 h-7 rounded-lg flex items-center justify-center ${
-                kpi.critical_risks_detected > 0 ? 'bg-amber-900/60' : 'bg-zinc-700/60'
-              }`}>
-                <AlertTriangle className={kpi.critical_risks_detected > 0 ? 'text-amber-400' : 'text-zinc-400'} size={14} />
-              </div>
-              <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiRisks')}</p>
-            </div>
-            <p className={`text-2xl font-bold leading-none ${
-              kpi.critical_risks_detected > 0 ? 'text-amber-400' : 'text-zinc-400'
-            }`}>
-              {kpi.critical_risks_detected}
-            </p>
-            {kpi.critical_risks_detected === 0 && (
-              <p className="text-[10px] text-zinc-500/80 mt-1.5">{t('risk.safeState')}</p>
-            )}
-          </div>
-
-          {/* Card D: Analyzed Today */}
-          <div className="bg-zinc-800/60 rounded-xl px-4 py-4 border border-zinc-700/60">
-            <div className="flex items-center gap-2 mb-2">
-              <div className="w-7 h-7 rounded-lg bg-zinc-700/60 flex items-center justify-center">
-                <Clock className="text-zinc-400" size={14} />
-              </div>
-              <p className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">{t('risk.kpiToday')}</p>
-            </div>
-            <p className="text-2xl font-bold text-white leading-none">
-              {kpi.today_new_ingestions.toLocaleString()}
-            </p>
-            <p className="text-[10px] text-zinc-600 mt-1.5">
-              {t('risk.kpiScanned')}: {kpi.total_scanned_reviews.toLocaleString()}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* ── Unified Scan Action Card ── */}
-      <div className="bg-gradient-to-r from-sky-950/60 to-zinc-900/60 rounded-2xl border border-sky-800/60 px-6 py-5">
-        {/* Primary: Full Demo */}
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className="w-9 h-9 bg-sky-900/60 border border-sky-700 rounded-xl flex items-center justify-center flex-shrink-0">
-              <Rocket className="text-sky-400" size={18} />
-            </div>
-            <div>
-              <p className="text-sm font-bold text-white">{t('risk.fullDemoBtn')}</p>
-              <p className="text-xs text-zinc-500">
-                {lang === 'ko'
-                  ? '50건 리뷰 수집 → 리스크 분류 → 판례 매칭 → KPI 갱신 → 웹 탐색'
-                  : '50 reviews → risk classification → precedent matching → KPI → web discovery'}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-3">
-            <button
-              onClick={handleFullDemo}
-              disabled={fullDemoLoading || amazonLoading}
-              className="px-5 py-2.5 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 shadow-sm shadow-sky-900/40 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
-            >
-              {fullDemoLoading
-                ? <><Loader2 className="animate-spin" size={15} />{t('risk.fullDemoRunning')}</>
-                : <><Rocket size={15} />{t('risk.fullDemoBtn')}</>}
-            </button>
-          </div>
-        </div>
-
-        {/* Divider */}
-        <div className="flex items-center gap-3 my-4">
-          <div className="flex-1 border-t border-zinc-700/50" />
-          <span className="text-[11px] text-zinc-600 font-medium">
-            {lang === 'ko' ? '또는 특정 상품 URL 스캔' : 'or scan a specific product URL'}
-          </span>
-          <div className="flex-1 border-t border-zinc-700/50" />
-        </div>
-
-        {/* Secondary: Amazon URL Scan */}
-        <div className="flex gap-2">
-          <input
-            type="text"
-            value={amazonUrl}
-            onChange={(e) => setAmazonUrl(e.target.value)}
-            onKeyDown={(e) => e.key === 'Enter' && handleAmazonIngest()}
-            placeholder={t('risk.amazonPlaceholder')}
-            className="flex-1 bg-zinc-800/80 border border-zinc-700 hover:border-sky-500/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-sky-600 transition-all duration-200"
-          />
-          <button
-            onClick={handleAmazonIngest}
-            disabled={amazonLoading || !amazonUrl.trim() || fullDemoLoading}
-            className="px-5 py-2.5 bg-zinc-700 text-zinc-200 rounded-xl font-semibold hover:bg-zinc-600 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-all duration-200 text-sm flex-shrink-0"
-          >
-            {amazonLoading
-              ? <><Loader2 className="animate-spin" size={15} />{t('risk.amazonIngesting')}</>
-              : <><ScanSearch size={15} />{t('risk.amazonBtn')}</>}
-          </button>
-        </div>
-
-        {/* Toast */}
-        {amazonToast && (
-          <p className={`mt-3 text-xs font-medium ${amazonToastType === 'error' ? 'text-amber-400' : 'text-sky-400'}`}>
-            {amazonToast}
-          </p>
-        )}
-      </div>
-
-      {/* ══════════════════════════════════════════════════════════
-           Results — unified view for both Full Demo and Risk Analysis
-         ══════════════════════════════════════════════════════════ */}
-
-      {/* Loading spinner */}
+      {/* ═══ 2. Loading States ═══ */}
       {(loading.demo || loading.all) && (
         <RiskLoadingSpinner mode={loading.demo ? 'demo' : 'all'} />
       )}
@@ -657,9 +326,9 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
         <RiskLoadingSpinner mode="fullDemo" />
       )}
 
-      {/* 스캔 애니메이션 (handleDemo flow) */}
+      {/* Scan phase animation */}
       {scanPhase && (
-        <div className="bg-zinc-900 rounded-2xl border border-sky-900 p-6 flex items-center gap-4">
+        <div className="bg-zinc-900 rounded-2xl border border-sky-900/50 p-6 flex items-center gap-4">
           <div className="w-10 h-10 bg-sky-950 border border-sky-800 rounded-xl flex items-center justify-center flex-shrink-0">
             <ScanSearch className="text-sky-400 animate-pulse" size={20} />
           </div>
@@ -674,11 +343,7 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
           </div>
           <div className="ml-auto flex gap-1">
             {[0, 1, 2, 3].map((i) => (
-              <div
-                key={i}
-                className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce"
-                style={{ animationDelay: `${i * 0.15}s` }}
-              />
+              <div key={i} className="w-1.5 h-1.5 bg-sky-400 rounded-full animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
             ))}
           </div>
         </div>
@@ -686,410 +351,168 @@ export default function RiskIntelligence({ analysisResult, onNavigatePlaybook })
 
       {/* Error */}
       {errors.demo && (
-        <div className="bg-amber-950 border border-amber-800 text-amber-400 rounded-xl px-4 py-3 text-sm">{errors.demo}</div>
-      )}
-
-      {/* Risk Level Banner */}
-      <RiskLevelBanner level={riskLevel} />
-
-      {/* 데이터 소스 뱃지 */}
-      {demoResult && dataSource && (
-        <div className="flex items-center gap-2">
-          {dataSource === 'youtube' ? (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-300">
-              <span className="w-1.5 h-1.5 rounded-full bg-sky-400 animate-pulse" />
-              {t('risk.youtube_live_data')}
-            </span>
-          ) : (
-            <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-400">
-              <span className="w-1.5 h-1.5 rounded-full bg-zinc-400" />
-              {t('risk.demo_scenario')}
-            </span>
-          )}
+        <div className="bg-amber-950/50 border border-amber-800/60 text-amber-400 rounded-xl px-4 py-3 text-sm">
+          {errors.demo}
         </div>
       )}
 
-      {/* Mock Scenario Cards */}
-      {demoResult && <MockScenario data={demoResult} />}
-
-      {/* ── Risk Timeline ── */}
-      {timeline.length > 0 && (
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
-          <div className="flex items-center gap-2 mb-4">
-            <Clock className="text-amber-400" size={16} />
-            <span className="text-sm font-bold text-white">{t('risk.timelineTitle')}</span>
-            <span className="text-xs text-zinc-600 ml-auto">
-              {lang === 'ko' ? `${timeline.length}건 탐지` : `${timeline.length} detections`}
-            </span>
-          </div>
-          <div className="space-y-2 max-h-72 overflow-y-auto">
-            {timeline.map((item) => {
-              const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
-              const colors = {
-                critical: 'bg-amber-950/60 border-amber-800 text-amber-400',
-                high: 'bg-amber-950/60 border-amber-800 text-amber-400',
-                medium: 'bg-zinc-800/60 border-zinc-700 text-zinc-400',
-              };
-              const badgeColors = {
-                critical: 'bg-amber-600 text-white',
-                high: 'bg-amber-600 text-white',
-                medium: 'bg-zinc-600 text-white',
-              };
-              const getCaseLabel = (caseId) => {
-                if (!caseId) return null;
-                if (caseId.startsWith('PL-')) return t('risk.caseLabelProductLiability');
-                if (caseId.startsWith('CA-')) return t('risk.caseLabelClassAction');
-                if (caseId.startsWith('FA-')) return t('risk.caseLabelConsumerFraud');
-                return t('risk.caseLabelLegalRisk');
-              };
-              const caseLabel = getCaseLabel(item.case_id);
-
-              return (
-                <div key={item.id} className={`flex flex-col gap-2 px-4 py-3 rounded-xl border ${colors[sev]}`}>
-                  <div className="flex items-center gap-3">
-                    <AlertTriangle size={16} className="flex-shrink-0" />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white truncate">{item.name}</p>
-                    </div>
-                    <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full flex-shrink-0 ${badgeColors[sev]}`}>
-                      {t(`risk.severity${sev.charAt(0).toUpperCase() + sev.slice(1)}`)}
-                    </span>
-                    <span className="text-[11px] text-zinc-600 flex-shrink-0 w-16 text-right">
-                      {item.source}
-                    </span>
-                  </div>
-                  {item.case_id && (
-                    <div className="flex items-center gap-2 ml-7">
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-sky-950/70 border border-sky-800/60 text-[10px] font-medium text-sky-300">
-                        <Scale size={10} />
-                        {caseLabel}
-                      </span>
-                      <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-mono text-zinc-400">
-                        {t('risk.matchedPrecedent')}: {item.case_id}
-                      </span>
-                    </div>
-                  )}
-                </div>
-              );
-            })}
-          </div>
-        </div>
-      )}
-
-      {/* ── Web Discovery Results ── */}
-      {(discoveryResults || discoveryLoading) && (
-        <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <Globe className="text-cyan-400" size={16} />
-              <span className="text-sm font-bold text-white">{t('discovery.title')}</span>
-              {discoveryResults && (
-                <span className="text-xs text-zinc-500 ml-2">
-                  {t('discovery.result')
-                    .replace('{count}', discoveryResults.total_scanned)
-                    .replace('{risks}', discoveryResults.risks_found)}
-                </span>
-              )}
-            </div>
-            <button
-              onClick={() => handleDiscoveryScan()}
-              disabled={discoveryLoading || !brandName.trim()}
-              className="px-3 py-1.5 bg-cyan-900/40 text-cyan-300 rounded-lg text-xs font-medium border border-cyan-800/60 hover:bg-cyan-900/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
-            >
-              {discoveryLoading
-                ? <><Loader2 className="animate-spin" size={12} />{t('discovery.scanning')}</>
-                : <><Globe size={12} />{t('discovery.scan')}</>}
-            </button>
-          </div>
-
-          {discoveryLoading && (
-            <div className="flex items-center justify-center py-8 gap-2 text-zinc-500 text-sm">
-              <Loader2 className="animate-spin text-cyan-400" size={18} />
-              {t('discovery.scanning')}
-            </div>
-          )}
-
-          {discoveryResults && discoveryResults.results.length > 0 && (
-            <div className="space-y-2 max-h-80 overflow-y-auto">
-              {discoveryResults.results.map((item) => (
-                <div key={item.url} className="bg-amber-950/30 border border-amber-900/50 rounded-xl px-4 py-3">
-                  <div className="flex items-start gap-3">
-                    <AlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={14} />
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
-                      <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
-                      <div className="flex items-center gap-2 mt-2">
-                        <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-400">
-                          <Globe size={9} />
-                          {item.source_domain}
-                        </span>
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
-                        >
-                          <ExternalLink size={9} />
-                          {t('discovery.source')}
-                        </a>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {discoveryResults && discoveryResults.results.length === 0 && (
-            <p className="text-sm text-zinc-500 text-center py-6">
-              {discoveryResults.error ? t('risk.errGeneric') : t('discovery.empty')}
-            </p>
-          )}
-        </div>
-      )}
-
-      {/* ── Ontology Graph ── */}
-      {(ontology || loading.ontology) && !loading.demo && !loading.all && (
-        <OntologyGraph
-          id="ontology-graph"
-          data={ontology}
-          loading={loading.ontology}
-          error={errors.ontology}
-          onGenerate={() => runSingle('ontology')}
-          onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
+      {/* ═══ 3. Exposure Hero (replaces KPI Strip) ═══ */}
+      {hasData && (
+        <ExposureHero
+          kpi={kpi}
+          timeline={timeline}
+          auditEvents={auditEvents}
+          amazonUrl={amazonUrl}
+          scanId={scanId}
+          discoveryResults={discoveryResults}
         />
       )}
 
-      {/* ── Compliance + Meeting ── */}
-      {(compliance || meeting || loading.compliance || loading.meeting) && !loading.demo && !loading.all && (
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <ComplianceReport
-            data={compliance}
-            loading={loading.compliance}
-            error={errors.compliance}
-            onGenerate={() => runSingle('compliance')}
-          />
-          <MeetingAgenda
-            data={meeting}
-            loading={loading.meeting}
-            error={errors.meeting}
-            onGenerate={() => runSingle('meeting')}
-          />
-        </div>
+      {/* ═══ 3b. Data Sources ═══ */}
+      {hasData && hasScanned && (
+        <DataSources kpi={kpi} discoveryResults={discoveryResults} hasScanned={hasScanned} />
       )}
 
-      {/* ── Audit Trail (Duty of Care) — only after scan ── */}
-      {hasScanned && <AuditTimeline />}
+      {/* ═══ 4. Investigation Workspace (2-column) ═══ */}
+      {hasData && (demoResult || timeline.length > 0 || discoveryResults || ontology) && (
+        <InvestigationWorkspace
+          leftCount={timeline.length + (discoveryResults?.results?.length || 0)}
+          rightCount={ontology?.nodes?.length}
+          graphSubtitle={t('hero.graphSubtitle')}
+          left={
+            <>
+              {/* AI Reasoning Chain — TOP of evidence feed */}
+              <ReasoningChain timeline={timeline} kpi={kpi} visible={timeline.length > 0} />
 
-      {/* ══════════════════════════════════════════════════════════
-           Advanced Analysis — brand/industry-specific risk scanning
-         ══════════════════════════════════════════════════════════ */}
+              {/* Risk Timeline */}
+              {timeline.length > 0 && (
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Clock className="text-amber-400" size={15} />
+                      <span className="text-sm font-semibold text-white">{t('risk.timelineTitle')}</span>
+                    </div>
+                    <span className="text-xs text-zinc-600 tabular-nums">
+                      {lang === 'ko' ? `${timeline.length}건 탐지` : `${timeline.length} detections`}
+                    </span>
+                  </div>
+                  <div className="space-y-2 max-h-[420px] overflow-y-auto">
+                    {timeline.map((item) => {
+                      const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
+                      const dotColor = sev === 'critical' ? 'bg-amber-400' : sev === 'high' ? 'bg-amber-500' : 'bg-zinc-500';
+                      const badgeStyle = sev === 'medium'
+                        ? 'bg-zinc-700 text-zinc-400'
+                        : 'bg-amber-400/10 text-amber-400';
 
-      {/* Header Card */}
-      <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-6">
-        <div className="flex items-start justify-between mb-5">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-zinc-800 border border-zinc-700 rounded-xl flex items-center justify-center">
-              <Shield className="text-zinc-400" size={20} />
-            </div>
-            <div>
-              <h2 className="text-lg font-bold text-white">Risk Intelligence</h2>
-              <p className="text-sm text-zinc-500">{t('risk.subtitle')}</p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 flex-shrink-0">
-            {/* 담당자 공유 드롭다운 */}
-            <div className="relative">
-              {shareDropdown && (
-                <div
-                  className="fixed inset-0 z-10"
-                  onClick={() => setShareDropdown(false)}
-                />
+                      return (
+                        <div key={item.id} className="group flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                          <span className={`mt-1.5 h-2 w-2 rounded-full flex-shrink-0 ${dotColor}`} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm text-white font-medium truncate">{item.name}</p>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[11px] text-zinc-500">{item.source}</span>
+                              {item.case_id && (
+                                <span className="text-[11px] text-zinc-600 font-mono">{item.case_id}</span>
+                              )}
+                            </div>
+                          </div>
+                          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeStyle}`}>
+                            {item.severity}
+                          </span>
+                        </div>
+                      );
+                    })}
+                  </div>
+                </div>
               )}
-              <button
-                onClick={() => setShareDropdown((v) => !v)}
-                className="px-3 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-medium hover:bg-zinc-700 transition-colors text-sm flex items-center gap-1.5 border border-zinc-700"
-              >
-                <Share2 size={14} />{t('risk.shareBtn')}
-                <span className="text-zinc-500 text-[10px]">▾</span>
-              </button>
-              {shareDropdown && (
-                <div className="absolute right-0 top-full mt-1 w-52 bg-zinc-800 border border-zinc-700 rounded-xl shadow-xl z-20 overflow-hidden">
-                  {SHARE_TARGETS.map((target) => (
+
+              {/* Web Discovery */}
+              {(discoveryResults || discoveryLoading) && (
+                <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
+                  <div className="flex items-center justify-between mb-4">
+                    <div className="flex items-center gap-2">
+                      <Globe className="text-cyan-400" size={15} />
+                      <span className="text-sm font-semibold text-white">{t('discovery.title')}</span>
+                      {discoveryResults && (
+                        <span className="text-xs text-zinc-500 ml-1">
+                          {t('discovery.result')
+                            .replace('{count}', discoveryResults.total_scanned)
+                            .replace('{risks}', discoveryResults.risks_found)}
+                        </span>
+                      )}
+                    </div>
                     <button
-                      key={target.id}
-                      onClick={() => handleShare(target)}
-                      className="w-full text-left px-4 py-2.5 text-sm text-zinc-300 hover:bg-zinc-700 hover:text-white transition-colors"
+                      onClick={() => handleDiscoveryScan()}
+                      disabled={discoveryLoading || !brandName.trim()}
+                      className="px-3 py-1.5 bg-cyan-900/40 text-cyan-300 rounded-lg text-xs font-medium border border-cyan-800/60 hover:bg-cyan-900/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
                     >
-                      {t(target.labelKey)}
+                      {discoveryLoading
+                        ? <><Loader2 className="animate-spin" size={12} />{t('discovery.scanning')}</>
+                        : <><Globe size={12} />{t('discovery.scan')}</>}
                     </button>
-                  ))}
+                  </div>
+
+                  {discoveryLoading && (
+                    <div className="flex items-center justify-center py-8 gap-2 text-zinc-500 text-sm">
+                      <Loader2 className="animate-spin text-cyan-400" size={18} />
+                      {t('discovery.scanning')}
+                    </div>
+                  )}
+
+                  {discoveryResults && discoveryResults.results.length > 0 && (
+                    <div className="space-y-2 max-h-80 overflow-y-auto">
+                      {discoveryResults.results.map((item) => (
+                        <div key={item.url} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
+                          <AlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={14} />
+                          <div className="flex-1 min-w-0">
+                            <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
+                            <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
+                            <div className="flex items-center gap-2 mt-2">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-400">
+                                <Globe size={9} />
+                                {item.source_domain}
+                              </span>
+                              <a
+                                href={item.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                              >
+                                <ExternalLink size={9} />
+                                {t('discovery.source')}
+                              </a>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {discoveryResults && discoveryResults.results.length === 0 && (
+                    <p className="text-sm text-zinc-500 text-center py-6">
+                      {discoveryResults.error ? t('risk.errGeneric') : t('discovery.empty')}
+                    </p>
+                  )}
                 </div>
               )}
-              {shareToast && (
-                <div className="absolute -bottom-10 right-0 bg-zinc-700 text-white text-xs px-3 py-1.5 rounded-lg whitespace-nowrap z-30 shadow border border-zinc-600">
-                  {shareToast}
-                </div>
-              )}
-            </div>
-            {analysisResult && (
-              <button
-                onClick={runAll}
-                disabled={isAnyLoading}
-                className="px-3 py-2 bg-sky-600 text-white rounded-xl font-medium hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm"
-              >
-                {loading.all ? <><Loader2 className="animate-spin" size={15} />{t('risk.analyzing')}</> : t('risk.runAllBtn')}
-              </button>
-            )}
-          </div>
-        </div>
-
-        {/* 브랜드 + 상품명 입력 */}
-        <div className="mb-5">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
-            <Search size={12} />{t('risk.registerTarget')}
-          </div>
-          <div className="flex gap-2">
-            <div className="flex flex-col gap-1 w-44 flex-shrink-0">
-              <label className="text-[11px] text-zinc-500 font-medium">
-                {t(INDUSTRY_INPUT_CFG[industry]?.labelKey1 ?? 'risk.label1_ecommerce')}
-              </label>
-              <input
-                ref={inputRef}
-                type="text"
-                value={brandName}
-                onChange={(e) => setBrandName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !isAnyLoading && handleDemo()}
-                className="bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-colors"
+            </>
+          }
+          right={
+            (ontology || loading.ontology) && !loading.demo && !loading.all ? (
+              <OntologyGraph
+                id="ontology-graph"
+                data={ontology}
+                loading={loading.ontology}
+                error={errors.ontology}
+                onGenerate={() => runSingle('ontology')}
+                onNavigatePlaybook={onNavigatePlaybook ? (nodeName) => onNavigatePlaybook(nodeName, industry) : undefined}
               />
-            </div>
-            <div className="flex flex-col gap-1 flex-1">
-              <label className="text-[11px] text-zinc-500 font-medium">
-                {t(INDUSTRY_INPUT_CFG[industry]?.labelKey2 ?? 'risk.label2_ecommerce')}
-              </label>
-              <input
-                type="text"
-                value={productName}
-                onChange={(e) => setProductName(e.target.value)}
-                onKeyDown={(e) => e.key === 'Enter' && !isAnyLoading && handleDemo()}
-                className="w-full bg-zinc-800 border border-zinc-700 rounded-xl px-3 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:ring-1 focus:ring-sky-500 focus:border-sky-500 transition-colors"
-              />
-            </div>
-            <div className="flex flex-col gap-1 flex-shrink-0">
-              <span className="text-[11px] text-transparent font-medium select-none">btn</span>
-              <button
-                onClick={handleDemo}
-                disabled={isAnyLoading || (!brandName.trim() && !productName.trim())}
-                className="px-5 py-2.5 bg-sky-600 text-white rounded-xl font-semibold hover:bg-sky-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 transition-colors text-sm h-[42px]"
-              >
-                {(scanPhase || loading.demo)
-                  ? <><Loader2 className="animate-spin" size={15} />{t('risk.scanning')}</>
-                  : <><Zap size={15} />{t('risk.analyzeBtn')}</>}
-              </button>
-            </div>
-          </div>
-          <p className="mt-2 text-xs text-zinc-600">{t('risk.registerHint')}</p>
-        </div>
-
-        {/* Industry + Channels */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-          <div>
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wide mb-2">
-              <Building2 size={12} />{t('risk.industryContext')}
-            </div>
-            <div className="flex gap-2 flex-wrap">
-              {INDUSTRIES.map(({ id, labelKey }) => (
-                <button key={id} onClick={() => {
-                  setIndustry(id);
-                  const cfg = INDUSTRY_INPUT_CFG[id];
-                  setBrandName(cfg.default1);
-                  setProductName(cfg.default2);
-                  setSelectedExtra(new Set());
-                  setDemoResult(null);
-                  setOntology(null);
-                  setCompliance(null);
-                  setMeeting(null);
-                  setRiskLevel(null);
-                  setDataSource(null);
-                  setErrors({});
-                }}
-                  className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
-                    industry === id
-                      ? 'bg-sky-950 text-sky-300 border-sky-700'
-                      : 'bg-zinc-800 text-zinc-400 border-zinc-700 hover:bg-zinc-700 hover:text-zinc-300'
-                  }`}>
-                  {t(labelKey)}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div>
-            <div className="flex items-center justify-between mb-2">
-              <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-wide">
-                <Radio size={12} />{t('risk.monitoringChannels')}
-              </div>
-              <span className="text-[11px] text-zinc-600">
-                {4 + selectedExtra.size} / 9
-              </span>
-            </div>
-            {/* 기본 4채널 */}
-            <div className="flex gap-2 flex-wrap mb-2">
-              {channels.map((ch) => (
-                <div key={ch.nameKey} className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs border ${
-                  ch.status === 'active'
-                    ? 'bg-zinc-800/80 text-zinc-300 border-zinc-700'
-                    : 'bg-zinc-800 text-zinc-500 border-zinc-700'
-                }`}>
-                  <span className={`w-1.5 h-1.5 rounded-full ${ch.status === 'active' ? 'bg-sky-400' : 'bg-zinc-600'}`} />
-                  {t(ch.nameKey)}
-                  {ch.count != null && <span className="font-semibold">{ch.count.toLocaleString()}</span>}
-                </div>
-              ))}
-            </div>
-            {/* 추가 선택채널 (최대 5) */}
-            <div className="flex items-center gap-1.5 flex-wrap">
-              <span className="text-[11px] text-zinc-600 mr-0.5">{t('risk.extraChannels')}:</span>
-              {(EXTRA_CHANNELS_BY_INDUSTRY[industry] || EXTRA_CHANNELS_BY_INDUSTRY.ecommerce).map(({ id, nameKey }) => {
-                const on = selectedExtra.has(id);
-                return (
-                  <button
-                    key={id}
-                    onClick={() => toggleExtra(id)}
-                    className={`flex items-center gap-1 px-2.5 py-1 rounded-lg text-xs border transition-colors ${
-                      on
-                        ? 'bg-sky-950/60 text-sky-300 border-sky-700'
-                        : 'bg-zinc-800/60 text-zinc-600 border-zinc-700/60 hover:text-zinc-400 hover:border-zinc-600'
-                    }`}
-                  >
-                    {on ? '✓' : '+'} {t(nameKey)}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Empty State — only when no scan and no analysis results */}
-      {!isAnyLoading && !hasResults && !demoResult && !hasScanned && !fullDemoLoading && (
-        <div className="bg-zinc-900 rounded-2xl border border-dashed border-zinc-700 p-12 text-center">
-          <Shield className="text-zinc-700 mx-auto mb-3" size={44} />
-          <p className="text-zinc-500 text-sm leading-relaxed">
-            <button
-              type="button"
-              className="font-semibold text-sky-400 hover:text-sky-300 underline-offset-2 hover:underline"
-              onClick={handleFullDemo}
-            >
-              {lang === 'ko' ? 'Run Full Demo를 실행' : 'Run Full Demo'}
-            </button>
-            {lang === 'ko'
-              ? '하여 리스크 인텔리전스 파이프라인을 체험하세요.'
-              : ' to experience the full risk intelligence pipeline.'}
-          </p>
-        </div>
+            ) : null
+          }
+        />
       )}
 
-      {/* AI Model Quality — 로컬 개발 환경에서만 표시 */}
+      {/* Dev-only model quality panel */}
       {import.meta.env.DEV && DevModelQuality && (
         <Suspense fallback={null}>
           <DevModelQuality />

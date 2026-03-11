@@ -6,122 +6,126 @@ import RiskPlaybook from './components/RiskPlaybook';
 import AgentSetup from './components/AgentSetup';
 import OntologyStudio from './components/OntologyStudio';
 import ComplianceTracker from './components/ComplianceTracker';
+import ComplianceReport from './components/ComplianceReport';
+import MeetingAgenda from './components/MeetingAgenda';
+import AuditTimeline from './components/AuditTimeline';
+import AppSidebar from './components/AppSidebar';
+import TopBar from './components/TopBar';
 import './index.css';
 
-const TABS = [
-  { id: 'risk',     labelKey: 'tabs.risk',     soon: false },
-  { id: 'playbook', labelKey: 'tabs.playbook', soon: false },
-  { id: 'agent',    labelKey: 'tabs.agent',    soon: false },
-  { id: 'studio',   labelKey: 'tabs.studio',   soon: false },
-  { id: 'complianceTracker', labelKey: 'tabs.complianceTracker', soon: false },
-];
+const PAGE_TITLES = {
+  intelligence: { ko: '인텔리전스', en: 'Intelligence' },
+  response:     { ko: '대응 전략',   en: 'Response' },
+  compliance:   { ko: '컴플라이언스', en: 'Compliance' },
+  studio:       { ko: '스튜디오',     en: 'Studio' },
+};
 
 function App() {
   const { lang, setLang, t } = useLang();
-  const [activeTab, setActiveTab] = useState('risk');
+  const [activeTab, setActiveTab] = useState('intelligence');
   const [playbookNode, setPlaybookNode] = useState(null);
   const [playbookIndustry, setPlaybookIndustry] = useState('ecommerce');
-  const currentTab = TABS.find((tab) => tab.id === activeTab) || TABS[0];
+
+  // Shared state lifted from Intelligence → Compliance
+  const [complianceData, setComplianceData] = useState(null);
+  const [meetingData, setMeetingData] = useState(null);
 
   const handleNavigatePlaybook = useCallback((nodeName, industry) => {
     setPlaybookNode(nodeName || null);
     setPlaybookIndustry(industry || 'ecommerce');
-    setActiveTab('playbook');
+    setActiveTab('response');
   }, []);
 
+  const pageTitle = PAGE_TITLES[activeTab]?.[lang] || PAGE_TITLES.intelligence[lang];
+
   return (
-    <div className="min-h-screen bg-zinc-950">
-      <header className="bg-zinc-900 border-b border-zinc-800 sticky top-0 z-10">
+    <div className="min-h-screen bg-zinc-950 flex">
+      {/* Sidebar */}
+      <AppSidebar
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        lang={lang}
+        onLangToggle={() => setLang(lang === 'ko' ? 'en' : 'ko')}
+      />
 
-        {/* Row 1: Breadcrumb + LIVE + Lang toggle */}
-        <div className="max-w-7xl mx-auto px-6 py-2.5 flex items-center justify-between border-b border-zinc-800/50">
-          <nav className="flex items-center gap-2 text-xs" aria-label="breadcrumb">
-            <span className="font-bold text-white tracking-tight">OntoReview</span>
-            <span className="text-zinc-700">/</span>
-            <span className="text-zinc-500">{t('tabs.riskMgmt')}</span>
-            <span className="text-zinc-700">/</span>
-            <span className="text-zinc-300 font-medium">{t(currentTab.labelKey)}</span>
-          </nav>
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-1.5">
-              <span className="relative flex h-1.5 w-1.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
-                <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
-              </span>
-              <span className="text-xs text-emerald-400 font-bold tracking-widest">LIVE</span>
-            </div>
-            <button
-              onClick={() => setLang(lang === 'ko' ? 'en' : 'ko')}
-              className="px-2.5 py-1 text-xs font-bold text-zinc-400 border border-zinc-700 rounded-md hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
-            >
-              {lang === 'ko' ? 'EN' : '한'}
-            </button>
+      {/* Content area */}
+      <div className="flex-1 ml-14 flex flex-col min-h-screen">
+        <TopBar title={pageTitle} />
+
+        <main className="flex-1 px-6 py-5">
+          {/* RiskIntelligence: display:none to preserve internal state */}
+          <div style={{ display: activeTab === 'intelligence' ? undefined : 'none' }}>
+            <ErrorBoundary>
+              <RiskIntelligence
+                onNavigatePlaybook={handleNavigatePlaybook}
+                onComplianceData={setComplianceData}
+                onMeetingData={setMeetingData}
+              />
+            </ErrorBoundary>
           </div>
-        </div>
 
-        {/* Row 2: Tab navigation — underline style */}
-        <div className="max-w-7xl mx-auto px-6">
-          <nav className="flex" role="tablist">
-            {TABS.map(({ id, labelKey, soon }) => (
-              <button
-                key={id}
-                role="tab"
-                aria-selected={activeTab === id}
-                disabled={soon}
-                onClick={() => !soon && setActiveTab(id)}
-                className={`px-5 py-3 text-sm font-medium border-b-2 transition-colors flex items-center gap-2 ${
-                  activeTab === id
-                    ? 'border-white text-white'
-                    : soon
-                      ? 'border-transparent text-zinc-600 cursor-not-allowed'
-                      : 'border-transparent text-zinc-500 hover:text-zinc-300 hover:border-zinc-600'
-                }`}
-              >
-                {t(labelKey)}
-              </button>
-            ))}
-          </nav>
-        </div>
-      </header>
+          {activeTab === 'response' && (
+            <div className="space-y-6">
+              {/* Playbook Header Context */}
+              <ErrorBoundary>
+                <RiskPlaybook
+                  key={playbookNode}
+                  nodeName={playbookNode}
+                  industry={playbookIndustry}
+                  onBack={() => {
+                    setActiveTab('intelligence');
+                    requestAnimationFrame(() => {
+                      document.getElementById('ontology-graph')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                  }}
+                />
+              </ErrorBoundary>
 
-      <main className="max-w-7xl mx-auto px-6 py-6">
-        {/* RiskIntelligence: display:none으로 숨겨 상태 보존 */}
-        <div style={{ display: activeTab === 'risk' ? undefined : 'none' }}>
-          <ErrorBoundary>
-            <RiskIntelligence onNavigatePlaybook={handleNavigatePlaybook} />
-          </ErrorBoundary>
-        </div>
-        {activeTab === 'playbook' && (
-          <ErrorBoundary>
-            <RiskPlaybook
-              key={playbookNode}
-              nodeName={playbookNode}
-              industry={playbookIndustry}
-              onBack={() => {
-                setActiveTab('risk');
-                requestAnimationFrame(() => {
-                  document.getElementById('ontology-graph')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-                });
-              }}
-            />
-          </ErrorBoundary>
-        )}
-        {activeTab === 'agent' && (
-          <ErrorBoundary>
-            <AgentSetup />
-          </ErrorBoundary>
-        )}
-        {activeTab === 'studio' && (
-          <ErrorBoundary>
-            <OntologyStudio />
-          </ErrorBoundary>
-        )}
-        {activeTab === 'complianceTracker' && (
-          <ErrorBoundary>
-            <ComplianceTracker />
-          </ErrorBoundary>
-        )}
-      </main>
+              {/* Strategy | Execution — 2-column layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <ErrorBoundary>
+                  <AgentSetup />
+                </ErrorBoundary>
+              </div>
+            </div>
+          )}
+
+          {activeTab === 'compliance' && (
+            <div className="space-y-6">
+              <ErrorBoundary>
+                <ComplianceTracker />
+              </ErrorBoundary>
+
+              {/* Reports from Intelligence scan */}
+              {(complianceData || meetingData) && (
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {complianceData && (
+                    <ErrorBoundary>
+                      <ComplianceReport data={complianceData} />
+                    </ErrorBoundary>
+                  )}
+                  {meetingData && (
+                    <ErrorBoundary>
+                      <MeetingAgenda data={meetingData} />
+                    </ErrorBoundary>
+                  )}
+                </div>
+              )}
+
+              {/* Audit Trail */}
+              <ErrorBoundary>
+                <AuditTimeline />
+              </ErrorBoundary>
+            </div>
+          )}
+
+          {activeTab === 'studio' && (
+            <ErrorBoundary>
+              <OntologyStudio />
+            </ErrorBoundary>
+          )}
+        </main>
+      </div>
     </div>
   );
 }
