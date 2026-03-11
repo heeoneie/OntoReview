@@ -133,7 +133,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
         <div className="flex items-center justify-between">
           <span className="text-sm text-zinc-400 font-medium">{t('agent.escalationThreshold')}</span>
           <span className={`text-sm font-bold ${
-            localConfig.escalation_threshold >= 8 ? 'text-amber-400'
+            localConfig.escalation_threshold >= 8 ? 'text-amber-300'
               : localConfig.escalation_threshold >= 5 ? 'text-amber-400' : 'text-sky-400'
           }`}>{localConfig.escalation_threshold}</span>
         </div>
@@ -202,7 +202,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
               <div className="flex justify-between">
                 <label className="text-xs text-zinc-500">{t('agent.severityInput')}</label>
                 <span className={`text-xs font-bold ${
-                  testSeverity >= 8 ? 'text-amber-400' : testSeverity >= 5 ? 'text-amber-400' : 'text-sky-400'
+                  testSeverity >= 8 ? 'text-amber-300' : testSeverity >= 5 ? 'text-amber-400' : 'text-sky-400'
                 }`}>{testSeverity}</span>
               </div>
               <input

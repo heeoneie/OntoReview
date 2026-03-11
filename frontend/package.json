@@ -15,10 +15,11 @@
     "@dagrejs/dagre": "^2.0.4",
     "@xyflow/react": "^12.10.1",
     "axios": "^1.13.4",
-    "html2canvas": "^1.4.1",
+    "html-to-image": "^1.11.13",
     "jspdf": "^4.2.0",
     "lucide-react": "^0.563.0",
     "react": "^19.2.0",
+    "react-countup": "^6.5.3",
     "react-dom": "^19.2.0",
     "react-dropzone": "^14.4.0",
     "recharts": "^3.7.0"

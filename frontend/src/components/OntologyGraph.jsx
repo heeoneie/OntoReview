@@ -240,7 +240,10 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         type: 'default',
         style: edgeStyle,
         animated: isCritical || isOwlEdge,
-        labelStyle: { fill: isOwlEdge ? '#7dd3fc' : '#a1a1aa', fontSize: 11 },
+        labelStyle: { fill: isOwlEdge ? '#7dd3fc' : '#fafafa', fontSize: 11, fontWeight: 600 },
+        labelBgStyle: { fill: '#3f3f46' },
+        labelBgPadding: [4, 6],
+        labelBgBorderRadius: 4,
         data: e.data ?? {},
       };
     });
