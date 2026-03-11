@@ -107,12 +107,10 @@ export default function HeroCommand({
           ))}
         </div>
 
-        {/* Brand + Product inputs + CTA */}
-        <div className="flex items-end gap-3">
-          <div className="space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
-              {t('hero.brand')}
-            </label>
+        {/* Brand + Product inputs */}
+        <div className="flex items-end gap-3 mb-5">
+          <div className="flex items-center gap-2">
+            <span className="text-xs text-zinc-500 font-medium flex-shrink-0">{t('hero.brand')}</span>
             <input
               type="text"
               value={brandName}
@@ -120,14 +118,12 @@ export default function HeroCommand({
               onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
               placeholder={brandLabel}
               disabled={analysisLoading}
-              className="w-40 bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-36 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
             />
           </div>
 
-          <div className="flex-1 space-y-1">
-            <label className="text-[10px] text-zinc-500 uppercase tracking-wider font-medium">
-              {t('hero.product')}
-            </label>
+          <div className="flex items-center gap-2 flex-1">
+            <span className="text-xs text-zinc-500 font-medium flex-shrink-0">{t('hero.product')}</span>
             <input
               type="text"
               value={productName}
@@ -135,19 +131,20 @@ export default function HeroCommand({
               onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
               placeholder={productLabel}
               disabled={analysisLoading}
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-xl px-4 py-2.5 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="flex-1 min-w-[120px] bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
             />
           </div>
-
-          <button
-            onClick={onRunAnalysis}
-            disabled={analysisLoading}
-            className="px-6 py-2.5 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:opacity-50 flex items-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)] flex-shrink-0"
-          >
-            {analysisLoading ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
-            {t('hero.runAnalysis')}
-          </button>
         </div>
+
+        {/* CTA */}
+        <button
+          onClick={onRunAnalysis}
+          disabled={analysisLoading}
+          className="px-6 py-3 bg-white text-zinc-950 rounded-xl font-semibold hover:bg-zinc-200 disabled:opacity-50 flex items-center gap-2.5 transition-all text-sm shadow-[0_0_20px_rgba(255,255,255,.08)]"
+        >
+          {analysisLoading ? <Loader2 className="animate-spin" size={16} /> : <Rocket size={16} />}
+          {t('hero.runAnalysis')}
+        </button>
       </div>
     </div>
   );
