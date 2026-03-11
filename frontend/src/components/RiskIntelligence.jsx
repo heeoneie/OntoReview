@@ -31,8 +31,15 @@ const INDUSTRY_INPUT_CFG = {
 // ── Helpers ──
 
 function injectBrand(obj, brand) {
-  if (!brand || !obj) return obj;
-  return JSON.parse(JSON.stringify(obj).replace(/OO/g, brand));
+  if (!brand || obj == null) return obj;
+  if (typeof obj === 'string') return obj.replace(/OO/g, brand);
+  if (Array.isArray(obj)) return obj.map((v) => injectBrand(v, brand));
+  if (typeof obj === 'object') {
+    return Object.fromEntries(
+      Object.entries(obj).map(([k, v]) => [k, injectBrand(v, brand)]),
+    );
+  }
+  return obj;
 }
 
 function getErrorMessage(err, t) {
@@ -123,13 +130,16 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
 
   const handleDiscoveryScan = async (brand, product) => {
     const b = brand || brandName.trim();
-    if (!b) return;
+    if (!b || discoveryLoading) return;
+    setDiscoveryLoading(true);
     try {
       const res = await searchBrandRisks(b, product || productName.trim() || null);
       setDiscoveryResults(res.data);
     } catch (err) {
       console.error('Discovery scan failed:', err);
       setDiscoveryResults({ results: [], total_scanned: 0, risks_found: 0, error: true });
+    } finally {
+      setDiscoveryLoading(false);
     }
   };
 
@@ -177,7 +187,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         setOntology(demoData.ontology);
       } else {
         try {
-          const graphRes = await getOntologyGraph(0);
+          const graphRes = await getOntologyGraph(d.scan_id || 0);
           if (graphRes.data?.nodes?.length > 0) setOntology(graphRes.data);
         } catch { /* ontology graph optional */ }
       }
