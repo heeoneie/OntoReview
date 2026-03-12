@@ -101,7 +101,7 @@ app = FastAPI(
 def _get_allowed_origins() -> List[str]:
     raw_origins = os.getenv("ALLOWED_ORIGINS", "")
     if not raw_origins:
-        return ["http://localhost:5173", "http://localhost:3000"]
+        return ["http://localhost:5173", "http://localhost:5174", "http://localhost:3000"]
     return [origin.strip() for origin in raw_origins.split(",") if origin.strip()]
 
 app.add_middleware(

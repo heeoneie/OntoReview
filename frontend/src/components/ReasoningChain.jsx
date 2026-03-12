@@ -48,25 +48,25 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
       label: t('reasoning.step2'),
       content: owlClass,
       sub: `${t('reasoning.severity')}: ${item.severity}`,
-      style: 'bg-amber-950/30 border-amber-800/50',
+      style: 'bg-zinc-800/80 border-zinc-600',
     },
     {
       label: t('reasoning.step3'),
       content: regulation,
       sub: null,
-      style: 'bg-sky-950/30 border-sky-800/50',
+      style: 'bg-zinc-800/60 border-zinc-700',
     },
     {
       label: t('reasoning.step4'),
       content: item.case_id || 'Matched Legal Precedent',
       sub: null,
-      style: 'bg-sky-950/30 border-sky-800/50',
+      style: 'bg-zinc-800/60 border-zinc-700',
     },
     {
       label: t('reasoning.step5'),
       content: `$${exposure.toLocaleString()}`,
       sub: null,
-      style: 'bg-amber-950/40 border-amber-800/60',
+      style: 'bg-zinc-800/80 border-zinc-600',
       isExposure: true,
     },
   ];
@@ -74,7 +74,7 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
   return (
     <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
       <div className="flex items-center gap-2 mb-5">
-        <Zap className="text-amber-400" size={15} />
+        <Zap className="text-white" size={15} />
         <span className="text-sm font-semibold text-white">{t('reasoning.title')}</span>
       </div>
 
@@ -85,7 +85,7 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
             {i > 0 && (
               <div className="flex flex-col items-center">
                 <div className="w-px h-4 bg-zinc-700" />
-                <span className="text-zinc-600 text-[10px] leading-none">&#9660;</span>
+                <span className="text-zinc-600 text-sm leading-none">&#9660;</span>
                 <div className="w-px h-2 bg-zinc-700" />
               </div>
             )}
@@ -97,22 +97,22 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
               }`}
               style={{ transitionDelay: `${i * 200}ms` }}
             >
-              <p className="text-[10px] uppercase tracking-wide text-zinc-500 font-medium mb-1">
+              <p className="text-sm uppercase tracking-wide text-zinc-500 font-medium mb-1">
                 {step.label}
               </p>
               <p
                 className={`font-medium leading-snug ${
                   step.isExposure
                     ? exposure > 0
-                      ? 'text-2xl text-amber-400 font-bold tabular-nums'
-                      : 'text-2xl text-zinc-400 font-bold tabular-nums'
+                      ? 'text-3xl text-white font-bold tabular-nums'
+                      : 'text-3xl text-zinc-400 font-bold tabular-nums'
                     : 'text-sm text-white'
                 }`}
               >
                 {step.content}
               </p>
               {step.sub && (
-                <p className="text-[11px] text-amber-400/80 mt-1 font-medium">{step.sub}</p>
+                <p className="text-sm text-zinc-400 mt-1 font-medium">{step.sub}</p>
               )}
             </div>
           </div>

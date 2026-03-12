@@ -4,11 +4,11 @@ import { useLang } from '../contexts/LangContext';
 import { getAuditEvents } from '../api/client';
 
 const EVENT_CONFIG = {
-  scan_started:       { icon: Radio,         accent: 'text-sky-400',    border: 'border-sky-500/30',  bg: 'bg-sky-950/20',    badge: 'bg-sky-500/20 text-sky-300 ring-sky-500/30' },
+  scan_started:       { icon: Radio,         accent: 'text-zinc-300',   border: 'border-zinc-700/50', bg: 'bg-zinc-800/30',   badge: 'bg-zinc-700/30 text-zinc-300 ring-zinc-600/30' },
   review_classified:  { icon: FileText,      accent: 'text-zinc-400',   border: 'border-zinc-700/50', bg: 'bg-zinc-800/30',   badge: 'bg-zinc-700/30 text-zinc-400 ring-zinc-600/30' },
-  precedent_matched:  { icon: Scale,         accent: 'text-amber-400',  border: 'border-amber-500/30',bg: 'bg-amber-950/20',  badge: 'bg-amber-500/20 text-amber-300 ring-amber-500/30' },
-  risk_flagged:       { icon: ShieldAlert,   accent: 'text-amber-400',  border: 'border-amber-500/40',bg: 'bg-amber-950/20',  badge: 'bg-amber-500/20 text-amber-300 ring-amber-500/30' },
-  scan_completed:     { icon: CheckCircle2,  accent: 'text-sky-400',    border: 'border-sky-500/30',  bg: 'bg-sky-950/20',    badge: 'bg-sky-500/20 text-sky-300 ring-sky-500/30' },
+  precedent_matched:  { icon: Scale,         accent: 'text-white',      border: 'border-zinc-600/50', bg: 'bg-zinc-800/40',   badge: 'bg-zinc-700/40 text-white ring-zinc-500/30' },
+  risk_flagged:       { icon: ShieldAlert,   accent: 'text-white',      border: 'border-zinc-600/60', bg: 'bg-zinc-800/50',   badge: 'bg-zinc-700/50 text-white ring-zinc-500/30' },
+  scan_completed:     { icon: CheckCircle2,  accent: 'text-zinc-300',   border: 'border-zinc-700/50', bg: 'bg-zinc-800/30',   badge: 'bg-zinc-700/30 text-zinc-300 ring-zinc-600/30' },
 };
 
 const EVENT_LABELS = {
@@ -39,7 +39,7 @@ function formatDate(iso) {
 function SeverityDot({ severity }) {
   if (severity == null) return null;
   const s = Number(severity);
-  const color = s >= 9 ? 'bg-amber-400 shadow-amber-400/60' : s >= 7 ? 'bg-amber-500 shadow-amber-500/50' : s >= 4 ? 'bg-sky-400 shadow-sky-400/40' : 'bg-zinc-500';
+  const color = s >= 9 ? 'bg-white shadow-white/60' : s >= 7 ? 'bg-zinc-400 shadow-zinc-400/50' : s >= 4 ? 'bg-zinc-500 shadow-zinc-500/40' : 'bg-zinc-600';
   return (
     <span className={`inline-block w-2 h-2 rounded-full shadow-[0_0_6px] ${color}`} title={`Severity: ${s}`} />
   );
@@ -97,7 +97,7 @@ export default function AuditTimeline() {
           </div>
           <div>
             <h3 className="text-sm font-bold text-white tracking-tight">{title}</h3>
-            <p className="text-[11px] text-zinc-500">{subtitle}</p>
+            <p className="text-sm text-zinc-500">{subtitle}</p>
           </div>
         </div>
         <div className="flex items-center gap-1.5">
@@ -105,7 +105,7 @@ export default function AuditTimeline() {
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
             <span className="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-400" />
           </span>
-          <span className="text-[10px] text-emerald-400 font-bold tracking-widest">LIVE</span>
+          <span className="text-sm text-emerald-400 font-bold tracking-widest">LIVE</span>
         </div>
       </div>
 
@@ -113,7 +113,7 @@ export default function AuditTimeline() {
       <div className="px-6 py-2.5 border-b border-zinc-800/50 flex items-center gap-2 overflow-x-auto">
         <button
           onClick={() => setFilter('')}
-          className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide transition-colors ${
+          className={`px-2.5 py-1 rounded-md text-sm font-bold tracking-wide transition-colors ${
             !filter
               ? 'bg-white/10 text-white ring-1 ring-white/20'
               : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
@@ -128,7 +128,7 @@ export default function AuditTimeline() {
             <button
               key={type}
               onClick={() => setFilter(filter === type ? '' : type)}
-              className={`px-2.5 py-1 rounded-md text-[10px] font-bold tracking-wide transition-colors whitespace-nowrap ${
+              className={`px-2.5 py-1 rounded-md text-sm font-bold tracking-wide transition-colors whitespace-nowrap ${
                 filter === type
                   ? `${cfg.badge} ring-1`
                   : 'text-zinc-500 hover:text-zinc-300 hover:bg-zinc-800'
@@ -143,15 +143,15 @@ export default function AuditTimeline() {
       {/* Table */}
       <div className="max-h-[400px] overflow-y-auto">
         {loading && events.length === 0 ? (
-          <div className="px-6 py-12 text-center text-zinc-600 text-xs">
+          <div className="px-6 py-12 text-center text-zinc-600 text-sm">
             {lang === 'ko' ? '로딩 중...' : 'Loading...'}
           </div>
         ) : filtered.length === 0 ? (
-          <div className="px-6 py-12 text-center text-zinc-600 text-xs">
+          <div className="px-6 py-12 text-center text-zinc-600 text-sm">
             {lang === 'ko' ? '기록된 이벤트가 없습니다' : 'No audit events recorded'}
           </div>
         ) : (
-          <table className="w-full text-[11px]">
+          <table className="w-full text-sm">
             <thead className="sticky top-0 z-10">
               <tr className="bg-zinc-900 border-b border-zinc-800">
                 <th className="text-left text-zinc-600 font-medium px-6 py-2 uppercase tracking-wider">Time</th>
@@ -177,7 +177,7 @@ export default function AuditTimeline() {
                     {/* Time */}
                     <td className="px-6 py-2.5 whitespace-nowrap">
                       <div className="text-zinc-400 font-mono">{formatTimestamp(evt.timestamp)}</div>
-                      <div className="text-zinc-600 font-mono text-[9px]">{formatDate(evt.timestamp)}</div>
+                      <div className="text-zinc-600 font-mono text-sm">{formatDate(evt.timestamp)}</div>
                     </td>
 
                     {/* Scan ID */}
@@ -187,7 +187,7 @@ export default function AuditTimeline() {
 
                     {/* Event type badge */}
                     <td className="px-3 py-2.5">
-                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded ring-1 text-[10px] font-bold tracking-wide ${cfg.badge}`}>
+                      <span className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded ring-1 text-sm font-bold tracking-wide ${cfg.badge}`}>
                         <Icon size={10} />
                         {labels[evt.event_type] || evt.event_type}
                       </span>
@@ -198,11 +198,11 @@ export default function AuditTimeline() {
                       {(evt.risk_category || details.risk_category) ? (
                         <span className="inline-flex items-center gap-1.5">
                           {isRisk && <SeverityDot severity={severity} />}
-                          <span className={isRisk ? 'text-amber-300 font-medium' : 'text-zinc-400'}>
+                          <span className={isRisk ? 'text-white font-medium' : 'text-zinc-400'}>
                             {evt.risk_category || details.risk_category}
                           </span>
                           {isRisk && severity != null && (
-                            <span className="text-amber-400/80 font-mono font-bold">{Number(severity).toFixed(1)}</span>
+                            <span className="text-zinc-300 font-mono font-bold">{Number(severity).toFixed(1)}</span>
                           )}
                         </span>
                       ) : (
@@ -234,10 +234,10 @@ function DetailsCell({ details, eventType }) {
     return (
       <div className="flex flex-col gap-0.5">
         {(details.case_title || details.case_name) && (
-          <span className="text-amber-300/90 font-medium truncate">{details.case_title || details.case_name}</span>
+          <span className="text-white font-medium truncate">{details.case_title || details.case_name}</span>
         )}
         {details.expected_exposure_usd != null && (
-          <span className="text-amber-400/70 font-mono text-[10px]">
+          <span className="text-zinc-400 font-mono text-sm">
             ${Number(details.expected_exposure_usd).toLocaleString()}
           </span>
         )}

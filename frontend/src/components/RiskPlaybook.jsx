@@ -6,28 +6,28 @@ import { useLang } from '../contexts/LangContext';
 const STRATEGY_CONFIG = {
   Conservative: {
     icon: ShieldCheck,
-    border: 'border-sky-700/60',
-    glow: 'shadow-[0_0_20px_rgba(14,165,233,0.08)]',
-    badge: 'bg-sky-500/15 text-sky-400 border-sky-700/50',
-    accent: 'text-sky-400',
+    border: 'border-zinc-700/60',
+    glow: '',
+    badge: 'bg-zinc-800 text-zinc-300 border-zinc-700/50',
+    accent: 'text-white',
     labelKey: 'playbook.conservative',
     descKey: 'playbook.conservativeDesc',
   },
   Moderate: {
     icon: MessageSquare,
-    border: 'border-amber-700/60',
-    glow: 'shadow-[0_0_20px_rgba(245,158,11,0.08)]',
-    badge: 'bg-amber-500/15 text-amber-400 border-amber-700/50',
-    accent: 'text-amber-400',
+    border: 'border-zinc-700/60',
+    glow: '',
+    badge: 'bg-zinc-800 text-zinc-300 border-zinc-700/50',
+    accent: 'text-white',
     labelKey: 'playbook.moderate',
     descKey: 'playbook.moderateDesc',
   },
   Aggressive: {
     icon: Scale,
-    border: 'border-amber-600/70',
-    glow: 'shadow-[0_0_24px_rgba(245,158,11,0.12)]',
-    badge: 'bg-amber-500/20 text-amber-300 border-amber-600/60',
-    accent: 'text-amber-300',
+    border: 'border-zinc-600/70',
+    glow: '',
+    badge: 'bg-zinc-700 text-white border-zinc-600/60',
+    accent: 'text-white',
     labelKey: 'playbook.aggressive',
     descKey: 'playbook.aggressiveDesc',
   },
@@ -105,7 +105,6 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
   const handleRetry = () => {
     if (!hasNode) return;
-    // Abort any existing request before retrying
     controllerRef.current?.abort();
     const controller = new AbortController();
     controllerRef.current = controller;
@@ -156,7 +155,7 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
           <button
             type="button"
             onClick={onBack}
-            className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium text-zinc-400
+            className="flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium text-zinc-400
               bg-zinc-800 border border-zinc-700 rounded-lg hover:bg-zinc-700 hover:text-zinc-200 transition-colors"
           >
             <ArrowLeft size={13} />
@@ -167,11 +166,11 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
       {/* Context badges */}
       <div className="flex items-center gap-2 flex-wrap">
-        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-300">
+        <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-300">
           {t('playbook.targetNode')}: {selectedNodeName}
         </span>
         {industry && (
-          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-xs font-medium text-zinc-400">
+          <span className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-400">
             {t('playbook.industry')}: {industry}
           </span>
         )}
@@ -181,10 +180,10 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
       {isLoading && (
         <div className="space-y-4">
           <div className="flex items-center gap-3 bg-zinc-900 rounded-xl border border-zinc-800 px-5 py-4">
-            <Loader2 className="animate-spin text-sky-400" size={20} />
+            <Loader2 className="animate-spin text-white" size={20} />
             <div>
               <p className="text-sm font-medium text-white">{t('playbook.loading')}</p>
-              <p className="text-xs text-zinc-500 mt-0.5">{t('playbook.loadingHint')}</p>
+              <p className="text-sm text-zinc-500 mt-0.5">{t('playbook.loadingHint')}</p>
             </div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -197,15 +196,15 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
       {/* Error state */}
       {error && !isLoading && (
-        <div className="bg-amber-950/40 border border-amber-800/60 rounded-xl px-5 py-4 flex items-center justify-between">
+        <div className="bg-zinc-800 border border-zinc-700 rounded-xl px-5 py-4 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <AlertTriangle className="text-amber-400" size={18} />
-            <p className="text-sm text-amber-400">{error}</p>
+            <AlertTriangle className="text-white" size={18} />
+            <p className="text-sm text-white">{error}</p>
           </div>
           <button
             type="button"
             onClick={handleRetry}
-            className="px-3 py-1.5 text-xs font-semibold text-amber-400 bg-amber-950 border border-amber-800 rounded-lg hover:bg-amber-900 transition-colors"
+            className="px-3 py-1.5 text-sm font-semibold text-white bg-zinc-700 border border-zinc-600 rounded-lg hover:bg-zinc-600 transition-colors"
           >
             {t('playbook.retry')}
           </button>
@@ -222,7 +221,7 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
             return (
               <div
                 key={scenario.strategy_name}
-                className={`bg-zinc-900/80 backdrop-blur-sm border ${cfg.border} rounded-2xl p-6 ${cfg.glow} transition-shadow hover:shadow-lg`}
+                className={`bg-zinc-900/80 backdrop-blur-sm border ${cfg.border} rounded-2xl p-6 transition-shadow hover:shadow-lg`}
               >
                 {/* Card header */}
                 <div className="flex items-center gap-3 mb-5">
@@ -233,7 +232,7 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
                     <h3 className="text-sm font-bold text-zinc-100">
                       {t(cfg.labelKey)}
                     </h3>
-                    <p className="text-[11px] text-zinc-500">
+                    <p className="text-sm text-zinc-500">
                       {t(cfg.descKey)}
                     </p>
                   </div>
@@ -241,11 +240,11 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
                 {/* Agent badge */}
                 <div className="mb-4">
-                  <span className="text-[10px] text-zinc-600 uppercase tracking-wider font-medium">
+                  <span className="text-sm text-zinc-600 uppercase tracking-wider font-medium">
                     {t('playbook.agent')}
                   </span>
                   <div className="mt-1">
-                    <span className={`inline-flex items-center px-2.5 py-1 text-xs font-semibold rounded-full border ${cfg.badge}`}>
+                    <span className={`inline-flex items-center px-2.5 py-1 text-sm font-semibold rounded-full border ${cfg.badge}`}>
                       {scenario.primary_agent}
                     </span>
                   </div>
@@ -253,13 +252,13 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
                 {/* Action steps */}
                 <div className="mb-4">
-                  <span className="text-[10px] text-zinc-600 uppercase tracking-wider font-medium">
+                  <span className="text-sm text-zinc-600 uppercase tracking-wider font-medium">
                     {t('playbook.steps')}
                   </span>
                   <ol className="mt-2 space-y-2">
                     {scenario.action_steps.map((step, i) => (
-                      <li key={i} className="flex gap-2.5 text-xs text-zinc-300 leading-relaxed">
-                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border ${cfg.border} bg-zinc-800 flex items-center justify-center text-[10px] font-bold ${cfg.accent}`}>
+                      <li key={i} className="flex gap-2.5 text-sm text-zinc-300 leading-relaxed">
+                        <span className={`flex-shrink-0 w-5 h-5 rounded-full border ${cfg.border} bg-zinc-800 flex items-center justify-center text-sm font-bold ${cfg.accent}`}>
                           {i + 1}
                         </span>
                         <span className="pt-0.5">{step}</span>
@@ -270,10 +269,10 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
                 {/* Estimated impact */}
                 <div className="mt-auto pt-4 border-t border-zinc-800/60">
-                  <span className="text-[10px] text-zinc-600 uppercase tracking-wider font-medium">
+                  <span className="text-sm text-zinc-600 uppercase tracking-wider font-medium">
                     {t('playbook.impact')}
                   </span>
-                  <p className="mt-1.5 text-xs text-zinc-400 leading-relaxed">
+                  <p className="mt-1.5 text-sm text-zinc-400 leading-relaxed">
                     {scenario.estimated_impact}
                   </p>
                 </div>

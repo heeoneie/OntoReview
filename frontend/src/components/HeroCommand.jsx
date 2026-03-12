@@ -32,10 +32,10 @@ export default function HeroCommand({
       <div className="bg-zinc-900 rounded-2xl border border-zinc-800 px-5 py-3 flex items-center gap-3">
         <div className="flex items-center gap-2 flex-shrink-0">
           <span className="relative flex h-1.5 w-1.5">
-            <span className="animate-ping absolute h-full w-full rounded-full bg-sky-400 opacity-40" />
-            <span className="relative h-1.5 w-1.5 rounded-full bg-sky-400" />
+            <span className="animate-ping absolute h-full w-full rounded-full bg-white opacity-40" />
+            <span className="relative h-1.5 w-1.5 rounded-full bg-white" />
           </span>
-          <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+          <span className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
             {t('hero.eyebrow')}
           </span>
         </div>
@@ -53,7 +53,7 @@ export default function HeroCommand({
         <button
           onClick={onRunAnalysis}
           disabled={analysisLoading}
-          className="px-4 py-1.5 bg-white text-zinc-950 rounded-lg text-xs font-semibold hover:bg-zinc-200 disabled:opacity-50 transition-colors flex items-center gap-1.5 flex-shrink-0"
+          className="px-4 py-1.5 bg-white text-zinc-950 rounded-lg text-sm font-semibold hover:bg-zinc-200 disabled:opacity-50 transition-colors flex items-center gap-1.5 flex-shrink-0"
         >
           {analysisLoading ? <Loader2 className="animate-spin" size={12} /> : <Rocket size={12} />}
           {t('hero.reanalyze')}
@@ -72,16 +72,16 @@ export default function HeroCommand({
         {/* Eyebrow */}
         <div className="flex items-center gap-2 mb-5">
           <span className="relative flex h-2 w-2">
-            <span className="animate-ping absolute h-full w-full rounded-full bg-sky-400 opacity-40" />
-            <span className="relative h-2 w-2 rounded-full bg-sky-400" />
+            <span className="animate-ping absolute h-full w-full rounded-full bg-white opacity-40" />
+            <span className="relative h-2 w-2 rounded-full bg-white" />
           </span>
-          <span className="text-[11px] font-semibold uppercase tracking-[.15em] text-zinc-500">
+          <span className="text-sm font-semibold uppercase tracking-[.15em] text-zinc-500">
             {t('hero.eyebrow')}
           </span>
         </div>
 
         {/* Headline */}
-        <h1 className="text-3xl font-bold text-white tracking-tight leading-tight mb-1">
+        <h1 className="text-4xl font-bold text-white tracking-tight leading-tight mb-1">
           {t('hero.headline1')}<br />
           <span className="text-zinc-500">{t('hero.headline2')}</span>
         </h1>
@@ -96,7 +96,7 @@ export default function HeroCommand({
               key={id}
               onClick={() => onIndustryChange(id)}
               disabled={analysisLoading}
-              className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-colors border ${
+              className={`px-3 py-1.5 rounded-lg text-sm font-medium transition-colors border ${
                 industry === id
                   ? 'bg-zinc-700 text-white border-zinc-600'
                   : 'bg-zinc-800/60 text-zinc-500 border-zinc-800 hover:text-zinc-300 hover:border-zinc-700'
@@ -110,7 +110,7 @@ export default function HeroCommand({
         {/* Brand + Product + CTA — labels on top, button aligned right */}
         <div className="flex items-end gap-3">
           <div>
-            <label className="block text-[10px] text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{brandLabel}</label>
+            <label className="block text-sm text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{brandLabel}</label>
             <input
               type="text"
               value={brandName}
@@ -118,12 +118,12 @@ export default function HeroCommand({
               onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
               placeholder={brandLabel}
               disabled={analysisLoading}
-              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
             />
           </div>
 
           <div className="flex-1">
-            <label className="block text-[10px] text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{productLabel}</label>
+            <label className="block text-sm text-zinc-500 uppercase tracking-wider font-medium mb-1.5">{productLabel}</label>
             <input
               type="text"
               value={productName}
@@ -131,7 +131,7 @@ export default function HeroCommand({
               onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
               placeholder={productLabel}
               disabled={analysisLoading}
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
             />
           </div>
 

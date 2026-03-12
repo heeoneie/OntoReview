@@ -4,14 +4,14 @@ import { KO_URGENCY_KEY } from '../i18n';
 
 const URGENCY_STYLES = {
   normal:   'bg-zinc-800 text-zinc-300 border border-zinc-700',
-  urgent:   'bg-amber-950 text-amber-400 border border-amber-800',
-  critical: 'bg-amber-900 text-amber-300 border border-amber-700 ring-1 ring-amber-500/30',
+  urgent:   'bg-zinc-800 text-white border border-zinc-600',
+  critical: 'bg-zinc-700 text-white border border-zinc-500 ring-1 ring-zinc-400/30',
 };
 
 const PRIORITY_BORDER = {
-  critical: 'border-l-amber-500',
-  high:     'border-l-amber-600',
-  medium:   'border-l-amber-700',
+  critical: 'border-l-white',
+  high:     'border-l-zinc-400',
+  medium:   'border-l-zinc-500',
   low:      'border-l-zinc-600',
 };
 
@@ -30,7 +30,7 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <CalendarClock className="text-zinc-400" size={20} />
-          <h3 className="text-base font-bold text-white">{t('meeting.title')}</h3>
+          <h3 className="text-lg font-bold text-white">{t('meeting.title')}</h3>
         </div>
         {!data && !loading && (
           <button
@@ -43,7 +43,7 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
       </div>
 
       {error && (
-        <div className="bg-amber-950 text-amber-400 border border-amber-800 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
+        <div className="bg-zinc-800 text-white border border-zinc-700 rounded-lg px-4 py-2 text-sm mb-4">{error}</div>
       )}
 
       {loading ? (
@@ -57,12 +57,12 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
           <div>
             <div className="flex items-center gap-2 mb-1">
               <h4 className="text-sm font-bold text-white">{data.meeting_title}</h4>
-              <span className={`px-2 py-0.5 rounded-full text-xs font-semibold ${URGENCY_STYLES[urgencyKey] || URGENCY_STYLES.urgent}`}>
+              <span className={`px-2 py-0.5 rounded-full text-sm font-semibold ${URGENCY_STYLES[urgencyKey] || URGENCY_STYLES.urgent}`}>
                 {t('meeting.' + urgencyKey)}
               </span>
             </div>
             {data.estimated_duration && (
-              <div className="flex items-center gap-1 text-xs text-zinc-500">
+              <div className="flex items-center gap-1 text-sm text-zinc-500">
                 <Clock size={12} />
                 {t('meeting.estimated')} {data.estimated_duration}
               </div>
@@ -71,14 +71,14 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
 
           {/* Attendees */}
           <div>
-            <h4 className="text-xs font-semibold text-zinc-500 uppercase tracking-wide flex items-center gap-1 mb-2">
+            <h4 className="text-sm font-semibold text-zinc-500 uppercase tracking-wide flex items-center gap-1 mb-2">
               <Users size={11} />{t('meeting.attendees')}
             </h4>
             <div className="flex flex-wrap gap-1.5">
               {DEFAULT_ATTENDEE_KEYS.map((key, idx) => (
                 <span
                   key={idx}
-                  className="px-2 py-1 bg-zinc-800/50 border border-zinc-700/60 rounded-lg text-xs text-zinc-300"
+                  className="px-2 py-1 bg-zinc-800/50 border border-zinc-700/60 rounded-lg text-sm text-zinc-300"
                 >
                   {t(key)}
                 </span>
@@ -96,25 +96,25 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
                 >
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <span className="w-5 h-5 bg-zinc-700 text-zinc-300 rounded-full flex items-center justify-center text-xs font-bold">
+                      <span className="w-5 h-5 bg-zinc-700 text-zinc-300 rounded-full flex items-center justify-center text-sm font-bold">
                         {item.order || idx + 1}
                       </span>
                       <span className="text-sm font-semibold text-zinc-200">{item.title}</span>
                     </div>
                     {item.duration && (
-                      <span className="text-xs text-zinc-500">{item.duration}</span>
+                      <span className="text-sm text-zinc-500">{item.duration}</span>
                     )}
                   </div>
 
                   {item.presenter && (
-                    <p className="text-xs text-zinc-500 mb-1.5">{t('meeting.presenter')} {item.presenter}</p>
+                    <p className="text-sm text-zinc-500 mb-1.5">{t('meeting.presenter')} {item.presenter}</p>
                   )}
 
                   {/* Discussion Points */}
                   {item.discussion_points?.length > 0 && (
                     <ul className="space-y-0.5 mb-2">
                       {item.discussion_points.map((point, pidx) => (
-                        <li key={pidx} className="text-xs text-zinc-400 flex items-start gap-1.5">
+                        <li key={pidx} className="text-sm text-zinc-400 flex items-start gap-1.5">
                           <span className="mt-0.5 text-zinc-600">–</span>
                           {point}
                         </li>
@@ -126,11 +126,11 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
                   {item.action_items?.length > 0 && (
                     <div className="bg-zinc-900 rounded-lg p-2 space-y-1 border border-zinc-700">
                       {item.action_items.map((ai, aidx) => (
-                        <div key={aidx} className="flex items-center justify-between text-xs">
+                        <div key={aidx} className="flex items-center justify-between text-sm">
                           <span className="text-zinc-300">{ai.task}</span>
                           <div className="flex items-center gap-2 text-zinc-500 flex-shrink-0">
                             <span>{ai.owner}</span>
-                            <span className="text-amber-400 font-medium">{ai.deadline}</span>
+                            <span className="text-white font-medium">{ai.deadline}</span>
                           </div>
                         </div>
                       ))}
@@ -144,10 +144,10 @@ export default function MeetingAgenda({ data, loading, error, onGenerate }) {
           {/* Preparation */}
           {data.preparation?.length > 0 && (
             <div className="bg-zinc-800 rounded-lg p-3 border border-zinc-700">
-              <h4 className="text-xs font-semibold text-zinc-400 mb-2 uppercase tracking-wide">{t('meeting.preparation')}</h4>
+              <h4 className="text-sm font-semibold text-zinc-400 mb-2 uppercase tracking-wide">{t('meeting.preparation')}</h4>
               <ul className="space-y-1">
                 {data.preparation.map((item, idx) => (
-                  <li key={idx} className="text-xs text-zinc-300 flex items-start gap-1.5">
+                  <li key={idx} className="text-sm text-zinc-300 flex items-start gap-1.5">
                     <span className="mt-0.5 text-zinc-500">•</span>
                     {item}
                   </li>

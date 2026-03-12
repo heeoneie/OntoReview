@@ -73,13 +73,13 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
   return (
     <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-8">
       <div className="flex flex-col items-center">
-        {/* 원형 진행률 */}
+        {/* Progress circle */}
         <div className="relative mb-6">
           <svg className="w-24 h-24 transform -rotate-90">
             <circle cx="48" cy="48" r="40" stroke="#1e293b" strokeWidth="8" fill="none" />
             <circle
               cx="48" cy="48" r="40"
-              stroke="#0ea5e9"
+              stroke="#ffffff"
               strokeWidth="8"
               fill="none"
               strokeDasharray={251.2}
@@ -89,13 +89,13 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
             />
           </svg>
           <div className="absolute inset-0 flex items-center justify-center">
-            <span className="text-2xl font-bold text-sky-400">{progress}%</span>
+            <span className="text-2xl font-bold text-white">{progress}%</span>
           </div>
         </div>
 
-        {/* 현재 작업 */}
+        {/* Current task */}
         <div className="flex items-center gap-2 mb-6">
-          <Radio className="text-sky-400 animate-pulse" size={16} />
+          <Radio className="text-white animate-pulse" size={16} />
           <p className="text-sm font-medium text-zinc-300">
             {mode === 'demo'
               ? currentStep <= 3
@@ -109,7 +109,7 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
           </p>
         </div>
 
-        {/* 단계 목록 */}
+        {/* Step list */}
         <div className="w-full max-w-md space-y-1.5">
           {steps.map((step, idx) => {
             const done = isDone(idx);
@@ -121,22 +121,22 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
                 key={idx}
                 className={`flex items-center gap-3 px-4 py-2 rounded-lg transition-all text-sm ${
                   done
-                    ? 'bg-sky-950/50 text-sky-400 border border-sky-900'
+                    ? 'bg-zinc-800 text-white border border-zinc-700'
                     : active
-                      ? 'bg-sky-950/50 text-sky-300 border border-sky-900'
+                      ? 'bg-zinc-800 text-zinc-300 border border-zinc-700'
                       : 'bg-zinc-800/50 text-zinc-600 border border-zinc-800'
                 }`}
               >
                 {done ? (
-                  <CheckCircle size={15} className="text-sky-400 flex-shrink-0" />
+                  <CheckCircle size={15} className="text-white flex-shrink-0" />
                 ) : active ? (
-                  <Loader2 size={15} className="animate-spin text-sky-400 flex-shrink-0" />
+                  <Loader2 size={15} className="animate-spin text-white flex-shrink-0" />
                 ) : (
                   <div className="w-[15px] h-[15px] rounded-full border border-zinc-700 flex-shrink-0" />
                 )}
                 <span className="font-medium">{step.label}</span>
                 {parallel && (
-                  <span className="ml-auto text-[10px] text-sky-500 font-semibold border border-sky-900 px-1.5 rounded">병렬</span>
+                  <span className="ml-auto text-sm text-zinc-500 font-semibold border border-zinc-700 px-1.5 rounded">병렬</span>
                 )}
               </div>
             );
@@ -144,7 +144,7 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
         </div>
 
         {(mode === 'demo' || mode === 'fullDemo') && (
-          <p className="mt-4 text-xs text-zinc-600">
+          <p className="mt-4 text-sm text-zinc-600">
             {mode === 'fullDemo'
               ? 'AI 분석 · 대시보드 갱신 병렬 처리 중'
               : '온톨로지 · 컴플라이언스 · 회의안건 동시 생성 중'}

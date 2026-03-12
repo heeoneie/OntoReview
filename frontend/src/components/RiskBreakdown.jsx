@@ -3,12 +3,12 @@ import { PieChart } from 'lucide-react';
 import { useLang } from '../contexts/LangContext';
 
 const CATEGORY_COLORS = {
-  ProductLiability: '#f59e0b',
-  ClassAction:      '#ef4444',
-  ConsumerFraud:    '#8b5cf6',
-  FoodSafety:       '#10b981',
-  RegulatoryRisk:   '#3b82f6',
-  Other:            '#6b7280',
+  ProductLiability: '#ffffff',
+  ClassAction:      '#a1a1aa',
+  ConsumerFraud:    '#71717a',
+  FoodSafety:       '#52525b',
+  RegulatoryRisk:   '#3f3f46',
+  Other:            '#27272a',
 };
 
 function classifyByCase(caseId) {
@@ -55,7 +55,7 @@ export default function RiskBreakdown({ timeline }) {
       {/* Header */}
       <div className="flex items-center gap-2 mb-3">
         <PieChart className="text-zinc-500" size={13} />
-        <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+        <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">
           {t('graph.breakdown')}
         </span>
       </div>
@@ -98,9 +98,9 @@ export default function RiskBreakdown({ timeline }) {
             <div key={item.category} className="flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <span className="w-2 h-2 rounded-sm flex-shrink-0" style={{ backgroundColor: item.color }} />
-                <span className="text-xs text-zinc-400">{item.category}</span>
+                <span className="text-sm text-zinc-400">{item.category}</span>
               </div>
-              <span className="text-xs text-zinc-500 tabular-nums">{item.count} ({item.pct}%)</span>
+              <span className="text-sm text-zinc-500 tabular-nums">{item.count} ({item.pct}%)</span>
             </div>
           ))}
         </div>

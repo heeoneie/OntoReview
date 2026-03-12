@@ -25,8 +25,7 @@ import {
 import { useLang } from '../contexts/LangContext';
 
 /* ────────────────────────────────────────────
-   Dagre layout — new instance per call to
-   avoid shared-state race conditions
+   Dagre layout
    ──────────────────────────────────────────── */
 const NODE_WIDTH = 250;
 const NODE_HEIGHT = 80;
@@ -62,7 +61,7 @@ function getLayoutedElements(nodes, edges) {
 }
 
 /* ────────────────────────────────────────────
-   Custom Node — defined OUTSIDE component
+   Custom Node
    ──────────────────────────────────────────── */
 const TYPE_ICONS = {
   signal: Radio,
@@ -83,12 +82,12 @@ function CustomRiskNode({ data }) {
 
   const shadowClass =
     severity >= 8
-      ? 'shadow-[0_0_15px_rgba(245,158,11,0.3)]'
+      ? 'shadow-[0_0_15px_rgba(255,255,255,0.15)]'
       : severity >= 5
-        ? 'shadow-[0_0_10px_rgba(245,158,11,0.2)]'
+        ? 'shadow-[0_0_10px_rgba(255,255,255,0.08)]'
         : '';
 
-  const owlGlow = isOwl ? 'ring-1 ring-sky-500/40' : '';
+  const owlGlow = isOwl ? 'ring-1 ring-zinc-400/40' : '';
 
   return (
     <div
@@ -109,17 +108,17 @@ function CustomRiskNode({ data }) {
         <Icon size={14} className="text-zinc-400 flex-shrink-0" />
         <span className="text-xs text-zinc-500 capitalize">{data.type}</span>
         {isOwl && data.owl_class && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium truncate max-w-[90px]" title={data.owl_class}>
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300 font-medium truncate max-w-[90px]" title={data.owl_class}>
             {data.owl_class}
           </span>
         )}
         {isOwl && !data.owl_class && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium">
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300 font-medium">
             OWL
           </span>
         )}
         {hasReasoning && (
-          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-sky-500/20 text-sky-300 font-medium">
+          <span className="text-[9px] px-1.5 py-0.5 rounded-full bg-zinc-700 text-zinc-300 font-medium">
             Inferred
           </span>
         )}
@@ -157,15 +156,15 @@ function toSeverityScore(value) {
 }
 
 function severityBorder(score) {
-  if (score >= 8) return 'border-amber-400';
-  if (score >= 5) return 'border-amber-600';
-  return 'border-sky-600';
+  if (score >= 8) return 'border-white';
+  if (score >= 5) return 'border-zinc-400';
+  return 'border-zinc-600';
 }
 
 function severityBadge(score) {
-  if (score >= 8) return 'bg-amber-400/20 text-amber-300';
-  if (score >= 5) return 'bg-amber-600/20 text-amber-400';
-  return 'bg-sky-500/20 text-sky-400';
+  if (score >= 8) return 'bg-zinc-600 text-white';
+  if (score >= 5) return 'bg-zinc-700 text-zinc-300';
+  return 'bg-zinc-800 text-zinc-400';
 }
 
 function severityLabel(score) {
@@ -184,16 +183,11 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
   const [isLoading, setIsLoading] = useState(false);
   const [fetchError, setFetchError] = useState(null);
 
-  // WOW 1: Severity filter
   const [minSeverity, setMinSeverity] = useState(0);
-
-  // WOW 2: Node click side panel
   const [selectedNode, setSelectedNode] = useState(null);
 
-  // Track whether first fetch has completed (for debounce skip)
   const hasMounted = useRef(false);
 
-  /* --- Apply nodes + edges through dagre layout --- */
   const applyGraphData = useCallback((rawNodes, rawEdges) => {
     const processedNodes = rawNodes.map((n) => ({
       ...n,
@@ -225,9 +219,9 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
 
       let edgeStyle;
       if (isCritical) {
-        edgeStyle = { stroke: '#f59e0b', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #f59e0b)' };
+        edgeStyle = { stroke: '#ffffff', strokeWidth: 3, filter: 'drop-shadow(0 0 5px #ffffff)' };
       } else if (isOwlEdge) {
-        edgeStyle = { stroke: '#0ea5e9', strokeWidth: 2, filter: 'drop-shadow(0 0 3px #0ea5e9)' };
+        edgeStyle = { stroke: '#a1a1aa', strokeWidth: 2, filter: 'drop-shadow(0 0 3px #a1a1aa)' };
       } else {
         edgeStyle = { stroke: '#52525b', strokeWidth: 1 };
       }
@@ -240,7 +234,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         type: 'default',
         style: edgeStyle,
         animated: isCritical || isOwlEdge,
-        labelStyle: { fill: isOwlEdge ? '#7dd3fc' : '#fafafa', fontSize: 11, fontWeight: 600 },
+        labelStyle: { fill: '#fafafa', fontSize: 11, fontWeight: 600 },
         labelBgStyle: { fill: '#3f3f46' },
         labelBgPadding: [4, 6],
         labelBgBorderRadius: 4,
@@ -256,10 +250,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
     setEdges(laidEdges);
   }, [setNodes, setEdges]);
 
-  /* --- Single unified useEffect: props.data override OR API fetch --- */
   useEffect(() => {
-    // If parent provides data with nodes array (even empty), use it — skip fetch
-    // This respects parent's intent when explicitly passing an empty array
     if (data?.nodes != null) {
       setSelectedNode(null);
       if (data.nodes.length > 0) {
@@ -271,7 +262,6 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
       return;
     }
 
-    // Fetch persisted graph — debounce slider changes, immediate on mount
     const controller = new AbortController();
     const delay = hasMounted.current ? 200 : 0;
     hasMounted.current = true;
@@ -316,7 +306,6 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
     };
   }, [minSeverity, data, applyGraphData, setNodes, setEdges]);
 
-  /* --- Node click handler --- */
   const onNodeClick = useCallback((_event, node) => {
     setSelectedNode(node);
   }, []);
@@ -330,11 +319,11 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
       {/* Header */}
       <div className="flex items-center gap-2 mb-5">
         <Network className="text-zinc-400" size={18} />
-        <h3 className="text-base font-bold text-white">
+        <h3 className="text-lg font-bold text-white">
           {t('ontology.title')}
         </h3>
         {showLoading && (
-          <span className="flex items-center gap-1 text-xs text-zinc-500 ml-1">
+          <span className="flex items-center gap-1 text-sm text-zinc-500 ml-1">
             <Loader2 className="animate-spin" size={12} />
             {t('ontology.analyzing')}
           </span>
@@ -343,12 +332,12 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
 
       {/* Error banner */}
       {displayError && (
-        <div className="bg-amber-950 text-amber-400 border border-amber-800 rounded-lg px-4 py-2 text-sm mb-4">
+        <div className="bg-zinc-800 text-white border border-zinc-700 rounded-lg px-4 py-2 text-sm mb-4">
           {displayError}
         </div>
       )}
 
-      {/* Graph container — relative for absolute overlays */}
+      {/* Graph container */}
       <div className="relative h-[600px] w-full border border-zinc-800 rounded-xl overflow-hidden bg-zinc-950">
         {showLoading && nodes.length === 0 ? (
           <div className="flex items-center justify-center h-full text-zinc-500">
@@ -381,13 +370,11 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
             />
             <MiniMap
               nodeColor={(n) =>
-                n.data?.is_owl
-                  ? '#8b5cf6'
-                  : n.data?.severity_score >= 8
-                    ? '#f59e0b'
-                    : n.data?.severity_score >= 5
-                      ? '#d97706'
-                      : '#0ea5e9'
+                n.data?.severity_score >= 8
+                  ? '#ffffff'
+                  : n.data?.severity_score >= 5
+                    ? '#a1a1aa'
+                    : '#52525b'
               }
               maskColor="rgba(0,0,0,0.7)"
               className="!bg-zinc-900 !border-zinc-700"
@@ -395,7 +382,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
           </ReactFlow>
         )}
 
-        {/* ── WOW 1: Severity Filter Slider ── */}
+        {/* Severity Filter Slider */}
         <div className="absolute bottom-3 left-3 z-10 flex items-center gap-2.5
           bg-zinc-900/80 backdrop-blur-md border border-zinc-700/60 rounded-lg px-3 py-2"
         >
@@ -419,17 +406,17 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               }`}
           />
           {isLiveOverride ? (
-            <span className="text-[10px] text-amber-400/80 font-medium whitespace-nowrap">
+            <span className="text-sm text-zinc-400 font-medium whitespace-nowrap">
               Live Override
             </span>
           ) : (
-            <span className="text-[11px] text-zinc-400 font-mono w-8 text-right tabular-nums">
+            <span className="text-sm text-zinc-400 font-mono w-8 text-right tabular-nums">
               ≥{minSeverity.toFixed(1)}
             </span>
           )}
         </div>
 
-        {/* ── WOW 2: Node Click Side Panel ── */}
+        {/* Node Click Side Panel */}
         {selectedNode && (
           <div className="absolute inset-0 z-20 pointer-events-none">
           <div
@@ -439,7 +426,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
           >
             {/* Panel header */}
             <div className="flex items-center justify-between px-4 pt-4 pb-3 border-b border-zinc-800">
-              <span className="text-xs font-semibold text-zinc-400 uppercase tracking-wider">
+              <span className="text-sm font-semibold text-zinc-400 uppercase tracking-wider">
                 Node Detail
               </span>
               <button
@@ -461,7 +448,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                   {selectedNode.data.label}
                 </h4>
                 <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-zinc-500 capitalize bg-zinc-800 rounded px-1.5 py-0.5">
+                  <span className="text-sm text-zinc-500 capitalize bg-zinc-800 rounded px-1.5 py-0.5">
                     {selectedNode.data.type}
                   </span>
                 </div>
@@ -472,44 +459,44 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                 className={`rounded-lg border p-3 ${severityBorder(selectedNode.data.severity_score ?? 0)}`}
               >
                 <div className="flex items-center justify-between mb-1">
-                  <span className="text-[11px] text-zinc-500 font-medium uppercase tracking-wide">
+                  <span className="text-sm text-zinc-500 font-medium uppercase tracking-wide">
                     Severity Score
                   </span>
                   <span
-                    className={`text-[10px] px-1.5 py-0.5 rounded-full font-medium ${severityBadge(selectedNode.data.severity_score ?? 0)}`}
+                    className={`text-sm px-1.5 py-0.5 rounded-full font-medium ${severityBadge(selectedNode.data.severity_score ?? 0)}`}
                   >
                     {severityLabel(selectedNode.data.severity_score ?? 0)}
                   </span>
                 </div>
                 <p className="text-2xl font-bold text-zinc-100 tabular-nums">
                   {(selectedNode.data.severity_score ?? 0).toFixed(1)}
-                  <span className="text-xs text-zinc-500 font-normal ml-1">/ 10</span>
+                  <span className="text-sm text-zinc-500 font-normal ml-1">/ 10</span>
                 </p>
               </div>
 
               {/* OWL Reasoning Path */}
               {selectedNode.data.is_owl && (
                 <div>
-                  <h5 className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider mb-2">
+                  <h5 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
                     OWL Ontology Classification
                   </h5>
-                  <div className="bg-sky-950/30 border border-sky-800/40 rounded-lg p-3 space-y-2">
+                  <div className="bg-zinc-800/60 border border-zinc-700/40 rounded-lg p-3 space-y-2">
                     {selectedNode.data.owl_class && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-zinc-500">Class</span>
-                        <span className="text-xs px-2 py-0.5 rounded-md bg-sky-500/20 border border-sky-700/50 text-sky-200 font-mono font-semibold">
+                        <span className="text-sm text-zinc-500">Class</span>
+                        <span className="text-sm px-2 py-0.5 rounded-md bg-zinc-700 border border-zinc-600 text-white font-mono font-semibold">
                           {selectedNode.data.owl_class}
                         </span>
                       </div>
                     )}
-                    <p className="text-[10px] text-sky-300/70">
+                    <p className="text-sm text-zinc-400">
                       Detected via OWL class hierarchy inference
                     </p>
                     {selectedNode.data.instance_count > 0 && (
                       <div className="flex items-center gap-2">
-                        <span className="text-[10px] text-zinc-500">Instances</span>
-                        <span className="text-xs text-amber-300 font-mono font-semibold">{selectedNode.data.instance_count}</span>
-                        <span className="text-[10px] text-zinc-600">accumulated</span>
+                        <span className="text-sm text-zinc-500">Instances</span>
+                        <span className="text-sm text-white font-mono font-semibold">{selectedNode.data.instance_count}</span>
+                        <span className="text-sm text-zinc-600">accumulated</span>
                       </div>
                     )}
                   </div>
@@ -519,7 +506,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               {/* Reasoning path details */}
               {selectedNode.data.reasoning_path && selectedNode.data.reasoning_path.length > 0 && (
                 <div>
-                  <h5 className="text-[11px] font-semibold text-sky-400 uppercase tracking-wider mb-2">
+                  <h5 className="text-sm font-semibold text-white uppercase tracking-wider mb-2">
                     Inference Chain
                   </h5>
                   <div className="space-y-1.5">
@@ -529,9 +516,9 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                     ).map((step, i) => (
                       <div
                         key={i}
-                        className="bg-sky-950/20 border border-sky-800/30 rounded-md px-2.5 py-1.5"
+                        className="bg-zinc-800/40 border border-zinc-700/30 rounded-md px-2.5 py-1.5"
                       >
-                        <p className="text-[10px] text-sky-300 leading-relaxed">
+                        <p className="text-sm text-zinc-300 leading-relaxed">
                           {typeof step === 'string' ? step : step.description}
                         </p>
                       </div>
@@ -543,7 +530,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
               {/* Evidence placeholder (non-OWL nodes) */}
               {!selectedNode.data.is_owl && !selectedNode.data.reasoning_path && (
                 <div>
-                  <h5 className="text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-2">
+                  <h5 className="text-sm font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                     Associated Risk Signals (Evidence)
                   </h5>
                   <div className="space-y-2">
@@ -555,7 +542,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
                       />
                     ))}
                   </div>
-                  <p className="text-[10px] text-zinc-600 mt-2 text-center">
+                  <p className="text-sm text-zinc-600 mt-2 text-center">
                     Evidence linking coming soon
                   </p>
                 </div>
@@ -584,14 +571,13 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
       {/* Legend */}
       <div className="flex flex-wrap gap-x-4 gap-y-1 mt-3 px-1">
         {[
-          { color: '#f59e0b', label: 'Critical (≥8)' },
-          { color: '#d97706', label: 'Warning (5–7)' },
-          { color: '#0ea5e9', label: 'Safe (<5)' },
-          { color: '#8b5cf6', label: 'OWL Inferred' },
+          { color: '#ffffff', label: 'Critical (≥8)' },
+          { color: '#a1a1aa', label: 'Warning (5–7)' },
+          { color: '#52525b', label: 'Safe (<5)' },
         ].map((item) => (
           <div
             key={item.label}
-            className="flex items-center gap-1.5 text-xs text-zinc-500"
+            className="flex items-center gap-1.5 text-sm text-zinc-500"
           >
             <span
               className="w-2 h-2 rounded-sm flex-shrink-0"
@@ -600,10 +586,10 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
             {item.label}
           </div>
         ))}
-        <div className="flex items-center gap-1.5 text-xs text-zinc-500 ml-2 border-l border-zinc-700 pl-3">
+        <div className="flex items-center gap-1.5 text-sm text-zinc-500 ml-2 border-l border-zinc-700 pl-3">
           <span
             className="inline-block w-5 h-0.5 flex-shrink-0"
-            style={{ background: '#f59e0b' }}
+            style={{ background: '#ffffff' }}
           />
           {t('ontology.escalation')}
         </div>

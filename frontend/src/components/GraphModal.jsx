@@ -35,21 +35,21 @@ function layoutGraph(nodes, edges) {
   };
 }
 
-/* ── Node colors ── */
+/* ── Node colors (monochrome) ── */
 const TYPE_COLORS = {
   review:     { bg: '#18181b', border: '#52525b', text: '#a1a1aa', badge: '#52525b' },
-  risk:       { bg: '#1c1306', border: '#b45309', text: '#fbbf24', badge: '#92400e' },
-  regulation: { bg: '#0f0a2e', border: '#7c3aed', text: '#c4b5fd', badge: '#5b21b6' },
-  department: { bg: '#05192d', border: '#0284c7', text: '#7dd3fc', badge: '#075985' },
-  exposure:   { bg: '#1c1306', border: '#f59e0b', text: '#fbbf24', badge: '#b45309' },
+  risk:       { bg: '#3f3f46', border: '#71717a', text: '#ffffff', badge: '#52525b' },
+  regulation: { bg: '#27272a', border: '#a1a1aa', text: '#e4e4e7', badge: '#71717a' },
+  department: { bg: '#27272a', border: '#71717a', text: '#a1a1aa', badge: '#52525b' },
+  exposure:   { bg: '#3f3f46', border: '#ffffff', text: '#ffffff', badge: '#71717a' },
   // Full graph fallback types
-  signal:     { bg: '#1c1306', border: '#b45309', text: '#fbbf24', badge: '#92400e' },
-  event:      { bg: '#1c1306', border: '#d97706', text: '#fcd34d', badge: '#92400e' },
-  impact:     { bg: '#1c0a0a', border: '#dc2626', text: '#fca5a5', badge: '#991b1b' },
-  response:   { bg: '#052e16', border: '#16a34a', text: '#86efac', badge: '#166534' },
-  category:   { bg: '#1c1306', border: '#b45309', text: '#fbbf24', badge: '#92400e' },
-  root_cause: { bg: '#1c0a0a', border: '#dc2626', text: '#fca5a5', badge: '#991b1b' },
-  risk_type:  { bg: '#0f0a2e', border: '#7c3aed', text: '#c4b5fd', badge: '#5b21b6' },
+  signal:     { bg: '#3f3f46', border: '#71717a', text: '#ffffff', badge: '#52525b' },
+  event:      { bg: '#3f3f46', border: '#a1a1aa', text: '#e4e4e7', badge: '#52525b' },
+  impact:     { bg: '#27272a', border: '#d4d4d8', text: '#ffffff', badge: '#71717a' },
+  response:   { bg: '#27272a', border: '#71717a', text: '#a1a1aa', badge: '#52525b' },
+  category:   { bg: '#3f3f46', border: '#71717a', text: '#ffffff', badge: '#52525b' },
+  root_cause: { bg: '#27272a', border: '#d4d4d8', text: '#ffffff', badge: '#71717a' },
+  risk_type:  { bg: '#27272a', border: '#a1a1aa', text: '#e4e4e7', badge: '#71717a' },
 };
 
 function getColors(data) {
@@ -84,7 +84,7 @@ function ModalNode({ data }) {
         {isOwl && (
           <span style={{
             fontSize: 8, padding: '1px 5px', borderRadius: 9999,
-            background: '#0ea5e933', color: '#7dd3fc', fontWeight: 600,
+            background: '#52525b', color: '#e4e4e7', fontWeight: 600,
           }}>OWL</span>
         )}
         {severity != null && (
@@ -256,10 +256,10 @@ export default function GraphModal({ ontology, subgraph, onClose, onNavigatePlay
         {/* Legend */}
         <div className="flex items-center gap-4 px-6 py-3 border-t border-zinc-800">
           {[
-            { color: '#b45309', label: 'Risk' },
-            { color: '#7c3aed', label: 'Regulation' },
-            { color: '#0284c7', label: 'Department' },
-            { color: '#f59e0b', label: 'Exposure' },
+            { color: '#71717a', label: 'Risk' },
+            { color: '#a1a1aa', label: 'Regulation' },
+            { color: '#71717a', label: 'Department' },
+            { color: '#ffffff', label: 'Exposure' },
             { color: '#52525b', label: 'Review' },
           ].map((item) => (
             <div key={item.label} className="flex items-center gap-1.5 text-xs text-zinc-500">

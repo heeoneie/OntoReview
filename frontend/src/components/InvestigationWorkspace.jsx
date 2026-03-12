@@ -3,12 +3,12 @@ import { useLang } from '../contexts/LangContext';
 function SectionHeader({ label, count }) {
   return (
     <div className="flex items-center gap-2 mb-3">
-      <div className="w-1 h-3 bg-sky-500 rounded-full" />
-      <span className="text-[11px] font-semibold uppercase tracking-[.12em] text-zinc-500">
+      <div className="w-1 h-3 bg-white rounded-full" />
+      <span className="text-sm font-semibold uppercase tracking-[.12em] text-zinc-500">
         {label}
       </span>
       {count != null && count > 0 && (
-        <span className="text-[11px] text-zinc-600 tabular-nums">{count}</span>
+        <span className="text-sm text-zinc-600 tabular-nums">{count}</span>
       )}
       <div className="flex-1 border-t border-zinc-800/50" />
     </div>

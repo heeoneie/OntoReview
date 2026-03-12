@@ -9,32 +9,32 @@ import { getAgentConfigs, updateAgentConfig, simulateAgent } from '../api/client
 const AGENT_META = {
   legal: {
     icon: Scale,
-    gradient: 'from-sky-500/20 to-sky-900/10',
-    border: 'border-sky-800/50',
-    accent: 'text-sky-400',
-    badge: 'bg-sky-950 text-sky-300 border-sky-800',
-    ring: 'ring-sky-500/30',
+    gradient: 'from-zinc-800/40 to-zinc-900/20',
+    border: 'border-zinc-700/50',
+    accent: 'text-white',
+    badge: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+    ring: 'ring-zinc-500/30',
   },
   cs: {
     icon: Headphones,
-    gradient: 'from-sky-500/20 to-sky-900/10',
-    border: 'border-sky-800/50',
-    accent: 'text-sky-400',
-    badge: 'bg-sky-950 text-sky-300 border-sky-800',
-    ring: 'ring-sky-500/30',
+    gradient: 'from-zinc-800/40 to-zinc-900/20',
+    border: 'border-zinc-700/50',
+    accent: 'text-white',
+    badge: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+    ring: 'ring-zinc-500/30',
   },
   operations: {
     icon: Settings2,
-    gradient: 'from-amber-500/20 to-amber-900/10',
-    border: 'border-amber-800/50',
-    accent: 'text-amber-400',
-    badge: 'bg-amber-950 text-amber-300 border-amber-800',
-    ring: 'ring-amber-500/30',
+    gradient: 'from-zinc-800/40 to-zinc-900/20',
+    border: 'border-zinc-700/50',
+    accent: 'text-white',
+    badge: 'bg-zinc-800 text-zinc-300 border-zinc-700',
+    ring: 'ring-zinc-500/30',
   },
 };
 
 const AUTONOMY_COLORS = [
-  '', 'bg-zinc-600', 'bg-zinc-500', 'bg-sky-600', 'bg-amber-500', 'bg-amber-400',
+  '', 'bg-zinc-600', 'bg-zinc-500', 'bg-zinc-400', 'bg-zinc-300', 'bg-white',
 ];
 
 const RISK_CATEGORIES = [
@@ -97,11 +97,11 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
             <Icon className={meta.accent} size={22} />
           </div>
           <div>
-            <h3 className="text-white font-bold text-base">{t(`agent.${agentType}`)}</h3>
-            <p className="text-zinc-500 text-xs mt-0.5">{config[descKey]}</p>
+            <h3 className="text-white font-bold text-lg">{t(`agent.${agentType}`)}</h3>
+            <p className="text-zinc-500 text-sm mt-0.5">{config[descKey]}</p>
           </div>
         </div>
-        {saving && <span className="text-xs text-zinc-500 animate-pulse">saving...</span>}
+        {saving && <span className="text-sm text-zinc-500 animate-pulse">saving...</span>}
       </div>
 
       {/* Autonomy Level */}
@@ -123,7 +123,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
             />
           ))}
         </div>
-        <p className="text-xs text-zinc-600">
+        <p className="text-sm text-zinc-600">
           {t(`agent.autonomyDesc${localConfig.autonomy_level}`)}
         </p>
       </div>
@@ -132,10 +132,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
       <div className="space-y-2">
         <div className="flex items-center justify-between">
           <span className="text-sm text-zinc-400 font-medium">{t('agent.escalationThreshold')}</span>
-          <span className={`text-sm font-bold ${
-            localConfig.escalation_threshold >= 8 ? 'text-amber-300'
-              : localConfig.escalation_threshold >= 5 ? 'text-amber-400' : 'text-sky-400'
-          }`}>{localConfig.escalation_threshold}</span>
+          <span className="text-sm font-bold text-white">{localConfig.escalation_threshold}</span>
         </div>
         <input
           type="range" min="1" max="10" step="0.5"
@@ -145,7 +142,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
           onTouchEnd={() => handleSave('escalation_threshold', localConfig.escalation_threshold)}
           className="w-full accent-zinc-400 h-1.5"
         />
-        <p className="text-xs text-zinc-600">{t('agent.escalationDesc')}</p>
+        <p className="text-sm text-zinc-600">{t('agent.escalationDesc')}</p>
       </div>
 
       {/* Auto Response Toggle */}
@@ -160,13 +157,13 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
         >
           {localConfig.auto_response ? (
             <>
-              <ToggleRight className="text-sky-400" size={24} />
-              <span className="text-xs text-sky-400 font-medium">{t('agent.autoResponseOn')}</span>
+              <ToggleRight className="text-white" size={24} />
+              <span className="text-sm text-white font-medium">{t('agent.autoResponseOn')}</span>
             </>
           ) : (
             <>
               <ToggleLeft className="text-zinc-600" size={24} />
-              <span className="text-xs text-zinc-600 font-medium">{t('agent.autoResponseOff')}</span>
+              <span className="text-sm text-zinc-600 font-medium">{t('agent.autoResponseOff')}</span>
             </>
           )}
         </button>
@@ -177,7 +174,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
         <span className="text-sm text-zinc-400 font-medium">{t('agent.allowedActions')}</span>
         <div className="flex flex-wrap gap-1.5">
           {localConfig.allowed_actions?.map((action) => (
-            <span key={action} className={`px-2 py-0.5 rounded-md text-xs border ${meta.badge}`}>
+            <span key={action} className={`px-2 py-0.5 rounded-md text-sm border ${meta.badge}`}>
               {action.replace(/_/g, ' ')}
             </span>
           ))}
@@ -200,10 +197,8 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
             {/* Severity slider */}
             <div className="space-y-1">
               <div className="flex justify-between">
-                <label className="text-xs text-zinc-500">{t('agent.severityInput')}</label>
-                <span className={`text-xs font-bold ${
-                  testSeverity >= 8 ? 'text-amber-300' : testSeverity >= 5 ? 'text-amber-400' : 'text-sky-400'
-                }`}>{testSeverity}</span>
+                <label className="text-sm text-zinc-500">{t('agent.severityInput')}</label>
+                <span className="text-sm font-bold text-white">{testSeverity}</span>
               </div>
               <input
                 type="range" min="1" max="10" step="1"
@@ -215,7 +210,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
 
             {/* Category select */}
             <div className="space-y-1">
-              <label className="text-xs text-zinc-500">{t('agent.categoryInput')}</label>
+              <label className="text-sm text-zinc-500">{t('agent.categoryInput')}</label>
               <select
                 value={testCategory}
                 onChange={(e) => setTestCategory(e.target.value)}
@@ -227,7 +222,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
 
             {/* Review text */}
             <div className="space-y-1">
-              <label className="text-xs text-zinc-500">{t('agent.reviewInput')}</label>
+              <label className="text-sm text-zinc-500">{t('agent.reviewInput')}</label>
               <input
                 type="text" value={testReview}
                 onChange={(e) => setTestReview(e.target.value)}
@@ -242,7 +237,7 @@ function AgentCard({ config, meta, t, lang, onUpdate, onSaved }) {
               className={`w-full py-2 rounded-lg text-sm font-medium transition-colors ${
                 simLoading
                   ? 'bg-zinc-700 text-zinc-500 cursor-wait'
-                  : `bg-zinc-800 ${meta.accent} hover:bg-zinc-700 border ${meta.border}`
+                  : `bg-zinc-800 text-white hover:bg-zinc-700 border ${meta.border}`
               }`}
             >
               {simLoading ? t('agent.simulating') : t('agent.simulate')}
@@ -263,17 +258,13 @@ function SimulationResult({ result, t, meta }) {
   const isEscalate = result.decision === 'escalate';
 
   return (
-    <div className={`rounded-xl border p-4 space-y-3 ${
-      isEscalate
-        ? 'bg-amber-950/30 border-amber-800/50'
-        : 'bg-sky-950/30 border-sky-800/50'
-    }`}>
+    <div className={`rounded-xl border p-4 space-y-3 bg-zinc-800/50 border-zinc-700/50`}>
       <div className="flex items-center justify-between">
         <h4 className="text-sm font-bold text-white">{t('agent.simResult')}</h4>
-        <span className={`px-2.5 py-0.5 rounded-full text-xs font-bold border ${
+        <span className={`px-2.5 py-0.5 rounded-full text-sm font-bold border ${
           isEscalate
-            ? 'bg-amber-950 text-amber-400 border-amber-800'
-            : 'bg-sky-950 text-sky-400 border-sky-800'
+            ? 'bg-zinc-800 text-white border-zinc-600'
+            : 'bg-zinc-800 text-zinc-400 border-zinc-700'
         }`}>
           {isEscalate ? (
             <span className="flex items-center gap-1"><AlertTriangle size={11} /> {t('agent.escalate')}</span>
@@ -283,7 +274,7 @@ function SimulationResult({ result, t, meta }) {
         </span>
       </div>
 
-      <div className="space-y-2 text-xs">
+      <div className="space-y-2 text-sm">
         <Row label={t('agent.confidence')} value={`${Math.round((result.confidence || 0) * 100)}%`} />
         <Row label={t('agent.message')} value={result.message} />
         {result.escalation_target && (
@@ -296,7 +287,7 @@ function SimulationResult({ result, t, meta }) {
             <span className="text-zinc-500">{t('agent.actionsTaken')}</span>
             <div className="flex flex-wrap gap-1 mt-1">
               {result.actions_taken.map((a, i) => (
-                <span key={i} className={`px-2 py-0.5 rounded text-xs border ${meta.badge}`}>
+                <span key={i} className={`px-2 py-0.5 rounded text-sm border ${meta.badge}`}>
                   {a.replace(/_/g, ' ')}
                 </span>
               ))}
@@ -352,8 +343,8 @@ export default function AgentSetup() {
 
   if (error) {
     return (
-      <div className="bg-amber-950/30 border border-amber-800/50 rounded-2xl p-8 text-center">
-        <p className="text-amber-400 font-medium">{t('risk.errGeneric')}</p>
+      <div className="bg-zinc-800 border border-zinc-700 rounded-2xl p-8 text-center">
+        <p className="text-white font-medium">{t('risk.errGeneric')}</p>
       </div>
     );
   }
@@ -383,7 +374,7 @@ export default function AgentSetup() {
 
       {/* Toast */}
       {toast && (
-        <div className="fixed bottom-6 right-6 bg-sky-950 text-sky-400 border border-sky-800 px-4 py-2.5 rounded-xl text-sm font-medium shadow-2xl animate-fade-in">
+        <div className="fixed bottom-6 right-6 bg-zinc-800 text-white border border-zinc-700 px-4 py-2.5 rounded-xl text-sm font-medium shadow-2xl animate-fade-in">
           {toast}
         </div>
       )}

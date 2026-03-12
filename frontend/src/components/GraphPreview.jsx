@@ -5,10 +5,7 @@ import { Maximize2, Network, Loader2 } from 'lucide-react';
 import { useLang } from '../contexts/LangContext';
 import GraphModal from './GraphModal';
 
-/* ── Reasoning subgraph extraction ──
-   From the full ontology, extract a 6–8 node "risk reasoning path":
-   Review → Risk Signal → Risk Category → Regulation → Escalation → Exposure
-*/
+/* ── Reasoning subgraph extraction ── */
 const REGULATION_MAP = {
   ProductLiability: 'FDA Cosmetic Act',
   ClassAction: 'Consumer Product Safety Act',
@@ -39,51 +36,42 @@ function buildReasoningSubgraph(ontology, timeline, kpi) {
   const edges = [];
   let id = 1;
 
-  // 1. Review source
   const reviewId = `n${id++}`;
   nodes.push({ id: reviewId, type: 'reasoning', data: { label: 'Customer Review', nodeType: 'review' }, position: { x: 0, y: 0 } });
 
-  // 2. Risk signal
   const signalId = `n${id++}`;
   const signalLabel = topRisk.name.length > 30 ? topRisk.name.slice(0, 28) + '…' : topRisk.name;
   nodes.push({ id: signalId, type: 'reasoning', data: { label: signalLabel, nodeType: 'risk', severity: topRisk.severity }, position: { x: 0, y: 0 } });
   edges.push({ id: `e${reviewId}-${signalId}`, source: reviewId, target: signalId, label: 'detected' });
 
-  // 3. Risk category
   if (riskClass) {
     const catId = `n${id++}`;
     nodes.push({ id: catId, type: 'reasoning', data: { label: riskClass, nodeType: 'risk' }, position: { x: 0, y: 0 } });
     edges.push({ id: `e${signalId}-${catId}`, source: signalId, target: catId, label: 'classified' });
 
-    // 4. Regulation
     const regId = `n${id++}`;
     nodes.push({ id: regId, type: 'reasoning', data: { label: regulation, nodeType: 'regulation' }, position: { x: 0, y: 0 } });
     edges.push({ id: `e${catId}-${regId}`, source: catId, target: regId, label: 'triggers' });
 
-    // 5. Potential escalation (ClassAction if not already)
     if (riskClass !== 'ClassAction' && topRisk.severity >= 8) {
       const escId = `n${id++}`;
       nodes.push({ id: escId, type: 'reasoning', data: { label: 'Potential Class Action', nodeType: 'risk' }, position: { x: 0, y: 0 } });
       edges.push({ id: `e${regId}-${escId}`, source: regId, target: escId, label: 'may escalate' });
 
-      // 6. Exposure
       const expId = `n${id++}`;
       nodes.push({ id: expId, type: 'reasoning', data: { label: `$${exposure.toLocaleString()}`, nodeType: 'exposure' }, position: { x: 0, y: 0 } });
       edges.push({ id: `e${escId}-${expId}`, source: escId, target: expId, label: 'exposure' });
     } else {
-      // 5. Exposure directly from regulation
       const expId = `n${id++}`;
       nodes.push({ id: expId, type: 'reasoning', data: { label: `$${exposure.toLocaleString()}`, nodeType: 'exposure' }, position: { x: 0, y: 0 } });
       edges.push({ id: `e${regId}-${expId}`, source: regId, target: expId, label: 'exposure' });
     }
   } else {
-    // No classification — direct to exposure
     const expId = `n${id++}`;
     nodes.push({ id: expId, type: 'reasoning', data: { label: `$${exposure.toLocaleString()}`, nodeType: 'exposure' }, position: { x: 0, y: 0 } });
     edges.push({ id: `e${signalId}-${expId}`, source: signalId, target: expId, label: 'exposure' });
   }
 
-  // Add additional high-severity signals if available (up to 2 more)
   const additionalRisks = timeline.filter((i) => i.id !== topRisk.id && i.severity >= 7).slice(0, 2);
   for (const risk of additionalRisks) {
     const rId = `n${id++}`;
@@ -95,7 +83,7 @@ function buildReasoningSubgraph(ontology, timeline, kpi) {
   return { nodes, edges };
 }
 
-/* ── Dagre layout (top-to-bottom for reasoning flow) ── */
+/* ── Dagre layout ── */
 const NODE_W = 160;
 const NODE_H = 44;
 
@@ -117,13 +105,13 @@ function layoutGraph(nodes, edges) {
   };
 }
 
-/* ── Node colors by type ── */
+/* ── Node colors by type (monochrome) ── */
 const TYPE_COLORS = {
   review:     { bg: '#27272a', border: '#52525b', text: '#a1a1aa' },
-  risk:       { bg: '#451a03', border: '#b45309', text: '#fbbf24' },
-  regulation: { bg: '#1e1b4b', border: '#7c3aed', text: '#c4b5fd' },
-  department: { bg: '#082f49', border: '#0284c7', text: '#7dd3fc' },
-  exposure:   { bg: '#451a03', border: '#f59e0b', text: '#fbbf24' },
+  risk:       { bg: '#3f3f46', border: '#71717a', text: '#ffffff' },
+  regulation: { bg: '#27272a', border: '#a1a1aa', text: '#e4e4e7' },
+  department: { bg: '#27272a', border: '#71717a', text: '#a1a1aa' },
+  exposure:   { bg: '#3f3f46', border: '#ffffff', text: '#ffffff' },
 };
 
 function ReasoningNode({ data }) {
@@ -185,12 +173,12 @@ export default function GraphPreview({ ontology, timeline, kpi, loading, onNavig
         <div className="flex items-center justify-between mb-3">
           <div className="flex items-center gap-2">
             <Network className="text-zinc-500" size={13} />
-            <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+            <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">
               {t('graph.title')}
             </span>
           </div>
           {totalNodes > 0 && (
-            <span className="text-[11px] text-zinc-600 tabular-nums">
+            <span className="text-sm text-zinc-600 tabular-nums">
               {totalNodes} nodes · {totalEdges} edges
             </span>
           )}
@@ -201,12 +189,12 @@ export default function GraphPreview({ ontology, timeline, kpi, loading, onNavig
           {loading ? (
             <div className="flex items-center justify-center h-full text-zinc-500 gap-2">
               <Loader2 className="animate-spin" size={16} />
-              <span className="text-xs">Analyzing…</span>
+              <span className="text-sm">Analyzing…</span>
             </div>
           ) : !layouted ? (
             <div className="flex flex-col items-center justify-center h-full text-zinc-600 gap-2">
               <Network size={24} />
-              <span className="text-xs">{t('graph.empty')}</span>
+              <span className="text-sm">{t('graph.empty')}</span>
             </div>
           ) : (
             <ReactFlow
@@ -235,7 +223,7 @@ export default function GraphPreview({ ontology, timeline, kpi, loading, onNavig
         {(ontology || layouted) && (
           <button
             onClick={() => setModalOpen(true)}
-            className="w-full mt-3 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/80 transition-colors text-xs font-medium"
+            className="w-full mt-3 flex items-center justify-center gap-2 px-3 py-2 rounded-xl bg-zinc-800 border border-zinc-700 text-zinc-400 hover:text-zinc-200 hover:bg-zinc-700/80 transition-colors text-sm font-medium"
           >
             <Maximize2 size={13} />
             {t('graph.expand')}

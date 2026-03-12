@@ -1,29 +1,29 @@
 import { Search, Shield, FileCheck, Settings2 } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { id: 'intelligence', icon: Search,    tooltipKo: '인텔리전스',   tooltipEn: 'Intelligence' },
-  { id: 'response',     icon: Shield,    tooltipKo: '대응 전략',     tooltipEn: 'Response' },
-  { id: 'compliance',   icon: FileCheck, tooltipKo: '컴플라이언스', tooltipEn: 'Compliance' },
-  { id: 'studio',       icon: Settings2, tooltipKo: '스튜디오',     tooltipEn: 'Studio' },
+  { id: 'intelligence', icon: Search,    labelKo: '인텔리전스', labelEn: 'Intel' },
+  { id: 'response',     icon: Shield,    labelKo: '대응',       labelEn: 'Response' },
+  { id: 'compliance',   icon: FileCheck, labelKo: '컴플라이언스', labelEn: 'Comply' },
+  { id: 'studio',       icon: Settings2, labelKo: '스튜디오',   labelEn: 'Studio' },
 ];
 
 export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle }) {
   return (
-    <aside className="fixed left-0 top-0 bottom-0 w-14 bg-zinc-900 border-r border-zinc-800 flex flex-col items-center z-50">
+    <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-zinc-900 border-r border-zinc-800 flex flex-col items-center z-50">
       {/* Logo */}
       <div className="h-14 flex items-center justify-center">
         <span className="text-white text-lg font-black select-none">◆</span>
       </div>
 
-      {/* Nav icons */}
+      {/* Nav icons + labels */}
       <nav className="flex-1 flex flex-col items-center gap-1 pt-2">
-        {NAV_ITEMS.map(({ id, icon: Icon, tooltipKo, tooltipEn }) => {
+        {NAV_ITEMS.map(({ id, icon: Icon, labelKo, labelEn }) => {
           const isActive = activeTab === id;
           return (
             <button
               key={id}
               onClick={() => onTabChange(id)}
-              className={`group relative w-10 h-10 flex items-center justify-center rounded-md transition-colors ${
+              className={`group relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md transition-colors ${
                 isActive
                   ? 'text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
@@ -31,12 +31,11 @@ export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle 
             >
               {/* Active left border indicator */}
               {isActive && (
-                <span className="absolute left-0 top-1.5 bottom-1.5 w-0.5 rounded-r bg-sky-500" />
+                <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r bg-white" />
               )}
               <Icon size={20} strokeWidth={isActive ? 2 : 1.5} />
-              {/* Tooltip */}
-              <span className="pointer-events-none absolute left-full ml-3 px-2 py-1 text-xs font-medium text-white bg-zinc-700 rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap z-[60]">
-                {lang === 'ko' ? tooltipKo : tooltipEn}
+              <span className="text-[9px] font-medium leading-tight text-center">
+                {lang === 'ko' ? labelKo : labelEn}
               </span>
             </button>
           );

@@ -143,13 +143,6 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
     }
   };
 
-  /**
-   * Unified analysis pipeline — single button triggers everything:
-   * Step 1: Ingest mock reviews + Web Discovery (parallel)
-   * Step 2: AI risk classification (demo scenario)
-   * Step 3: Legal precedent matching (ontology graph fetch)
-   * Step 4: KPI/Timeline/Audit refresh → done
-   */
   const handleAnalysis = async () => {
     if (analysisLoading) return;
     const brand = brandName.trim() || INDUSTRY_INPUT_CFG[industry].default1;
@@ -165,7 +158,6 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
     setErrors({});
 
     try {
-      // Step 1: Ingest mock reviews + Web discovery (parallel)
       const [ingestRes] = await Promise.all([
         runFullDemo(),
         handleDiscoveryScan(brand, product),
@@ -173,15 +165,11 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       const d = ingestRes.data;
       setScanId(d.scan_id ?? null);
 
-      // Step 2: AI risk classification (demo scenario with brand context)
-
       const demoRes = await runDemoScenario(industry, lang);
       const demoData = injectBrand(demoRes.data, brand);
       setDemoResult(demoData);
       if (demoData.compliance) setCompliance(demoData.compliance);
       if (demoData.meeting) setMeeting(demoData.meeting);
-
-      // Step 3: Precedent matching — fetch ontology graph
 
       if (demoData.ontology) {
         setOntology(demoData.ontology);
@@ -192,17 +180,13 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         } catch { /* ontology graph optional */ }
       }
 
-      // Step 4: Refresh KPI/Timeline/Audit
-
       await refreshDashboard();
 
-      // Brief pause to show completion state
       await new Promise((r) => setTimeout(r, 600));
     } catch (err) {
       setErrors({ analysis: getErrorMessage(err, t) });
     } finally {
       setAnalysisLoading(false);
-
     }
   };
 
@@ -216,7 +200,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
   return (
     <div className="space-y-6">
 
-      {/* ═══ 1. Hero Command ═══ */}
+      {/* 1. Hero Command */}
       <HeroCommand
         expanded={!hasData}
         industry={industry}
@@ -231,19 +215,19 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         analysisLoading={analysisLoading}
       />
 
-      {/* ═══ 2. Loading ═══ */}
+      {/* 2. Loading */}
       {analysisLoading && (
         <RiskLoadingSpinner mode="fullDemo" />
       )}
 
       {/* Error */}
       {errors.analysis && (
-        <div className="bg-amber-950/50 border border-amber-800/60 text-amber-400 rounded-xl px-4 py-3 text-sm">
+        <div className="bg-zinc-800 border border-zinc-700 text-white rounded-xl px-4 py-3 text-sm">
           {errors.analysis}
         </div>
       )}
 
-      {/* ═══ 3. Exposure Hero ═══ */}
+      {/* 3. Exposure Hero */}
       {hasData && (
         <ExposureHero
           kpi={kpi}
@@ -254,13 +238,13 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         />
       )}
 
-      {/* ═══ 4. Investigation Workspace (2-column) ═══ */}
+      {/* 4. Investigation Workspace (2-column) */}
       {hasData && (demoResult || timeline.length > 0 || discoveryResults || ontology) && (
         <InvestigationWorkspace
           leftCount={timeline.length + (discoveryResults?.results?.length || 0)}
           left={
             <>
-              {/* AI Reasoning Chain — TOP of evidence feed */}
+              {/* AI Reasoning Chain */}
               <ReasoningChain timeline={timeline} kpi={kpi} visible={timeline.length > 0} />
 
               {/* Risk Timeline */}
@@ -268,22 +252,22 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                 <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <Clock className="text-amber-400" size={15} />
+                      <Clock className="text-zinc-400" size={15} />
                       <span className="text-sm font-semibold text-white">{t('risk.timelineTitle')}</span>
                     </div>
-                    <span className="text-xs text-zinc-600 tabular-nums">
+                    <span className="text-sm text-zinc-600 tabular-nums">
                       {lang === 'ko' ? `${timeline.length}건 탐지` : `${timeline.length} detections`}
                     </span>
                   </div>
                   <div className="space-y-2 max-h-[420px] overflow-y-auto">
                     {timeline.map((item) => {
                       const sev = item.severity >= 9 ? 'critical' : item.severity >= 7 ? 'high' : 'medium';
-                      const dotColor = sev === 'critical' ? 'bg-amber-400' : sev === 'high' ? 'bg-amber-500' : 'bg-zinc-500';
+                      const dotColor = sev === 'critical' ? 'bg-white' : sev === 'high' ? 'bg-zinc-400' : 'bg-zinc-600';
                       const badgeStyle = sev === 'critical'
-                        ? 'bg-amber-500/15 text-amber-300'
+                        ? 'bg-zinc-700 text-white'
                         : sev === 'high'
-                          ? 'bg-amber-400/10 text-amber-400'
-                          : 'bg-zinc-700 text-zinc-400';
+                          ? 'bg-zinc-800 text-zinc-300'
+                          : 'bg-zinc-800 text-zinc-400';
 
                       return (
                         <div key={item.id} className="group flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
@@ -291,13 +275,13 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-white font-medium truncate">{item.name}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-[11px] text-zinc-500">{item.source}</span>
+                              <span className="text-sm text-zinc-500">{item.source}</span>
                               {item.case_id && (
-                                <span className="text-[11px] text-zinc-600 font-mono">{item.case_id}</span>
+                                <span className="text-sm text-zinc-600 font-mono">{item.case_id}</span>
                               )}
                             </div>
                           </div>
-                          <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeStyle}`}>
+                          <span className={`text-sm font-semibold px-2 py-0.5 rounded-md flex-shrink-0 ${badgeStyle}`}>
                             {item.severity}
                           </span>
                         </div>
@@ -312,10 +296,10 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                 <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-5">
                   <div className="flex items-center justify-between mb-4">
                     <div className="flex items-center gap-2">
-                      <Globe className="text-cyan-400" size={15} />
+                      <Globe className="text-zinc-400" size={15} />
                       <span className="text-sm font-semibold text-white">{t('discovery.title')}</span>
                       {discoveryResults && (
-                        <span className="text-xs text-zinc-500 ml-1">
+                        <span className="text-sm text-zinc-500 ml-1">
                           {t('discovery.result')
                             .replace('{count}', discoveryResults.total_scanned)
                             .replace('{risks}', discoveryResults.risks_found)}
@@ -325,7 +309,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                     <button
                       onClick={() => handleDiscoveryScan()}
                       disabled={discoveryLoading || !brandName.trim()}
-                      className="px-3 py-1.5 bg-cyan-900/40 text-cyan-300 rounded-lg text-xs font-medium border border-cyan-800/60 hover:bg-cyan-900/60 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
+                      className="px-3 py-1.5 bg-zinc-800 text-zinc-300 rounded-lg text-sm font-medium border border-zinc-700 hover:bg-zinc-700 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5 transition-colors"
                     >
                       {discoveryLoading
                         ? <><Loader2 className="animate-spin" size={12} />{t('discovery.scanning')}</>
@@ -335,7 +319,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
 
                   {discoveryLoading && (
                     <div className="flex items-center justify-center py-8 gap-2 text-zinc-500 text-sm">
-                      <Loader2 className="animate-spin text-cyan-400" size={18} />
+                      <Loader2 className="animate-spin text-zinc-400" size={18} />
                       {t('discovery.scanning')}
                     </div>
                   )}
@@ -344,12 +328,12 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                     <div className="space-y-2 max-h-80 overflow-y-auto">
                       {discoveryResults.results.map((item) => (
                         <div key={item.url} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
-                          <AlertTriangle className="text-amber-400 flex-shrink-0 mt-0.5" size={14} />
+                          <AlertTriangle className="text-white flex-shrink-0 mt-0.5" size={14} />
                           <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
-                            <p className="text-xs text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
+                            <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
                             <div className="flex items-center gap-2 mt-2">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-[10px] font-medium text-zinc-400">
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-400">
                                 <Globe size={9} />
                                 {item.source_domain}
                               </span>
@@ -357,7 +341,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                                 href={item.url}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-[10px] text-cyan-400 hover:text-cyan-300 transition-colors"
+                                className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors"
                               >
                                 <ExternalLink size={9} />
                                 {t('discovery.source')}

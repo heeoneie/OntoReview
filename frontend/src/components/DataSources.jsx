@@ -15,7 +15,6 @@ export default function DataSources({ kpi, discoveryResults, hasScanned }) {
   const [elapsed, setElapsed] = useState(0);
   const lastSyncRef = useRef(Date.now());
 
-  // Reset timer when data changes
   useEffect(() => {
     if (!hasScanned) return;
     lastSyncRef.current = Date.now();
@@ -37,11 +36,11 @@ export default function DataSources({ kpi, discoveryResults, hasScanned }) {
       <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <Database className="text-zinc-500" size={13} />
-          <span className="text-[11px] font-bold uppercase tracking-widest text-zinc-500">
+          <span className="text-sm font-bold uppercase tracking-widest text-zinc-500">
             {t('sources.title')}
           </span>
         </div>
-        <span className="text-[11px] text-zinc-600 tabular-nums">
+        <span className="text-sm text-zinc-600 tabular-nums">
           {t('sources.lastSync')}: {elapsed}{t('sources.secondsAgo')}
         </span>
       </div>
@@ -53,7 +52,7 @@ export default function DataSources({ kpi, discoveryResults, hasScanned }) {
           const connected = count !== null;
           const displayCount = typeof count === 'number'
             ? count.toLocaleString()
-            : count; // 'matched' or null
+            : count;
 
           return (
             <div
@@ -62,15 +61,15 @@ export default function DataSources({ kpi, discoveryResults, hasScanned }) {
             >
               <div className="flex items-center gap-2">
                 {connected ? (
-                  <Check className="text-sky-400" size={12} strokeWidth={3} />
+                  <Check className="text-white" size={12} strokeWidth={3} />
                 ) : (
                   <Minus className="text-zinc-600" size={12} strokeWidth={3} />
                 )}
-                <span className={`text-xs ${connected ? 'text-zinc-300' : 'text-zinc-600'}`}>
+                <span className={`text-sm ${connected ? 'text-zinc-300' : 'text-zinc-600'}`}>
                   {t(src.labelKey)}
                 </span>
               </div>
-              <span className={`text-xs tabular-nums ${connected ? 'text-zinc-300' : 'text-zinc-600'}`}>
+              <span className={`text-sm tabular-nums ${connected ? 'text-zinc-300' : 'text-zinc-600'}`}>
                 {connected ? displayCount : '\u2014'}
               </span>
             </div>

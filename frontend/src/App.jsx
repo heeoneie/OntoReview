@@ -49,7 +49,7 @@ function App() {
       />
 
       {/* Content area */}
-      <div className="flex-1 ml-14 flex flex-col min-h-screen">
+      <div className="flex-1 ml-[72px] flex flex-col min-h-screen">
         <TopBar title={pageTitle} />
 
         <main className="flex-1 px-6 py-5">
