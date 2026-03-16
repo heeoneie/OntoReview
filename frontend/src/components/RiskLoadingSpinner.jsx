@@ -2,19 +2,19 @@ import { useEffect, useState } from 'react';
 import { Loader2, CheckCircle, Radio } from 'lucide-react';
 
 const STEPS = [
-  { label: '4개 채널 신호 수신 및 클러스터링', duration: 2000 },
-  { label: '온톨로지 엔진 인과관계 분석', duration: 8000 },
-  { label: '컴플라이언스 리스크 보고서 생성', duration: 8000 },
-  { label: '경영진 긴급 회의 안건 생성', duration: 8000 },
-  { label: '결과 통합 및 리스크 레벨 산정', duration: 3000 },
+  { label: 'Receiving & clustering signals from 4 channels', duration: 2000 },
+  { label: 'Ontology engine causal analysis', duration: 8000 },
+  { label: 'Generating compliance risk report', duration: 8000 },
+  { label: 'Generating executive meeting agenda', duration: 8000 },
+  { label: 'Aggregating results & calculating risk level', duration: 3000 },
 ];
 
 const FULL_DEMO_STEPS = [
-  { label: '리뷰 수집 및 리스크 분류', duration: 4000 },
-  { label: 'AI 리스크 분석 (온톨로지·컴플라이언스·회의안건)', duration: 12000 },
-  { label: '대시보드 KPI 갱신', duration: 3000 },
-  { label: '웹 탐색 및 브랜드 리스크 스캔', duration: 5000 },
-  { label: '결과 통합 완료', duration: 1000 },
+  { label: 'Collecting reviews & classifying risks', duration: 4000 },
+  { label: 'AI risk analysis (ontology · compliance · agenda)', duration: 12000 },
+  { label: 'Refreshing dashboard KPIs', duration: 3000 },
+  { label: 'Web discovery & brand risk scan', duration: 5000 },
+  { label: 'Finalizing results', duration: 1000 },
 ];
 
 const FULL_DEMO_PARALLEL = [1, 2];
@@ -27,9 +27,9 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
 
   const steps = mode === 'single'
     ? [
-        { label: '분석 데이터 수집 중', duration: 2000 },
-        { label: 'AI 분석 실행 중', duration: 10000 },
-        { label: '결과 정리 중', duration: 2000 },
+        { label: 'Collecting analysis data', duration: 2000 },
+        { label: 'Running AI analysis', duration: 10000 },
+        { label: 'Compiling results', duration: 2000 },
       ]
     : mode === 'fullDemo'
     ? FULL_DEMO_STEPS
@@ -99,13 +99,13 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
           <p className="text-sm font-medium text-zinc-300">
             {mode === 'demo'
               ? currentStep <= 3
-                ? 'AI 엔진 병렬 분석 중...'
-                : '결과 통합 중...'
+                ? 'AI engine parallel analysis in progress...'
+                : 'Aggregating results...'
               : mode === 'fullDemo'
               ? currentStep <= parallelMax
-                ? 'Full Demo 실행 중...'
-                : (steps[currentStep]?.label || '처리 중...')
-              : (steps[currentStep]?.label || '분석 중...')}
+                ? 'Running full analysis...'
+                : (steps[currentStep]?.label || 'Processing...')
+              : (steps[currentStep]?.label || 'Analyzing...')}
           </p>
         </div>
 
@@ -136,7 +136,7 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
                 )}
                 <span className="font-medium">{step.label}</span>
                 {parallel && (
-                  <span className="ml-auto text-sm text-zinc-500 font-semibold border border-zinc-700 px-1.5 rounded">병렬</span>
+                  <span className="ml-auto text-sm text-zinc-500 font-semibold border border-zinc-700 px-1.5 rounded">parallel</span>
                 )}
               </div>
             );
@@ -146,8 +146,8 @@ export default function RiskLoadingSpinner({ mode = 'demo' }) {
         {(mode === 'demo' || mode === 'fullDemo') && (
           <p className="mt-4 text-sm text-zinc-600">
             {mode === 'fullDemo'
-              ? 'AI 분석 · 대시보드 갱신 병렬 처리 중'
-              : '온톨로지 · 컴플라이언스 · 회의안건 동시 생성 중'}
+              ? 'AI analysis & dashboard refresh running in parallel'
+              : 'Ontology · compliance · agenda generating simultaneously'}
           </p>
         )}
       </div>
