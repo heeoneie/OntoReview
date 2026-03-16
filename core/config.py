@@ -15,13 +15,19 @@ NEGATIVE_RATING_THRESHOLD = 3
 RECENT_PERIOD_DAYS = 30
 COMPARISON_PERIOD_DAYS = 60
 
-# LLM provider: "openai" (prod default) or "google" (local dev)
-_VALID_LLM_PROVIDERS = {"openai", "google"}
+# LLM provider: "bedrock" (AWS Nova) or "openai" (prod) or "google" (local dev)
+_VALID_LLM_PROVIDERS = {"openai", "google", "bedrock"}
 LLM_PROVIDER = os.getenv("LLM_PROVIDER", "openai").strip().lower()
 if LLM_PROVIDER not in _VALID_LLM_PROVIDERS:
     raise ValueError(
         f"LLM_PROVIDER must be one of {_VALID_LLM_PROVIDERS}, got '{LLM_PROVIDER}'"
     )
+
+# AWS Bedrock settings
+AWS_ACCESS_KEY_ID = os.getenv("AWS_ACCESS_KEY_ID")
+AWS_SECRET_ACCESS_KEY = os.getenv("AWS_SECRET_ACCESS_KEY")
+AWS_DEFAULT_REGION = os.getenv("AWS_DEFAULT_REGION", "us-east-1")
+BEDROCK_MODEL_ID = "us.amazon.nova-2-lite-v1:0"  # Amazon Nova 2 Lite (inference profile)
 
 # LLM settings
 LLM_MODEL = "gpt-4o-mini"               # OpenAI primary model
