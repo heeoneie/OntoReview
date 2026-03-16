@@ -22,10 +22,10 @@ import RiskBreakdown from './RiskBreakdown';
 // ── Constants ──
 
 const INDUSTRY_INPUT_CFG = {
-  ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: '넥서스',       labelKey2: 'risk.label2_ecommerce', default2: '파워 충전기 65W' },
-  hospital:  { labelKey1: 'risk.label1_hospital',  default1: '한빛의료재단', labelKey2: 'risk.label2_hospital',  default2: '무릎 인공관절 수술' },
-  finance:   { labelKey1: 'risk.label1_finance',   default1: '페이트러스트', labelKey2: 'risk.label2_finance',   default2: '간편결제 앱 v3.0' },
-  gaming:    { labelKey1: 'risk.label1_gaming',     default1: '크로노게임즈', labelKey2: 'risk.label2_gaming',    default2: '크로노워 모바일' },
+  ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: 'LANEIGE',          labelKey2: 'risk.label2_ecommerce', default2: 'Water Sleeping Mask' },
+  hospital:  { labelKey1: 'risk.label1_hospital',  default1: 'MedStar Health',   labelKey2: 'risk.label2_hospital',  default2: 'Knee Replacement Surgery' },
+  finance:   { labelKey1: 'risk.label1_finance',   default1: 'PayTrust',         labelKey2: 'risk.label2_finance',   default2: 'Mobile Pay App v3.0' },
+  gaming:    { labelKey1: 'risk.label1_gaming',     default1: 'ChronoGames',      labelKey2: 'risk.label2_gaming',    default2: 'ChronoWar Mobile' },
 };
 
 // ── Helpers ──
