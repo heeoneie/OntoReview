@@ -114,11 +114,10 @@ export default function HeroCommand({
             <input
               type="text"
               value={brandName}
-              onChange={(e) => onBrandChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+              readOnly
               placeholder={brandLabel}
               disabled={analysisLoading}
-              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-44 bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors disabled:opacity-50 cursor-default"
             />
           </div>
 
@@ -127,11 +126,10 @@ export default function HeroCommand({
             <input
               type="text"
               value={productName}
-              onChange={(e) => onProductChange(e.target.value)}
-              onKeyDown={(e) => e.key === 'Enter' && !analysisLoading && onRunAnalysis()}
+              readOnly
               placeholder={productLabel}
               disabled={analysisLoading}
-              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-zinc-500 transition-colors disabled:opacity-50"
+              className="w-full bg-zinc-800/60 border border-zinc-700/50 rounded-lg px-3 py-2 text-sm text-white placeholder-zinc-600 focus:outline-none transition-colors disabled:opacity-50 cursor-default"
             />
           </div>
 
