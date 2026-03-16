@@ -109,7 +109,7 @@ def _call_bedrock(prompt, system_prompt, temperature):
         "system": [{"text": system_prompt}],
         "inferenceConfig": {
             "temperature": temperature,
-            "maxTokens": 1024,
+            "maxTokens": 2048,
         },
     }
 
