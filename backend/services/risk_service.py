@@ -346,106 +346,110 @@ def generate_meeting_agenda(analysis_data: dict) -> dict:
 
 DEMO_DATA = {
     "ecommerce": {
-        "incident_title": "OO 충전기 폭발 사건",
+        "incident_title": "LANEIGE Water Sleeping Mask — Chemical Burn Incident",
         "incident_summary": (
-            "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일 제품 결함 사건이 동시 감지되었습니다. "
-            "화재위험·불매운동 징후·법적 분쟁·기술적 결함 폭로가 복합 발생하여 "
-            "치명적 리스크(RED)로 자동 격상되었습니다."
+            "Simultaneous detection across Amazon Reviews, YouTube, Reddit, and FDA Recall DB. "
+            "Multiple reports of severe chemical burns, allergic reactions, and suspected contaminated batches. "
+            "Escalated to critical risk (RED) due to compound signals: product liability, class action indicators, and regulatory investigation."
         ),
         "clustering_reason": (
-            "4개 채널에서 '폭발', '화재', '설계결함', '법적 대응', '불매' 키워드 동시 감지 "
-            "→ 온톨로지 엔진 동일 사건 클러스터링 판정"
+            "Keywords 'chemical burn', 'allergic reaction', 'FDA', 'lawsuit', 'recall' detected simultaneously "
+            "across 4 channels → Ontology engine clustered as single incident"
         ),
         "signals": [
             {
-                "platform": "Coupang",
+                "platform": "Amazon",
                 "channel_type": "internal",
                 "data_type": "Product Review",
-                "item_name": "초소형 고속 충전기 65W",
+                "item_name": "LANEIGE Water Sleeping Mask 70ml",
                 "content": (
-                    "사용 중에 퍽 소리가 나면서 타는 냄새가 나요. "
-                    "아이 방에서 쓰다가 불날 뻔했습니다. 제품 결함 같은데 환불해주세요."
+                    "After using this overnight, I woke up with severe chemical burns on my face. "
+                    "My skin was red, blistered, and peeling. I had to go to the ER. "
+                    "I think this batch is contaminated. Filing a complaint with the FDA."
                 ),
                 "metadata": {
                     "rating": 1, "is_verified_purchase": True,
-                    "timestamp": "2026-02-20T10:30:00Z",
+                    "timestamp": "2026-03-10T08:30:00Z",
                 },
-                "risk_indicators": ["화재위험", "폭발", "안전결함"],
-                "metric_label": "유사 민원 리뷰",
-                "viral_risk": "보통",
+                "risk_indicators": ["Chemical burn", "ER visit", "FDA complaint"],
+                "metric_label": "Similar complaints",
+                "viral_risk": "Medium",
                 "comment_growth": [
-                    {"t": "+5분", "delta": 2},
-                    {"t": "+10분", "delta": 5},
-                    {"t": "+20분", "delta": 9},
+                    {"t": "+5m", "delta": 3},
+                    {"t": "+10m", "delta": 7},
+                    {"t": "+20m", "delta": 14},
                 ],
             },
             {
                 "platform": "YouTube",
                 "channel_type": "external",
                 "data_type": "Video Comment",
-                "video_title": "[리뷰] 가성비 끝판왕 OO 충전기 한 달 사용기",
-                "channel_name": "테크마스터TV",
+                "video_title": "LANEIGE Water Sleeping Mask HONEST Review — Is It Safe?",
+                "channel_name": "SkincareTruth",
                 "content": (
-                    "이거 저도 샀는데 커뮤니티 보니까 저만 터진 게 아니더라고요. "
-                    "제조사 대응도 엉망이라는데 불매해야 하는 거 아님?"
+                    "DO NOT BUY THIS. I had the same reaction — severe rash and swelling overnight. "
+                    "Multiple people in the comments reporting the same issue. "
+                    "This is a class action waiting to happen. Someone needs to sue LANEIGE."
                 ),
                 "metadata": {
-                    "likes": 156, "replies_count": 24,
-                    "author_subscriber_count": 500, "timestamp": "2026-02-20T11:15:00Z",
+                    "likes": 892, "replies_count": 147,
+                    "author_subscriber_count": 45000, "timestamp": "2026-03-11T14:20:00Z",
                 },
-                "risk_indicators": ["불매운동 징후", "집단 불만", "확산성 높음"],
-                "metric_label": "대댓글",
-                "viral_risk": "높음",
+                "risk_indicators": ["Class action mention", "Mass complaints", "High virality"],
+                "metric_label": "Replies",
+                "viral_risk": "High",
                 "comment_growth": [
-                    {"t": "+5분", "delta": 8},
-                    {"t": "+10분", "delta": 19},
-                    {"t": "+20분", "delta": 41},
+                    {"t": "+5m", "delta": 12},
+                    {"t": "+10m", "delta": 34},
+                    {"t": "+20m", "delta": 78},
                 ],
             },
             {
-                "platform": "Naver Blog",
+                "platform": "Reddit",
                 "channel_type": "external",
-                "data_type": "Blog Post",
-                "post_title": "실제 경험담: OO 충전기 폭발 사고와 제조사의 무책임한 대응",
+                "data_type": "Post",
+                "post_title": "PSA: LANEIGE Water Sleeping Mask causing chemical burns — multiple reports",
                 "content": (
-                    "충전기가 터져서 멀티탭까지 다 탔습니다. "
-                    "업체에 전화했더니 사용자 과실이라며 보상을 거부하네요. "
-                    "소비자원에 고발할 예정입니다. (사진 첨부)"
+                    "Posting this as a warning. After one night of use, I woke up with 2nd degree burns on my cheeks. "
+                    "Dermatologist confirmed chemical burn from cosmetic product. "
+                    "I've contacted a personal injury attorney. If anyone else is affected, "
+                    "there may be grounds for a class action lawsuit."
                 ),
                 "metadata": {
-                    "visitor_count": 1200, "is_top_exposure": True,
-                    "timestamp": "2026-02-19T18:00:00Z",
+                    "visitor_count": 23000, "is_top_exposure": True,
+                    "timestamp": "2026-03-10T22:00:00Z",
                 },
-                "risk_indicators": ["법적 분쟁", "증거 포함", "고노출 데이터"],
-                "metric_label": "방문자",
-                "viral_risk": "높음",
+                "risk_indicators": ["Legal action", "Medical evidence", "High exposure post"],
+                "metric_label": "Upvotes",
+                "viral_risk": "High",
                 "comment_growth": [
-                    {"t": "+5분", "delta": 94},
-                    {"t": "+10분", "delta": 267},
-                    {"t": "+20분", "delta": 531},
+                    {"t": "+5m", "delta": 156},
+                    {"t": "+10m", "delta": 412},
+                    {"t": "+20m", "delta": 890},
                 ],
             },
             {
-                "platform": "Community (뽐뿌)",
+                "platform": "FDA Recall DB",
                 "channel_type": "external",
-                "data_type": "Post Text",
-                "post_title": "형들 이번 OO 충전기 이슈 정리해준다.txt",
+                "data_type": "Regulatory Alert",
+                "post_title": "FDA MedWatch — Adverse Event Reports for LANEIGE Water Sleeping Mask",
                 "content": (
-                    "회로 설계 자체가 65W를 못 버티게 설계됨. "
-                    "뜯어보니까 콘덴서 싸구려 썼네. "
-                    "이거 조만간 터질 일만 남았다 다들 쓰지 마라."
+                    "47 adverse event reports filed in the past 30 days for LANEIGE Water Sleeping Mask. "
+                    "Reported injuries include chemical burns, severe allergic reactions, and permanent scarring. "
+                    "FDA is evaluating whether to issue a safety alert. "
+                    "Batch numbers 2026-WS-0118 through 2026-WS-0203 flagged for investigation."
                 ),
                 "metadata": {
-                    "view_count": 4500, "recommend_count": 89,
-                    "board_name": "자유게시판", "timestamp": "2026-02-20T13:45:00Z",
+                    "view_count": 8900, "recommend_count": 0,
+                    "board_name": "MedWatch", "timestamp": "2026-03-12T09:00:00Z",
                 },
-                "risk_indicators": ["기술적 결함 폭로", "전문가 분석 포함", "여론 선동"],
-                "metric_label": "추천·공감",
-                "viral_risk": "높음",
+                "risk_indicators": ["Regulatory investigation", "47 adverse events", "Potential recall"],
+                "metric_label": "Adverse reports",
+                "viral_risk": "High",
                 "comment_growth": [
-                    {"t": "+5분", "delta": 11},
-                    {"t": "+10분", "delta": 29},
-                    {"t": "+20분", "delta": 57},
+                    {"t": "+5m", "delta": 0},
+                    {"t": "+10m", "delta": 0},
+                    {"t": "+20m", "delta": 0},
                 ],
             },
         ],
@@ -839,7 +843,7 @@ risk_type 노드에 severity 10 포함."""
         persist_ontology(db, result, source="demo")
         _enrich_nodes_with_owl(result)
         return result
-    return {"nodes": [], "links": [], "summary": "온톨로지 생성 실패"}
+    return {"nodes": [], "links": [], "summary": "Ontology generation failed"}
 
 
 def _demo_generate_compliance(
@@ -860,45 +864,45 @@ def _demo_generate_compliance(
 
 ## 출력 형식
 {{
-  "report_title": "OO 충전기 폭발 사건 긴급 리스크 보고서",
-  "report_date": "2026-02-20",
-  "overall_risk_level": "위험",
-  "monitoring_summary": "쿠팡·YouTube·네이버 블로그·뽐뿌 4개 채널에서 동일한 충전기 화재/폭발 사건이 동시 감지되었습니다. 개별 채널 황색 경보가 복합 발생으로 치명적(RED) 수준으로 격상되었습니다.",  # pylint: disable=line-too-long
+  "report_title": "LANEIGE Water Sleeping Mask — Emergency Risk Report",
+  "report_date": "2026-03-12",
+  "overall_risk_level": "Danger",
+  "monitoring_summary": "Simultaneous detection across Amazon Reviews, YouTube, Reddit, and FDA Recall DB. Multiple chemical burn reports and regulatory investigation flagged. Individual channel alerts compounded to critical (RED) level.",
   "monitored_channels": [
-    {{"channel": "쿠팡 리뷰", "feed_count": 1, "risk_count": 1, "status": "active"}},
-    {{"channel": "YouTube 댓글", "feed_count": 1, "risk_count": 1, "status": "active"}},
-    {{"channel": "네이버 블로그", "feed_count": 1, "risk_count": 1, "status": "active"}},
-    {{"channel": "뽐뿌 커뮤니티", "feed_count": 1, "risk_count": 1, "status": "active"}}
+    {{"channel": "Amazon Reviews", "feed_count": 1, "risk_count": 1, "status": "active"}},
+    {{"channel": "YouTube Comments", "feed_count": 1, "risk_count": 1, "status": "active"}},
+    {{"channel": "Reddit", "feed_count": 1, "risk_count": 1, "status": "active"}},
+    {{"channel": "FDA Recall DB", "feed_count": 1, "risk_count": 1, "status": "active"}}
   ],
   "risk_assessment": {{
-    "legal": {{"level": "high", "description": "법적 리스크 설명"}},
-    "reputation": {{"level": "high", "description": "평판 리스크 설명"}},
-    "operational": {{"level": "high", "description": "운영 리스크 설명"}},
-    "safety": {{"level": "high", "description": "안전 리스크 설명"}}
+    "legal": {{"level": "high", "description": "Legal risk description"}},
+    "reputation": {{"level": "high", "description": "Reputation risk description"}},
+    "operational": {{"level": "high", "description": "Operational risk description"}},
+    "safety": {{"level": "high", "description": "Safety risk description"}}
   }},
   "risk_events": [
     {{
-      "id": 1, "severity": "critical", "category": "제품 안전 결함",
-      "channel": "쿠팡 리뷰", "description": "설명",
-      "affected_count": 1, "recommended_action": "즉각 리콜 검토"
+      "id": 1, "severity": "critical", "category": "Product Safety Defect",
+      "channel": "Amazon Reviews", "description": "Description",
+      "affected_count": 47, "recommended_action": "Immediate recall assessment"
     }},
     {{
-      "id": 2, "severity": "high", "category": "집단 불매운동 징후",
-      "channel": "YouTube 댓글", "description": "설명",
-      "affected_count": 156, "recommended_action": "대응 공지 게시"
+      "id": 2, "severity": "high", "category": "Class Action Indicators",
+      "channel": "YouTube Comments", "description": "Description",
+      "affected_count": 892, "recommended_action": "Issue public response statement"
     }},
     {{
-      "id": 3, "severity": "high", "category": "법적 분쟁 가능성",
-      "channel": "네이버 블로그", "description": "설명",
-      "affected_count": 1200, "recommended_action": "법무팀 즉각 검토"
+      "id": 3, "severity": "high", "category": "Litigation Risk",
+      "channel": "Reddit", "description": "Description",
+      "affected_count": 23000, "recommended_action": "Legal team immediate review"
     }},
     {{
-      "id": 4, "severity": "high", "category": "기술적 결함 공개 폭로",
-      "channel": "뽐뿌 커뮤니티", "description": "설명",
-      "affected_count": 4500, "recommended_action": "제품 긴급 검수"
+      "id": 4, "severity": "high", "category": "Regulatory Investigation",
+      "channel": "FDA Recall DB", "description": "Description",
+      "affected_count": 8900, "recommended_action": "Emergency batch inspection"
     }}
   ],
-  "next_actions": ["즉각 조치 1", "즉각 조치 2", "즉각 조치 3"]
+  "next_actions": ["Immediate action 1", "Immediate action 2", "Immediate action 3"]
 }}
 
 각 risk_events의 description을 실제 내용 기반으로 상세히 작성하세요. next_actions 3개 이상."""
@@ -906,9 +910,9 @@ def _demo_generate_compliance(
     content = call_openai_json(client, prompt, system_prompt=_get_system_prompt(lang))
     result = extract_json_from_text(content)
     return result if result else {
-        "report_title": "OO 충전기 폭발 사건 긴급 리스크 보고서",
-        "overall_risk_level": "위험",
-        "monitoring_summary": "4개 채널에서 치명적 리스크 감지됨",
+        "report_title": "LANEIGE Water Sleeping Mask — Emergency Risk Report",
+        "overall_risk_level": "Danger",
+        "monitoring_summary": "Critical risk detected across 4 channels",
         "monitored_channels": [],
         "risk_assessment": {},
         "risk_events": [],
@@ -946,8 +950,8 @@ def _demo_generate_meeting(client, incident_context: str, lang: str = "ko") -> d
     content = call_openai_json(client, prompt, system_prompt=_get_system_prompt(lang))
     result = extract_json_from_text(content)
     return result if result else {
-        "meeting_title": "초긴급 충전기 화재 사건 경영진 대응 회의",
-        "urgency": "초긴급",
+        "meeting_title": "LANEIGE Chemical Burn Crisis — Executive Response Meeting",
+        "urgency": "Critical",
         "attendees": [],
         "agenda_items": [],
         "preparation": [],
@@ -1007,7 +1011,7 @@ def _real_generate_ontology(  # pylint: disable=too-many-arguments,too-many-posi
     if result and "nodes" in result:
         persist_ontology(db, result, source="youtube")
         return result
-    return {"nodes": [], "links": [], "summary": "온톨로지 생성 실패"}
+    return {"nodes": [], "links": [], "summary": "Ontology generation failed"}
 
 
 def _real_generate_compliance(  # pylint: disable=too-many-arguments,too-many-positional-arguments
