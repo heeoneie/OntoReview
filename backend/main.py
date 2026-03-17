@@ -112,6 +112,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+from backend.middleware.rate_limit import RateLimitMiddleware  # pylint: disable=wrong-import-position
+app.add_middleware(RateLimitMiddleware)
+
 app.include_router(agent.router, prefix="/api/agent", tags=["agent"])
 app.include_router(compliance.router, prefix="/api/compliance", tags=["compliance"])
 app.include_router(data.router, prefix="/api/data", tags=["data"])
