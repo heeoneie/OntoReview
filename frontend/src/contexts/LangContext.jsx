@@ -4,7 +4,7 @@ import { translations } from '../i18n';
 export const LangContext = createContext(null);
 
 export function LangProvider({ children }) {
-  const [lang, setLang] = useState('ko');
+  const [lang, setLang] = useState('en');
 
   const t = (path) => {
     const keys = path.split('.');
