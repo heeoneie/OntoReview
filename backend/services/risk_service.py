@@ -346,14 +346,14 @@ def generate_meeting_agenda(analysis_data: dict) -> dict:
 
 DEMO_DATA = {
     "ecommerce": {
-        "incident_title": "LANEIGE Water Sleeping Mask — Chemical Burn Incident",
+        "incident_title": "OO — Product Mislabeling & Food Safety Incident",
         "incident_summary": (
             "Simultaneous detection across Amazon Reviews, YouTube, Reddit, and FDA Recall DB. "
-            "Multiple reports of severe chemical burns, allergic reactions, and suspected contaminated batches. "
-            "Escalated to critical risk (RED) due to compound signals: product liability, class action indicators, and regulatory investigation."
+            "Multiple reports of false protein claims, undeclared allergens, and foodborne illness. "
+            "Escalated to critical risk (RED) due to compound signals: false advertising, product liability, and regulatory investigation."
         ),
         "clustering_reason": (
-            "Keywords 'chemical burn', 'allergic reaction', 'FDA', 'lawsuit', 'recall' detected simultaneously "
+            "Keywords 'mislabeled', 'allergen', 'food poisoning', 'lawsuit', 'recall' detected simultaneously "
             "across 4 channels → Ontology engine clustered as single incident"
         ),
         "signals": [
@@ -361,17 +361,17 @@ DEMO_DATA = {
                 "platform": "Amazon",
                 "channel_type": "internal",
                 "data_type": "Product Review",
-                "item_name": "LANEIGE Water Sleeping Mask 70ml",
+                "item_name": "OO",
                 "content": (
-                    "After using this overnight, I woke up with severe chemical burns on my face. "
-                    "My skin was red, blistered, and peeling. I had to go to the ER. "
-                    "I think this batch is contaminated. Filing a complaint with the FDA."
+                    "Says 20g of protein on the package but my dietitian tested it and it's more like 14g. "
+                    "This is false advertising. I've been tracking macros for a medical condition "
+                    "and this mislabeling could seriously hurt people. Filing an FTC complaint."
                 ),
                 "metadata": {
                     "rating": 1, "is_verified_purchase": True,
                     "timestamp": "2026-03-10T08:30:00Z",
                 },
-                "risk_indicators": ["Chemical burn", "ER visit", "FDA complaint"],
+                "risk_indicators": ["False advertising", "Nutrition mislabeling", "FTC complaint"],
                 "metric_label": "Similar complaints",
                 "viral_risk": "Medium",
                 "comment_growth": [
@@ -384,18 +384,18 @@ DEMO_DATA = {
                 "platform": "YouTube",
                 "channel_type": "external",
                 "data_type": "Video Comment",
-                "video_title": "LANEIGE Water Sleeping Mask HONEST Review — Is It Safe?",
-                "channel_name": "SkincareTruth",
+                "video_title": "OO HONEST Review — Are the nutrition labels accurate?",
+                "channel_name": "FoodTruthLab",
                 "content": (
-                    "DO NOT BUY THIS. I had the same reaction — severe rash and swelling overnight. "
-                    "Multiple people in the comments reporting the same issue. "
-                    "This is a class action waiting to happen. Someone needs to sue LANEIGE."
+                    "DO NOT trust the label. I'm severely allergic to soy and had an anaphylactic reaction. "
+                    "There's nothing about soy on the ingredients list but it's clearly in there. "
+                    "This is a class action waiting to happen. Undeclared allergens are an FDA recall trigger."
                 ),
                 "metadata": {
                     "likes": 892, "replies_count": 147,
                     "author_subscriber_count": 45000, "timestamp": "2026-03-11T14:20:00Z",
                 },
-                "risk_indicators": ["Class action mention", "Mass complaints", "High virality"],
+                "risk_indicators": ["Class action mention", "Undeclared allergen", "High virality"],
                 "metric_label": "Replies",
                 "viral_risk": "High",
                 "comment_growth": [
@@ -408,10 +408,10 @@ DEMO_DATA = {
                 "platform": "Reddit",
                 "channel_type": "external",
                 "data_type": "Post",
-                "post_title": "PSA: LANEIGE Water Sleeping Mask causing chemical burns — multiple reports",
+                "post_title": "PSA: OO causing food poisoning — multiple reports in r/PlantBased",
                 "content": (
-                    "Posting this as a warning. After one night of use, I woke up with 2nd degree burns on my cheeks. "
-                    "Dermatologist confirmed chemical burn from cosmetic product. "
+                    "Posting this as a warning. My family ate these patties and within hours "
+                    "we all had severe stomach cramps and vomiting. Checked the batch — grey discoloration inside. "
                     "I've contacted a personal injury attorney. If anyone else is affected, "
                     "there may be grounds for a class action lawsuit."
                 ),
@@ -419,7 +419,7 @@ DEMO_DATA = {
                     "visitor_count": 23000, "is_top_exposure": True,
                     "timestamp": "2026-03-10T22:00:00Z",
                 },
-                "risk_indicators": ["Legal action", "Medical evidence", "High exposure post"],
+                "risk_indicators": ["Legal action", "Foodborne illness", "High exposure post"],
                 "metric_label": "Upvotes",
                 "viral_risk": "High",
                 "comment_growth": [
@@ -432,18 +432,18 @@ DEMO_DATA = {
                 "platform": "FDA Recall DB",
                 "channel_type": "external",
                 "data_type": "Regulatory Alert",
-                "post_title": "FDA MedWatch — Adverse Event Reports for LANEIGE Water Sleeping Mask",
+                "post_title": "FDA MedWatch — Adverse Event Reports for OO",
                 "content": (
-                    "47 adverse event reports filed in the past 30 days for LANEIGE Water Sleeping Mask. "
-                    "Reported injuries include chemical burns, severe allergic reactions, and permanent scarring. "
-                    "FDA is evaluating whether to issue a safety alert. "
-                    "Batch numbers 2026-WS-0118 through 2026-WS-0203 flagged for investigation."
+                    "23 adverse event reports filed in the past 30 days for OO. "
+                    "Reported issues include undeclared soy allergen, E. coli contamination suspicion, "
+                    "and protein content mislabeling. "
+                    "FDA is evaluating whether to issue a safety alert."
                 ),
                 "metadata": {
                     "view_count": 8900, "recommend_count": 0,
                     "board_name": "MedWatch", "timestamp": "2026-03-12T09:00:00Z",
                 },
-                "risk_indicators": ["Regulatory investigation", "47 adverse events", "Potential recall"],
+                "risk_indicators": ["Regulatory investigation", "23 adverse events", "Potential recall"],
                 "metric_label": "Adverse reports",
                 "viral_risk": "High",
                 "comment_growth": [

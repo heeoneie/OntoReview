@@ -47,13 +47,26 @@ def get_kpi_summary(db: Session = Depends(get_db)):
         or 0
     )
 
-    # Total legal exposure from matched precedents
-    total_legal_exposure_usd = (
-        db.query(func.sum(Node.estimated_loss_usd))  # pylint: disable=not-callable
+    # Total legal exposure — deduplicate by case_id, take max per case
+    # This prevents inflated totals from multiple reviews matching the same precedent
+    from sqlalchemy import distinct
+    case_exposures = (
+        db.query(
+            func.coalesce(Node.case_id, Node.name),  # pylint: disable=not-callable
+            func.max(Node.estimated_loss_usd),  # pylint: disable=not-callable
+        )
         .filter(Node.estimated_loss_usd > 0)
-        .scalar()
-        or 0
+        .group_by(func.coalesce(Node.case_id, Node.name))  # pylint: disable=not-callable
+        .all()
     )
+    raw_exposure = sum(row[1] for row in case_exposures)
+    # IMPORTANT: Do NOT remove this cap without replacing with tiered dynamic cap.
+    # KPI tooltip promises "Conservative upper-bound estimate" — cap is the
+    # implementation of that promise.
+    # TODO(Phase 2): Replace with category-tiered cap from exposure_caps.yaml
+    #   Food/CPG: $25M, Hospital-Medical: $100M, Finance-Fintech: $250M
+    #   Triggered by: first 3+ pilot customers with real data
+    total_legal_exposure_usd = min(raw_exposure, 10_000_000) if raw_exposure > 0 else 0
 
     return {
         "total_scanned_reviews": total_reviews,

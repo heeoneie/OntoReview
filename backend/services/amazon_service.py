@@ -89,471 +89,314 @@ def detect_risk_candidate(text: Optional[str]) -> bool:
     return any(re.search(rf"\b{kw}\b", lower) for kw in _RISK_CANDIDATE_KEYWORDS)
 
 MOCK_REVIEWS = [
-    # ── Existing 10 reviews ──────────────────────────────────────────────
+    # ── Food/CPG Reviews (50 total) ──────────────────────────────────────
     {
         "rating": 1,
-        "title": "Caused severe rash on my face",
+        "title": "Protein content 30% less than labeled — misleading",
         "body": (
-            "I used this K-Beauty snail mucin serum for two days and developed a severe rash "
-            "across my cheeks and forehead. Had to go to urgent care. This should NOT be sold "
-            "without proper FDA testing. Considering a lawsuit against the seller."
+            "I had this plant-based burger patty tested by my dietitian and the protein content "
+            "is only 14g, not the 20g claimed on the package. This is false advertising. "
+            "I rely on accurate nutrition info for a medical condition. Filing an FTC complaint."
         ),
     },
     {
         "rating": 1,
-        "title": "Chemical burn from this product",
+        "title": "Undeclared soy allergen caused my daughter's anaphylaxis",
         "body": (
-            "This Korean skincare toner gave me a chemical burn. My dermatologist said the "
-            "pH level is dangerously low. I ended up in the hospital ER. This product needs "
-            "an immediate recall."
+            "My daughter is severely allergic to soy. Nothing on the label mentions soy, but she "
+            "had an anaphylactic reaction within minutes of eating this patty. We had to use an EpiPen "
+            "and rush to the ER. Filing an FDA complaint and contacting a lawyer."
         ),
     },
     {
         "rating": 1,
-        "title": "Allergic reaction — DO NOT BUY",
+        "title": "Patties had grey discoloration inside the package",
         "body": (
-            "Severe allergic reaction after using this K-Beauty sheet mask. My eyes swelled shut "
-            "and I had to use an EpiPen. The ingredients list doesn't even match what's in the "
-            "product. Toxic chemicals not disclosed. Filing FDA complaint."
+            "Opened the package and the patties were grey and green in the center. Clearly "
+            "spoiled or improperly stored. My kid took a bite before I noticed and got sick "
+            "within hours. This is a food safety hazard."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Food poisoning symptoms 6 hours after eating this",
+        "body": (
+            "Severe stomach cramps, vomiting, and diarrhea starting 6 hours after eating these "
+            "plant-based patties. My wife had the same symptoms. Possible E. coli contamination. "
+            "Reporting to FDA MedWatch."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Sodium content is triple what the label claims",
+        "body": (
+            "I'm on a sodium-restricted diet for heart disease. Had this tested by my nutritionist "
+            "and the sodium is 890mg per serving, not the 300mg on the label. This could literally "
+            "kill someone. Filing an FTC complaint for false labeling."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Found plastic fragment in the patty",
+        "body": (
+            "Bit into this burger patty and felt something hard. Pulled out a clear plastic shard "
+            "about 1cm long. This is a choking hazard and a manufacturing defect. Saved the fragment "
+            "and contacted the company. No response after 2 weeks."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Expired product sold at full price",
+        "body": (
+            "These plant-based patties arrived already 3 weeks past expiration. The color was off "
+            "and they smelled sour. Amazon is selling expired food and this needs to stop. "
+            "Demanded a refund and reported to FDA."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Mold on the surface before opening",
+        "body": (
+            "Visible white and green mold on two of the four patties inside a sealed, non-expired "
+            "package. The vacuum seal was intact. This is a cold chain or manufacturing contamination "
+            "issue. Reported to FDA and kept evidence."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Nutrition facts don't match independent lab results",
+        "body": (
+            "I sent this product to an independent lab. The protein is 30% lower than claimed, "
+            "fat is 25% higher, and they found undisclosed soy lecithin. Every number on the "
+            "nutrition label is wrong. This is systematic fraud."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Labeled 'organic' but contains GMO ingredients",
+        "body": (
+            "Third-party testing confirmed GMO soy in this 'USDA Organic' labeled product. "
+            "This is a federal labeling violation. I've reported this to the USDA organic integrity "
+            "database and am considering joining a class action."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "E. coli symptoms after consumption — hospitalized",
+        "body": (
+            "Three days after eating these patties I was hospitalized with confirmed E. coli "
+            "infection. Blood in stool, severe dehydration, 5 days in the hospital. CDC has been "
+            "notified. If anyone else is sick, please report it."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Claims '100% plant-based' but contains dairy traces",
+        "body": (
+            "I'm vegan and lactose intolerant. After eating this '100% plant-based' patty I had "
+            "a severe lactose reaction. Had it tested — contains casein (dairy protein). "
+            "This is a lie on the label and dangerous for people with dairy allergies."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Misleading health claims about heart disease",
+        "body": (
+            "The marketing says 'heart-healthy alternative' but the saturated fat per serving "
+            "is higher than a regular beef patty. My cardiologist was shocked when I showed him "
+            "the test results. FTC needs to investigate these health claims."
         ),
     },
     {
         "rating": 2,
-        "title": "Kimchi arrived spoiled and smelled terrible",
+        "title": "Package weight 15% less than stated",
         "body": (
-            "The K-Food kimchi arrived with a bloated bag and smelled like it was fermenting "
-            "way too long. Concerned about food safety. Other Amazon reviews mention similar "
-            "issues — possible cold-chain failure."
+            "Weighed these on my kitchen scale — consistently 15% less than the stated package "
+            "weight. Across 6 boxes, every single one was short. This is systematic and it's "
+            "consumer fraud, plain and simple."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Listeria risk — FDA recall issued but not notified",
+        "body": (
+            "Found out through a news article that this batch was part of a voluntary recall "
+            "for listeria risk. Amazon never notified me. I had already eaten two patties. "
+            "The recall system is broken and consumers are at risk."
         ),
     },
     {
         "rating": 2,
-        "title": "Gochujang paste leaked everywhere",
+        "title": "Ingredients list hides artificial preservatives",
         "body": (
-            "Packaging was terrible. The gochujang container leaked inside the box. Everything "
-            "was sticky and ruined. Product itself tasted off compared to what I buy at H-Mart. "
-            "Disappointing quality control."
+            "The front label says 'no artificial preservatives' but the ingredient list includes "
+            "potassium sorbate and sodium benzoate. These are literally artificial preservatives. "
+            "Deceptive labeling that violates FDA guidelines."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Cross-contamination with gluten despite 'gluten-free' label",
+        "body": (
+            "I have celiac disease and trusted the 'gluten-free' label. Had a severe reaction "
+            "after eating this. Independent testing confirmed gluten above 20ppm — the FDA threshold. "
+            "This is dangerous mislabeling."
+        ),
+    },
+    {
+        "rating": 2,
+        "title": "Saturated fat content understated by 40%",
+        "body": (
+            "Had this product tested at a university food science lab. Saturated fat is 8g per "
+            "serving, not the 5g on the label. For people managing cholesterol, this understatement "
+            "could cause real health harm."
+        ),
+    },
+    {
+        "rating": 1,
+        "title": "Caused severe allergic reaction — missing allergen warning",
+        "body": (
+            "Had a full-body allergic reaction after eating this patty. Turns out it contains "
+            "methylcellulose derived from tree pulp, which I'm allergic to. No allergen warning "
+            "anywhere on the package. This needs to be recalled."
+        ),
+    },
+    {
+        "rating": 2,
+        "title": "Iron content claim unverified by third-party testing",
+        "body": (
+            "The label claims 25% daily iron value. I had this tested — it's closer to 8%. "
+            "For people relying on this as an iron source, the discrepancy is medically relevant. "
+            "The brand should be required to verify these claims."
+        ),
+    },
+    # Rating 3 — moderate concerns
+    {
+        "rating": 3,
+        "title": "Texture was weird but tasted okay",
+        "body": (
+            "The center of the patty had a mushy, almost raw texture even after cooking to "
+            "the recommended temperature. Tasted fine but the texture was off-putting. "
+            "Not sure if this is normal for plant-based or a quality issue."
         ),
     },
     {
         "rating": 3,
-        "title": "Sheet mask is okay but nothing special",
+        "title": "Tastes nothing like the description",
         "body": (
-            "This K-Beauty collagen mask is average. Doesn't feel as hydrating as Korean brands "
-            "I buy from Olive Young directly. Overpriced for what you get. Not bad, just meh."
+            "The marketing says 'indistinguishable from beef' but this tastes like seasoned "
+            "bean paste. Not bad, just misleading. Lower your expectations and it's a decent "
+            "product. But the advertising is definitely exaggerated."
+        ),
+    },
+    {
+        "rating": 3,
+        "title": "Concerned about processing chemicals",
+        "body": (
+            "Looked into the manufacturing process and this uses hexane extraction for the "
+            "protein isolate. There's debate about residual hexane in the final product. "
+            "Would prefer a brand that's transparent about processing methods."
+        ),
+    },
+    {
+        "rating": 3,
+        "title": "Packaging not recyclable despite claims",
+        "body": (
+            "The package says 'recyclable packaging' but my local recycling center says the "
+            "multi-layer film isn't accepted. This is greenwashing. Minor issue compared to "
+            "food safety, but still dishonest."
+        ),
+    },
+    # Rating 4 — minor issues
+    {
+        "rating": 4,
+        "title": "Good product but serving size is misleading",
+        "body": (
+            "The patty is good but the nutrition label serving size is for a 71g patty while "
+            "the actual patty weighs 113g. This makes the calories and fat look lower than "
+            "they really are. Common industry trick but still annoying."
         ),
     },
     {
         "rating": 4,
-        "title": "Love this sunscreen but shipping was slow",
+        "title": "Solid plant-based option, wish it had less sodium",
         "body": (
-            "The Korean sunscreen SPF50 is amazing — lightweight, no white cast. Only issue "
-            "is it took 3 weeks to arrive. Would buy again if shipping improves."
+            "Flavor is great and it grills nicely. My only concern is the sodium — 390mg per "
+            "patty adds up fast if you eat these regularly. Would be 5 stars if they could "
+            "reduce the salt without losing flavor."
+        ),
+    },
+    {
+        "rating": 4,
+        "title": "Good alternative but pricey",
+        "body": (
+            "These plant-based patties are tasty and cook well on the grill. Price is almost "
+            "double regular beef though. Worth it for the environmental angle but the value "
+            "proposition needs work."
+        ),
+    },
+    {
+        "rating": 4,
+        "title": "Kids liked it — good sign",
+        "body": (
+            "Made these for a family BBQ and even the kids ate them without complaining. "
+            "Texture is convincing and the char marks looked great. Would have given 5 stars "
+            "but the patties shrank more than expected."
+        ),
+    },
+    # Rating 5 — positive
+    {
+        "rating": 5,
+        "title": "Best plant-based burger I've ever had",
+        "body": (
+            "Grilled these for a summer cookout and even the beef-lovers were impressed. "
+            "Juicy, great char, holds together well. This is the future of protein. "
+            "Ordering the bulk pack for the season."
         ),
     },
     {
         "rating": 5,
-        "title": "Best tteokbokki sauce ever!",
+        "title": "Finally a plant burger that satisfies",
         "body": (
-            "Authentic Korean rice cake sauce! Tastes exactly like what I had in Seoul. "
-            "Perfect spice level. Already ordered 3 more bottles for friends."
-        ),
-    },
-    {
-        "rating": 3,
-        "title": "Expiration date concerns",
-        "body": (
-            "The K-Food ramen bundle arrived with only 2 months until expiration. For the price "
-            "I paid, I expected at least 6 months. Feels like they're dumping old stock on "
-            "Amazon. Not cool."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Fake product — not the real Korean brand",
-        "body": (
-            "This is NOT genuine Sulwhasoo. The packaging is different, the texture is wrong, "
-            "and it irritated my skin. This seller is selling counterfeit K-Beauty products. "
-            "Amazon needs to crack down on this. Reporting to FTC."
-        ),
-    },
-    # ── 40 new reviews (11-50) ───────────────────────────────────────────
-    # Rating 1 — Product Liability
-    {
-        "rating": 1,
-        "title": "Sunscreen caused blisters on my neck",
-        "body": (
-            "Applied this Korean SPF50 sunscreen before going to the beach and within an hour "
-            "I had painful blister patches all over my neck. I've never reacted to any sunscreen "
-            "before. Had to visit urgent care and missed two days of work."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Serum left a permanent scar",
-        "body": (
-            "This vitamin C serum from a K-Beauty brand left a dark scar on my jawline after "
-            "only three uses. My dermatologist confirmed it was a chemical "
-            "injury from the product. "
-            "I'm documenting everything for a potential lawsuit."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Snail cream gave me hives all over",
-        "body": (
-            "Within minutes of applying this Korean snail cream my arms and face broke out in "
-            "hives. My throat started feeling tight and I had to take Benadryl immediately. "
-            "There is no allergen warning on the label — this is dangerous."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Eye cream caused swollen eyelids for a week",
-        "body": (
-            "My eyelids became extremely swollen after using this K-Beauty eye cream twice. "
-            "I looked like I had been stung by bees. The ophthalmologist said the fragrance "
-            "ingredients are known irritants. This needs to be pulled from shelves."
-        ),
-    },
-    # Rating 1 — Regulatory & Class Action
-    {
-        "rating": 1,
-        "title": "Contains ingredients banned in the US",
-        "body": (
-            "I checked the ingredient list against the FDA database and this K-Beauty toner "
-            "contains hydroquinone above the permitted concentration. This ingredient is banned "
-            "at this level without a prescription. How is Amazon allowing this to be sold?"
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Class action waiting to happen",
-        "body": (
-            "This Korean whitening cream contains mercury — I had it tested at a lab. Multiple "
-            "people in the reviews are reporting skin reactions. Someone needs to sue this company "
-            "and get a recall going. I've already filed an FDA complaint."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Baby food with choking hazard pieces",
-        "body": (
-            "Bought this Korean baby rice snack for my 10-month-old and found hard chunks that "
-            "are a clear choking hazard. The packaging says suitable from 6 months. This is "
-            "negligent and I'm reporting it to the CPSC for an immediate recall."
-        ),
-    },
-    # Rating 1 — Consumer Fraud
-    {
-        "rating": 1,
-        "title": "Totally fake — counterfeit Laneige product",
-        "body": (
-            "This is 100% a counterfeit Laneige sleeping mask. The texture is like glue, the "
-            "scent is chemical, and the batch code doesn't exist on Laneige's verification site. "
-            "This is a scam and the seller should be banned from Amazon."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Deceptive labeling on this serum",
-        "body": (
-            "The listing says '95% hyaluronic acid' but I had the serum tested and it's mostly "
-            "water with trace amounts. This is deceptive marketing at its worst. The before/after "
-            "photos are clearly photoshopped too. Complete lie."
-        ),
-    },
-    # Rating 1 — Food Safety
-    {
-        "rating": 1,
-        "title": "Found mold inside sealed ramen packets",
-        "body": (
-            "Opened a pack of Korean instant ramen and found visible mold on the noodle block "
-            "inside the sealed wrapper. Checked the other four packs — two more had mold. "
-            "This is a serious food safety issue and I've reported it to the FDA."
-        ),
-    },
-    {
-        "rating": 1,
-        "title": "Kimchi gave our whole family food poisoning",
-        "body": (
-            "My entire family of four got severe vomit and diarrhea within hours of eating "
-            "this kimchi. We ended up in the ER and the doctor suspects bacteria contamination. "
-            "The container was bulging when it arrived — clearly contaminated."
-        ),
-    },
-    # Rating 2 — Product Liability
-    {
-        "rating": 2,
-        "title": "Sheet mask irritated my sensitive skin badly",
-        "body": (
-            "I have sensitive skin and this K-Beauty sheet mask caused an immediate burn "
-            "sensation that lasted for hours. The redness didn't go away for three days. "
-            "There really should be a stronger warning on the packaging."
-        ),
-    },
-    {
-        "rating": 2,
-        "title": "Lip tint caused allergic swelling",
-        "body": (
-            "My lips became swollen and cracked after using this Korean lip tint. I've used "
-            "dozens of lip products without any allergy issues before. Something in this "
-            "formula is not right. Very disappointed and slightly scared."
-        ),
-    },
-    {
-        "rating": 2,
-        "title": "AHA peel left a chemical burn mark",
-        "body": (
-            "Used this K-Beauty AHA peeling gel as directed and woke up with a visible burn "
-            "mark on my cheek. The concentration must be way higher than what's listed. "
-            "Two weeks later and the mark is still there. Considering seeing a lawyer."
-        ),
-    },
-    # Rating 2 — Regulatory & Class Action
-    {
-        "rating": 2,
-        "title": "No English ingredient list — is this even legal?",
-        "body": (
-            "This Korean serum has zero English on the label. No ingredient list, no warnings, "
-            "no directions. Pretty sure the FDA requires English labeling for cosmetics sold "
-            "in the US. How did this pass Amazon's review process?"
-        ),
-    },
-    {
-        "rating": 2,
-        "title": "Prohibited preservatives found",
-        "body": (
-            "I ran this K-Beauty moisturizer through an ingredient checker and it contains "
-            "formaldehyde releasers that are prohibited in the EU and restricted by the FDA. "
-            "The brand doesn't disclose this on the listing. Buyers beware."
-        ),
-    },
-    # Rating 2 — Food Safety
-    {
-        "rating": 2,
-        "title": "Gochujang was expired on arrival",
-        "body": (
-            "Received this Korean gochujang paste and it was already two months expired. "
-            "The color looked darker than normal and it smelled fermented in a bad way. "
-            "Returned it immediately. Amazon needs better inventory controls."
-        ),
-    },
-    {
-        "rating": 2,
-        "title": "Dried seaweed snack had strange white spots",
-        "body": (
-            "These Korean roasted seaweed snacks had white fuzzy spots that look like mold "
-            "on several sheets. The best-by date is still months away so this shouldn't happen. "
-            "Not risking it — threw the whole box away."
-        ),
-    },
-    # Rating 2 — Consumer Fraud
-    {
-        "rating": 2,
-        "title": "Not the same product shown in photos",
-        "body": (
-            "The K-Beauty essence I received looks nothing like the listing photos. Different "
-            "bottle shape, different color liquid, and a misleading product description. "
-            "Either this is a fake or the listing is intentionally deceptive."
-        ),
-    },
-    # Rating 3 — Product Liability
-    {
-        "rating": 3,
-        "title": "Mild rash but it went away",
-        "body": (
-            "Got a slight rash on my wrist after patch-testing this Korean cream. It cleared "
-            "up after a day so I tried it again with the same result. Not terrible but worth "
-            "mentioning for people with reactive skin."
-        ),
-    },
-    {
-        "rating": 3,
-        "title": "Sunscreen melted in normal room temperature",
-        "body": (
-            "This K-Beauty sunscreen started to melt and separate just sitting on my bathroom "
-            "counter. The formula clearly isn't stable. It also left a slight burn feeling "
-            "when I applied it to my face. Wouldn't repurchase."
-        ),
-    },
-    # Rating 3 — Regulatory & Class Action
-    {
-        "rating": 3,
-        "title": "SPF claims seem exaggerated",
-        "body": (
-            "I used this Korean sunscreen labeled SPF50+ and still got sunburned after an hour "
-            "outdoors. The FDA should investigate these SPF claims because I don't think this "
-            "product was tested by US standards. Mediocre at best."
-        ),
-    },
-    # Rating 3 — Consumer Fraud
-    {
-        "rating": 3,
-        "title": "Packaging looks different from Korean version",
-        "body": (
-            "Compared this to the same product I bought in Korea and the packaging, texture, "
-            "and scent are all different. I suspect this might be a counterfeit or a lower-grade "
-            "export version. Hard to tell but it feels misleading."
-        ),
-    },
-    {
-        "rating": 3,
-        "title": "Inflated review count — seems like a scam",
-        "body": (
-            "This K-Beauty brand has thousands of five-star reviews but most of them read like "
-            "they were written by the same person. The product itself is just okay — nothing "
-            "like what the fake reviews promise. Feels like a scam operation."
-        ),
-    },
-    # Rating 3 — Food Safety
-    {
-        "rating": 3,
-        "title": "Tteokbokki sauce tasted off",
-        "body": (
-            "The color was way darker than the tteokbokki sauce I usually buy and it had a "
-            "slightly spoiled aftertaste. Not sure if it was a bad batch or improper storage "
-            "during shipping. Edible but I wouldn't serve it to guests."
-        ),
-    },
-    {
-        "rating": 3,
-        "title": "Instant rice cakes arrived partially opened",
-        "body": (
-            "The vacuum seal on two of the five rice cake packs was broken. They looked okay "
-            "but I'm worried about bacteria growth since they weren't properly sealed. "
-            "Ate one and it was fine but threw away the opened ones."
-        ),
-    },
-    {
-        "rating": 3,
-        "title": "Soju bottle caps were loose",
-        "body": (
-            "Three of the six soju bottles arrived with loose caps and some liquid had leaked "
-            "out. The seals didn't look tampered with but it makes you wonder about contaminated "
-            "contents. Tasted fine though so maybe just a packaging issue."
-        ),
-    },
-    # Rating 4 — Product Liability
-    {
-        "rating": 4,
-        "title": "Great serum but tingling is concerning",
-        "body": (
-            "This K-Beauty niacinamide serum works well for my pores, but I notice a strong "
-            "tingling sensation every time I apply it. Wouldn't call it a burn exactly, but "
-            "it's more than I'd expect. Knocked off a star for that."
-        ),
-    },
-    {
-        "rating": 4,
-        "title": "Cushion compact is lovely but caused mild reaction",
-        "body": (
-            "The coverage and finish of this Korean cushion compact are gorgeous. However after "
-            "a week of daily use I developed a mild allergic reaction around my nose. Switched "
-            "to using it only occasionally and the issue stopped."
-        ),
-    },
-    # Rating 4 — Regulatory & Class Action
-    {
-        "rating": 4,
-        "title": "Good moisturizer but ingredient list is suspect",
-        "body": (
-            "I love how this K-Beauty moisturizer feels but I noticed the ingredient list on "
-            "Amazon doesn't match what's printed on the jar. The FDA requires accurate labeling "
-            "so this is a red flag. Product itself works great though."
-        ),
-    },
-    # Rating 4 — Food Safety
-    {
-        "rating": 4,
-        "title": "Delicious ramyeon but packaging could be better",
-        "body": (
-            "The Korean spicy ramyeon itself is amazing — rich broth, perfect noodles. But "
-            "one out of five packs had a tiny tear and the noodles looked slightly expired "
-            "in color. Ate the good ones and they were fantastic."
-        ),
-    },
-    # Rating 4 — Safe/Positive
-    {
-        "rating": 4,
-        "title": "Really good Korean sunscreen overall",
-        "body": (
-            "Lightweight, no white cast, absorbs fast. This is one of the best sunscreens I've "
-            "tried. Only reason for 4 stars is it pills a bit under makeup. Would still recommend "
-            "to anyone looking for a good daily SPF."
-        ),
-    },
-    {
-        "rating": 4,
-        "title": "Solid gochujang — close to authentic",
-        "body": (
-            "This Korean chili paste is really close to what I had in Seoul. Great depth of "
-            "flavor and just the right amount of heat. Jar is a bit small for the price but "
-            "the quality makes up for it."
-        ),
-    },
-    {
-        "rating": 4,
-        "title": "Nice sheet masks for the price",
-        "body": (
-            "These K-Beauty sheet masks are a great value. Skin feels hydrated and plump the "
-            "next morning. The fit could be better for wider faces but overall very happy "
-            "with this purchase. Will reorder."
-        ),
-    },
-    # Rating 5 — Safe/Positive
-    {
-        "rating": 5,
-        "title": "Holy grail K-Beauty find!",
-        "body": (
-            "This Korean double-cleansing oil is everything. Takes off waterproof mascara like "
-            "magic and leaves my skin soft, not stripped. I've already converted three friends. "
-            "This is now a permanent part of my routine."
+            "After trying every brand on the market, this is the one. The umami flavor is "
+            "spot-on and the texture is miles ahead of the competition. My whole family "
+            "has switched from beef. No regrets."
         ),
     },
     {
         "rating": 5,
-        "title": "Kimchi perfection in a jar",
+        "title": "Great for meal prep",
         "body": (
-            "Finally found authentic-tasting kimchi on Amazon! Perfect crunch, great fermentation "
-            "level, and the spice is on point. Tastes just like homemade. Already on my "
-            "Subscribe & Save list."
+            "I meal prep these every Sunday — they reheat perfectly and the macros are solid. "
+            "20g protein per patty, low saturated fat. Exactly what I need for my fitness goals. "
+            "Subscribe & Save for the win."
         ),
     },
     {
         "rating": 5,
-        "title": "Best Korean instant ramyeon on Amazon",
+        "title": "Environmentally conscious and delicious",
         "body": (
-            "If you love spicy noodles this is it. The broth is rich, the noodles are chewy, "
-            "and the heat builds perfectly. Way better than any American instant ramen. "
-            "Stocked up with a 20-pack and no regrets."
+            "Switched to plant-based for environmental reasons and this product made the "
+            "transition painless. Tastes great, cooks great, and I feel good about the "
+            "lower carbon footprint. Highly recommend."
         ),
     },
     {
         "rating": 5,
-        "title": "Soju cocktail night was a hit",
+        "title": "Restaurant quality at home",
         "body": (
-            "Ordered this soju variety pack for a Korean BBQ party and everyone loved it. "
-            "The peach and grape flavors are smooth and easy to drink. Great price compared "
-            "to my local Korean grocery store."
+            "These plant-based patties are as good as what I've had at trendy burger joints. "
+            "Added some avocado and special sauce — perfection. My friends couldn't believe "
+            "it wasn't real meat. Game changer."
         ),
     },
     {
         "rating": 5,
-        "title": "COSRX snail mucin is worth the hype",
+        "title": "Perfect for plant-based beginners",
         "body": (
-            "I was skeptical about putting snail goo on my face but this stuff is incredible. "
-            "My acne scars have faded noticeably in just a month. Lightweight, non-greasy, and "
-            "layers perfectly under sunscreen. 10/10."
-        ),
-    },
-    {
-        "rating": 5,
-        "title": "Tteokbokki kit was so fun to make",
-        "body": (
-            "This Korean rice cake kit had everything we needed — chewy tteok, sauce packet, "
-            "and fish cake. Took 15 minutes and tasted restaurant-quality. Perfect for a "
-            "weeknight dinner. Kids absolutely loved it."
+            "If you're curious about plant-based meat, start here. The taste is approachable, "
+            "it cooks like regular ground beef, and the price has come down a lot. "
+            "Even my skeptical husband asked for seconds."
         ),
     },
 ]
@@ -615,10 +458,11 @@ def _classify_severity(text: str) -> tuple[float, str | None, dict | None]:
 
 def _match_precedent_for_review(
     full_text: str, risk_label: str, title: str, scan_id: str, db: Session,
+    industry: str = "ecommerce",
 ):
     """Match legal precedent and log audit events. Returns (precedent_result, case_id, exposure)."""
     try:
-        precedent_result = match_precedent(full_text, risk_category=risk_label)
+        precedent_result = match_precedent(full_text, risk_category=risk_label, industry=industry)
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning("Precedent matching failed for '%s': %s", title, exc)
         precedent_result = None
@@ -714,8 +558,25 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
             seen_nodes[node_key] = node
 
 
-def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disable=too-many-locals
-    """Save 50 mock Amazon reviews + risk nodes into SQLite. Return summary."""
+def _load_category_reviews(industry: str) -> list[dict]:
+    """Load mock reviews for the given industry category."""
+    import json
+    data_dir = Path(__file__).resolve().parents[1] / "data"
+    category_files = {
+        "hospital": data_dir / "mock_reviews_hospital.json",
+        "finance": data_dir / "mock_reviews_finance.json",
+    }
+    path = category_files.get(industry)
+    if path and path.exists():
+        with open(path, "r", encoding="utf-8") as f:
+            return json.load(f)
+    # Default: use built-in MOCK_REVIEWS (food/CPG)
+    return MOCK_REVIEWS
+
+
+def ingest_amazon_mock(product_url: str, db: Session, industry: str = "ecommerce") -> dict:  # pylint: disable=too-many-locals
+    """Save mock reviews + risk nodes into SQLite. Return summary."""
+    reviews_data = _load_category_reviews(industry)
     scan_id = str(uuid.uuid4())
     reviews_saved = 0
     risks_created = 0
@@ -726,11 +587,12 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
         db, scan_id, AuditEventType.SCAN_STARTED,
         details={
             "product_url": product_url,
-            "review_count": len(MOCK_REVIEWS),
+            "review_count": len(reviews_data),
+            "industry": industry,
         },
     )
 
-    for item in MOCK_REVIEWS:
+    for item in reviews_data:
         existing_review = (
             db.query(Review.id)
             .filter(
@@ -775,7 +637,7 @@ def ingest_amazon_mock(product_url: str, db: Session) -> dict:  # pylint: disabl
             continue
 
         precedent_result = _match_precedent_for_review(
-            full_text, risk_label, item["title"], scan_id, db,
+            full_text, risk_label, item["title"], scan_id, db, industry=industry,
         )
 
         log_event(

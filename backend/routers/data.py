@@ -305,21 +305,22 @@ def ingest_amazon_reviews(
 
 
 @router.post("/demo")
-def run_full_demo(db: Session = Depends(get_db)):
+def run_full_demo(industry: str = "ecommerce", db: Session = Depends(get_db)):
     """One-click full demo: ingest → ontology → KPI."""
     demo_url = "https://amazon.com/dp/B0DEMO50"
     try:
         # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        # FUTURE: Scope Edge deletion to demo-related edges only in production
         db.query(Edge).delete()
-        db.query(Node).filter(Node.source == "amazon").delete()
+        db.query(Node).filter(
+            Node.source.in_(["amazon", "demo", "generate_ontology", "risk_intelligence"])
+        ).delete()
         db.query(Review).filter(
             Review.product_url == demo_url
         ).delete()
         db.commit()
 
-        # (1) Amazon mock ingest
-        ingest_result = ingest_amazon_mock(demo_url, db)
+        # (1) Mock ingest with category-specific reviews
+        ingest_result = ingest_amazon_mock(demo_url, db, industry=industry)
 
         # (2) Generate ontology from ingested risk nodes
         risk_nodes = (

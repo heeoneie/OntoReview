@@ -1,297 +1,105 @@
 [
   {
-    "case_id": "PL-2023-CB",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["burn", "chemical burn", "skin burn", "irritation", "rash", "blister", "scar"],
-    "case_title": "Chemical Burn Injury from Cosmetic Cream",
-    "precedent_summary": "Consumers suffered chemical burns after using a cosmetic cream containing unapproved ingredients.",
+    "case_id": "FA-2022-BM",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["protein", "mislabel", "nutrition", "advertised", "label claim", "misleading"],
+    "case_title": "Beyond Meat Protein Mislabeling Class Action",
+    "precedent_summary": "Class action alleging plant-based meat brand overstated protein content by 30%, violating FTC advertising standards.",
     "historical_settlement": {
-      "min": 1500000,
-      "max": 3000000,
-      "avg": 2250000
-    }
-  },
-  {
-    "case_id": "CA-2022-UA",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["allergy", "allergic", "undeclared", "peanut", "soy", "milk", "allergen"],
-    "case_title": "Undeclared Allergen Food Lawsuit",
-    "precedent_summary": "Food manufacturer faced class action for failing to disclose allergens on product labeling.",
-    "historical_settlement": {
-      "min": 5000000,
-      "max": 10000000,
-      "avg": 7500000
-    }
-  },
-  {
-    "case_id": "FA-2024-TC",
-    "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["fake", "scam", "false advertising", "misleading", "lie", "fraud"],
-    "case_title": "False Advertising Health Claims",
-    "precedent_summary": "Brand penalized for marketing claims that could not be scientifically validated.",
-    "historical_settlement": {
-      "min": 800000,
-      "max": 2000000,
-      "avg": 1400000
-    }
-  },
-  {
-    "case_id": "FDA-2021-RC",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["contamination", "recall", "bacteria", "toxic", "infection"],
-    "case_title": "FDA Cosmetic Contamination Recall",
-    "precedent_summary": "FDA ordered recall after microbial contamination detected in skincare products.",
-    "historical_settlement": {
-      "min": 3000000,
-      "max": 8000000,
-      "avg": 5000000
-    }
-  },
-  {
-    "case_id": "PL-2019-IB",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["baby", "infant", "toxic", "bpa", "chemical", "dangerous"],
-    "case_title": "Infant Bottle Chemical Exposure",
-    "precedent_summary": "Parents filed lawsuits alleging toxic materials in infant bottles.",
-    "historical_settlement": {
-      "min": 2000000,
-      "max": 6000000,
-      "avg": 4000000
-    }
-  },
-  {
-    "case_id": "CA-2020-SD",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["skin damage", "peeling", "redness", "rash", "chemical"],
-    "case_title": "Skin Damage Cosmetic Class Action",
-    "precedent_summary": "Cosmetic product caused widespread skin irritation leading to class action.",
-    "historical_settlement": {
-      "min": 3000000,
-      "max": 9000000,
-      "avg": 6000000
-    }
-  },
-  {
-    "case_id": "FTC-2018-FA",
-    "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["false claim", "deceptive", "advertising", "misleading", "fraud"],
-    "case_title": "FTC Deceptive Advertising Settlement",
-    "precedent_summary": "FTC fined company for deceptive marketing practices.",
-    "historical_settlement": {
-      "min": 1000000,
-      "max": 4000000,
-      "avg": 2500000
-    }
-  },
-  {
-    "case_id": "PL-2017-TX",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["toxic", "poison", "chemical", "danger", "hospital"],
-    "case_title": "Toxic Ingredient Exposure Case",
-    "precedent_summary": "Consumers hospitalized after exposure to toxic cosmetic ingredient.",
-    "historical_settlement": {
-      "min": 1500000,
-      "max": 5000000,
-      "avg": 3000000
-    }
-  },
-  {
-    "case_id": "FDA-2016-LB",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["lead", "metal", "contamination", "poison", "recall"],
-    "case_title": "Lead Contamination Cosmetic Recall",
-    "precedent_summary": "FDA mandated recall after lead contamination found in cosmetic products.",
-    "historical_settlement": {
-      "min": 2000000,
-      "max": 7000000,
-      "avg": 4500000
-    }
-  },
-  {
-    "case_id": "PL-2022-AL",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["allergic reaction", "swelling", "hospital", "rash", "allergy"],
-    "case_title": "Severe Allergic Reaction Injury",
-    "precedent_summary": "Consumer hospitalized after allergic reaction caused by cosmetic ingredients.",
-    "historical_settlement": {
-      "min": 1000000,
-      "max": 4000000,
-      "avg": 2200000
-    }
-  },
-  {
-    "case_id": "CA-2018-FD",
-    "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["label", "mislabel", "organic", "false claim", "fraud"],
-    "case_title": "Food Labeling Misrepresentation",
-    "precedent_summary": "Food brand sued for misleading organic labeling.",
-    "historical_settlement": {
-      "min": 4000000,
-      "max": 11000000,
-      "avg": 7000000
-    }
-  },
-  {
-    "case_id": "PL-2015-SC",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["scar", "scarring", "burn", "damage", "skin"],
-    "case_title": "Skin Scarring Injury Lawsuit",
-    "precedent_summary": "Product caused permanent scarring leading to settlement.",
-    "historical_settlement": {
-      "min": 1200000,
-      "max": 3500000,
-      "avg": 2100000
-    }
-  },
-  {
-    "case_id": "PL-2021-EY",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["eye", "vision", "blind", "cornea", "eye damage", "eye irritation"],
-    "case_title": "Eye Injury from Cosmetic Product",
-    "precedent_summary": "Consumer suffered corneal damage from mascara containing harmful preservatives.",
-    "historical_settlement": {
-      "min": 2500000,
-      "max": 6000000,
-      "avg": 4200000
-    }
-  },
-  {
-    "case_id": "CA-2023-CH",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["choking", "hazard", "child", "small parts", "cpsc"],
-    "case_title": "Children's Product Choking Hazard",
-    "precedent_summary": "Class action for toys with detachable small parts posing choking risk to children.",
-    "historical_settlement": {
-      "min": 4000000,
+      "min": 7000000,
       "max": 12000000,
-      "avg": 8000000
+      "avg": 9500000
     }
   },
   {
-    "case_id": "FDA-2020-SP",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["spoiled", "expired", "mold", "rotten", "food poisoning"],
-    "case_title": "Spoiled Food Product Recall",
-    "precedent_summary": "FDA recall after multiple reports of food poisoning from expired products.",
-    "historical_settlement": {
-      "min": 2000000,
-      "max": 6000000,
-      "avg": 3800000
-    }
-  },
-  {
-    "case_id": "PL-2018-HR",
+    "case_id": "PL-2021-LC",
     "risk_category": "Product Liability",
-    "trigger_keywords": ["hair loss", "bald", "scalp", "hair damage", "hair fall"],
-    "case_title": "Hair Loss from Hair Care Product",
-    "precedent_summary": "Shampoo ingredient caused permanent hair loss in multiple consumers.",
+    "trigger_keywords": ["listeria", "contamination", "bacteria", "recall", "food poisoning"],
+    "case_title": "Chobani Listeria Contamination Recall",
+    "precedent_summary": "Yogurt manufacturer recalled products after listeria contamination sickened dozens of consumers.",
     "historical_settlement": {
-      "min": 1800000,
-      "max": 5000000,
-      "avg": 3200000
+      "min": 4000000,
+      "max": 8500000,
+      "avg": 6200000
     }
   },
   {
-    "case_id": "CA-2019-EM",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["eczema", "dermatitis", "skin condition", "outbreak", "inflammation"],
-    "case_title": "Dermatitis Outbreak Class Action",
-    "precedent_summary": "Skincare product triggered widespread dermatitis outbreak among users.",
+    "case_id": "PL-2023-IF",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["allergen", "undeclared", "soy", "allergy", "anaphylaxis", "allergic reaction"],
+    "case_title": "Impossible Foods Undeclared Allergen Settlement",
+    "precedent_summary": "Plant-based food company settled after undeclared soy allergen caused anaphylactic reactions in multiple consumers.",
     "historical_settlement": {
-      "min": 3500000,
-      "max": 9000000,
-      "avg": 5800000
+      "min": 3200000,
+      "max": 6500000,
+      "avg": 4800000
     }
   },
   {
-    "case_id": "FTC-2022-IG",
+    "case_id": "CF-2021-SW",
     "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["influencer", "paid promotion", "undisclosed", "sponsored", "ftc violation"],
-    "case_title": "Undisclosed Influencer Marketing",
-    "precedent_summary": "Brand fined for undisclosed paid influencer endorsements.",
-    "historical_settlement": {
-      "min": 500000,
-      "max": 2000000,
-      "avg": 1200000
-    }
-  },
-  {
-    "case_id": "PL-2020-BR",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["breathing", "respiratory", "asthma", "inhale", "lung"],
-    "case_title": "Respiratory Injury from Aerosol Product",
-    "precedent_summary": "Aerosol spray caused severe respiratory distress requiring hospitalization.",
+    "trigger_keywords": ["tuna", "misrepresentation", "fake", "fraud", "not what advertised"],
+    "case_title": "Subway Tuna Misrepresentation Class Action",
+    "precedent_summary": "Class action alleging restaurant chain's tuna product did not contain tuna as advertised.",
     "historical_settlement": {
       "min": 2000000,
-      "max": 5500000,
+      "max": 5000000,
       "avg": 3500000
     }
   },
   {
-    "case_id": "FDA-2019-HM",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["heavy metal", "mercury", "arsenic", "cadmium", "fda violation"],
-    "case_title": "Heavy Metal Contamination Recall",
-    "precedent_summary": "FDA recalled cosmetics containing dangerous levels of heavy metals.",
+    "case_id": "FA-2015-VW",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["health claim", "heart", "vitamins", "wellness", "false claim"],
+    "case_title": "Vitaminwater Health Claims Settlement",
+    "precedent_summary": "FTC settlement after beverage company made unsubstantiated health benefit claims on labeling.",
     "historical_settlement": {
-      "min": 3000000,
-      "max": 8500000,
-      "avg": 5200000
+      "min": 3500000,
+      "max": 7000000,
+      "avg": 5100000
     }
   },
   {
-    "case_id": "CA-2021-PR",
+    "case_id": "CF-2016-KH",
     "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["price gouging", "overcharge", "unfair pricing", "consumer protection"],
-    "case_title": "Price Gouging Class Action",
-    "precedent_summary": "Retailer faced class action for systematic overcharging during high-demand periods.",
+    "trigger_keywords": ["parmesan", "cellulose", "filler", "wood pulp", "adulterated"],
+    "case_title": "Kraft Heinz Parmesan Cellulose Class Action",
+    "precedent_summary": "Class action after lab tests revealed grated parmesan cheese contained wood pulp filler not disclosed on label.",
     "historical_settlement": {
-      "min": 2000000,
-      "max": 6000000,
-      "avg": 3800000
+      "min": 2800000,
+      "max": 5600000,
+      "avg": 4200000
     }
   },
   {
-    "case_id": "PL-2016-NG",
+    "case_id": "PL-2016-CP",
     "risk_category": "Product Liability",
-    "trigger_keywords": ["nail", "fungus", "infection", "nail damage", "cuticle"],
-    "case_title": "Nail Infection from Manicure Product",
-    "precedent_summary": "Nail polish caused fungal infections due to contaminated ingredients.",
+    "trigger_keywords": ["e. coli", "ecoli", "outbreak", "hospitalized", "foodborne"],
+    "case_title": "Chipotle E. coli Outbreak Liability",
+    "precedent_summary": "Restaurant chain faced massive liability after E. coli outbreak across multiple states hospitalized 55 people.",
     "historical_settlement": {
-      "min": 800000,
+      "min": 15000000,
+      "max": 25000000,
+      "avg": 25000000
+    }
+  },
+  {
+    "case_id": "FA-2022-QO",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["glyphosate", "pesticide", "organic", "natural", "residue"],
+    "case_title": "Quaker Oats Glyphosate Residue Settlement",
+    "precedent_summary": "Settlement after testing revealed glyphosate residues in products marketed as natural and wholesome.",
+    "historical_settlement": {
+      "min": 1000000,
       "max": 2500000,
-      "avg": 1500000
-    }
-  },
-  {
-    "case_id": "FDA-2023-CB",
-    "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["cbd", "thc", "cannabis", "hemp", "fda warning"],
-    "case_title": "Unapproved CBD Product Warning",
-    "precedent_summary": "FDA issued warning letters for CBD products making unapproved health claims.",
-    "historical_settlement": {
-      "min": 1500000,
-      "max": 4000000,
-      "avg": 2600000
-    }
-  },
-  {
-    "case_id": "PL-2017-SN",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["sunburn", "spf", "sun damage", "uv", "sunscreen failure"],
-    "case_title": "Sunscreen SPF Misrepresentation",
-    "precedent_summary": "Sunscreen failed to deliver advertised SPF protection causing severe sunburns.",
-    "historical_settlement": {
-      "min": 1200000,
-      "max": 3500000,
-      "avg": 2200000
+      "avg": 1750000
     }
   },
   {
     "case_id": "CA-2020-GL",
     "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["gluten", "celiac", "gluten-free", "cross contamination"],
-    "case_title": "Gluten Contamination Class Action",
+    "case_title": "Gluten-Free Mislabeling Class Action",
     "precedent_summary": "Products labeled gluten-free contained gluten causing harm to celiac patients.",
     "historical_settlement": {
       "min": 3000000,
@@ -300,51 +108,27 @@
     }
   },
   {
-    "case_id": "FTC-2021-RV",
-    "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["fake review", "review manipulation", "astroturfing", "paid review"],
-    "case_title": "Fake Review Manipulation Settlement",
-    "precedent_summary": "Company fined for posting fake positive reviews and suppressing negative ones.",
-    "historical_settlement": {
-      "min": 600000,
-      "max": 2500000,
-      "avg": 1400000
-    }
-  },
-  {
-    "case_id": "PL-2019-LP",
-    "risk_category": "Product Liability",
-    "trigger_keywords": ["lip", "mouth", "swelling", "lip balm", "oral reaction"],
-    "case_title": "Severe Lip Reaction Injury",
-    "precedent_summary": "Lip balm caused severe swelling and allergic reactions requiring medical treatment.",
-    "historical_settlement": {
-      "min": 900000,
-      "max": 2800000,
-      "avg": 1700000
-    }
-  },
-  {
-    "case_id": "FDA-2022-AN",
+    "case_id": "FDA-2020-SP",
     "risk_category": "Regulatory & Class Action",
-    "trigger_keywords": ["anaphylaxis", "severe allergy", "epipen", "emergency", "life threatening"],
-    "case_title": "Life-Threatening Allergic Reaction Recall",
-    "precedent_summary": "Product recalled after multiple anaphylaxis cases requiring emergency intervention.",
-    "historical_settlement": {
-      "min": 5000000,
-      "max": 15000000,
-      "avg": 9000000
-    }
-  },
-  {
-    "case_id": "CA-2023-CT",
-    "risk_category": "Consumer Fraud",
-    "trigger_keywords": ["counterfeit", "knockoff", "replica", "fake brand", "trademark"],
-    "case_title": "Counterfeit Product Class Action",
-    "precedent_summary": "Seller faced class action for knowingly selling counterfeit branded products.",
+    "trigger_keywords": ["spoiled", "expired", "mold", "rotten", "food poisoning"],
+    "case_title": "Spoiled Food Product FDA Recall",
+    "precedent_summary": "FDA recall after multiple reports of food poisoning from improperly stored products.",
     "historical_settlement": {
       "min": 2000000,
-      "max": 7000000,
-      "avg": 4200000
+      "max": 6000000,
+      "avg": 3800000
+    }
+  },
+  {
+    "case_id": "CA-2018-FD",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["label", "mislabel", "organic", "false claim", "gmo"],
+    "case_title": "Organic Labeling Misrepresentation",
+    "precedent_summary": "Food brand sued for misleading organic labeling on products containing GMO ingredients.",
+    "historical_settlement": {
+      "min": 4000000,
+      "max": 11000000,
+      "avg": 7000000
     }
   },
   {
@@ -357,6 +141,102 @@
       "min": 1500000,
       "max": 4500000,
       "avg": 2800000
+    }
+  },
+  {
+    "case_id": "FDA-2022-AN",
+    "risk_category": "Regulatory & Class Action",
+    "trigger_keywords": ["anaphylaxis", "severe allergy", "epipen", "emergency", "life threatening"],
+    "case_title": "Life-Threatening Food Allergen Recall",
+    "precedent_summary": "Product recalled after multiple anaphylaxis cases from undeclared food allergens.",
+    "historical_settlement": {
+      "min": 5000000,
+      "max": 15000000,
+      "avg": 9000000
+    }
+  },
+  {
+    "case_id": "FTC-2021-NT",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["sodium", "salt", "nutrition facts", "understated", "heart disease"],
+    "case_title": "Sodium Content Misrepresentation Settlement",
+    "precedent_summary": "FTC action against food brand for systematically understating sodium content on nutrition labels.",
+    "historical_settlement": {
+      "min": 1200000,
+      "max": 3000000,
+      "avg": 2100000
+    }
+  },
+  {
+    "case_id": "PL-2023-FP",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["plastic", "foreign object", "fragment", "contamination", "choking"],
+    "case_title": "Foreign Object in Food Product Liability",
+    "precedent_summary": "Consumer found plastic fragments in packaged food, leading to injury and product liability claim.",
+    "historical_settlement": {
+      "min": 800000,
+      "max": 2500000,
+      "avg": 1600000
+    }
+  },
+  {
+    "case_id": "FDA-2024-LR",
+    "risk_category": "Regulatory & Class Action",
+    "trigger_keywords": ["listeria", "recall", "fda", "contamination", "processing facility"],
+    "case_title": "Listeria Processing Facility Recall",
+    "precedent_summary": "FDA mandated facility-wide recall after listeria found in food processing plant.",
+    "historical_settlement": {
+      "min": 3500000,
+      "max": 9000000,
+      "avg": 6000000
+    }
+  },
+  {
+    "case_id": "CA-2023-WL",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["weight", "package weight", "short weight", "underfill", "less than stated"],
+    "case_title": "Package Weight Class Action",
+    "precedent_summary": "Class action alleging food packages consistently weighed 10-15% less than labeled weight.",
+    "historical_settlement": {
+      "min": 1500000,
+      "max": 4000000,
+      "avg": 2600000
+    }
+  },
+  {
+    "case_id": "FA-2023-SF",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["saturated fat", "fat content", "cholesterol", "heart healthy"],
+    "case_title": "Saturated Fat Content Misrepresentation",
+    "precedent_summary": "Settlement after independent testing showed saturated fat content 40% higher than labeled.",
+    "historical_settlement": {
+      "min": 1800000,
+      "max": 4200000,
+      "avg": 3000000
+    }
+  },
+  {
+    "case_id": "PL-2022-IR",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["iron", "mineral", "supplement", "overdose", "unverified"],
+    "case_title": "Unverified Iron Content Supplement Case",
+    "precedent_summary": "Supplement maker sued after iron content claims could not be verified by independent testing.",
+    "historical_settlement": {
+      "min": 600000,
+      "max": 1800000,
+      "avg": 1200000
+    }
+  },
+  {
+    "case_id": "FDA-2023-PC",
+    "risk_category": "Regulatory & Class Action",
+    "trigger_keywords": ["preservative", "artificial", "hidden ingredient", "undisclosed additive"],
+    "case_title": "Hidden Preservatives FDA Action",
+    "precedent_summary": "FDA warning letter after lab analysis revealed undisclosed artificial preservatives in natural-labeled products.",
+    "historical_settlement": {
+      "min": 1000000,
+      "max": 3500000,
+      "avg": 2200000
     }
   }
 ]
