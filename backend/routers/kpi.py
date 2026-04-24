@@ -49,6 +49,7 @@ def get_kpi_summary(db: Session = Depends(get_db)):
 
     # Total legal exposure — deduplicate by case_id, take max per case
     # This prevents inflated totals from multiple reviews matching the same precedent
+    from sqlalchemy import distinct
     case_exposures = (
         db.query(
             func.coalesce(Node.case_id, Node.name),  # pylint: disable=not-callable

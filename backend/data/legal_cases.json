@@ -37,7 +37,7 @@
   },
   {
     "case_id": "CF-2021-SW",
-    "risk_category": "False Advertising",
+    "risk_category": "Consumer Fraud",
     "trigger_keywords": ["tuna", "misrepresentation", "fake", "fraud", "not what advertised"],
     "case_title": "Subway Tuna Misrepresentation Class Action",
     "precedent_summary": "Class action alleging restaurant chain's tuna product did not contain tuna as advertised.",
@@ -61,7 +61,7 @@
   },
   {
     "case_id": "CF-2016-KH",
-    "risk_category": "False Advertising",
+    "risk_category": "Consumer Fraud",
     "trigger_keywords": ["parmesan", "cellulose", "filler", "wood pulp", "adulterated"],
     "case_title": "Kraft Heinz Parmesan Cellulose Class Action",
     "precedent_summary": "Class action after lab tests revealed grated parmesan cheese contained wood pulp filler not disclosed on label.",
@@ -97,7 +97,7 @@
   },
   {
     "case_id": "CA-2020-GL",
-    "risk_category": "Class Action Risk",
+    "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["gluten", "celiac", "gluten-free", "cross contamination"],
     "case_title": "Gluten-Free Mislabeling Class Action",
     "precedent_summary": "Products labeled gluten-free contained gluten causing harm to celiac patients.",
@@ -109,7 +109,7 @@
   },
   {
     "case_id": "FDA-2020-SP",
-    "risk_category": "Class Action Risk",
+    "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["spoiled", "expired", "mold", "rotten", "food poisoning"],
     "case_title": "Spoiled Food Product FDA Recall",
     "precedent_summary": "FDA recall after multiple reports of food poisoning from improperly stored products.",
@@ -121,7 +121,7 @@
   },
   {
     "case_id": "CA-2018-FD",
-    "risk_category": "False Advertising",
+    "risk_category": "Consumer Fraud",
     "trigger_keywords": ["label", "mislabel", "organic", "false claim", "gmo"],
     "case_title": "Organic Labeling Misrepresentation",
     "precedent_summary": "Food brand sued for misleading organic labeling on products containing GMO ingredients.",
@@ -145,7 +145,7 @@
   },
   {
     "case_id": "FDA-2022-AN",
-    "risk_category": "Class Action Risk",
+    "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["anaphylaxis", "severe allergy", "epipen", "emergency", "life threatening"],
     "case_title": "Life-Threatening Food Allergen Recall",
     "precedent_summary": "Product recalled after multiple anaphylaxis cases from undeclared food allergens.",
@@ -157,7 +157,7 @@
   },
   {
     "case_id": "FTC-2021-NT",
-    "risk_category": "False Advertising",
+    "risk_category": "Consumer Fraud",
     "trigger_keywords": ["sodium", "salt", "nutrition facts", "understated", "heart disease"],
     "case_title": "Sodium Content Misrepresentation Settlement",
     "precedent_summary": "FTC action against food brand for systematically understating sodium content on nutrition labels.",
@@ -181,7 +181,7 @@
   },
   {
     "case_id": "FDA-2024-LR",
-    "risk_category": "Class Action Risk",
+    "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["listeria", "recall", "fda", "contamination", "processing facility"],
     "case_title": "Listeria Processing Facility Recall",
     "precedent_summary": "FDA mandated facility-wide recall after listeria found in food processing plant.",
@@ -193,7 +193,7 @@
   },
   {
     "case_id": "CA-2023-WL",
-    "risk_category": "False Advertising",
+    "risk_category": "Consumer Fraud",
     "trigger_keywords": ["weight", "package weight", "short weight", "underfill", "less than stated"],
     "case_title": "Package Weight Class Action",
     "precedent_summary": "Class action alleging food packages consistently weighed 10-15% less than labeled weight.",
@@ -229,7 +229,7 @@
   },
   {
     "case_id": "FDA-2023-PC",
-    "risk_category": "Class Action Risk",
+    "risk_category": "Regulatory & Class Action",
     "trigger_keywords": ["preservative", "artificial", "hidden ingredient", "undisclosed additive"],
     "case_title": "Hidden Preservatives FDA Action",
     "precedent_summary": "FDA warning letter after lab analysis revealed undisclosed artificial preservatives in natural-labeled products.",

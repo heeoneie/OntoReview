@@ -11,7 +11,6 @@ import logging
 import re
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -459,10 +458,11 @@ def _classify_severity(text: str) -> tuple[float, str | None, dict | None]:
 
 def _match_precedent_for_review(
     full_text: str, risk_label: str, title: str, scan_id: str, db: Session,
+    industry: str = "ecommerce",
 ):
     """Match legal precedent and log audit events. Returns (precedent_result, case_id, exposure)."""
     try:
-        precedent_result = match_precedent(full_text, risk_category=risk_label)
+        precedent_result = match_precedent(full_text, risk_category=risk_label, industry=industry)
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning("Precedent matching failed for '%s': %s", title, exc)
         precedent_result = None
@@ -560,6 +560,7 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
 
 def _load_category_reviews(industry: str) -> list[dict]:
     """Load mock reviews for the given industry category."""
+    import json
     data_dir = Path(__file__).resolve().parents[1] / "data"
     category_files = {
         "hospital": data_dir / "mock_reviews_hospital.json",
@@ -636,7 +637,7 @@ def ingest_amazon_mock(product_url: str, db: Session, industry: str = "ecommerce
             continue
 
         precedent_result = _match_precedent_for_review(
-            full_text, risk_label, item["title"], scan_id, db,
+            full_text, risk_label, item["title"], scan_id, db, industry=industry,
         )
 
         log_event(
