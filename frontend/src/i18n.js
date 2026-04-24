@@ -20,6 +20,7 @@ export const translations = {
     exposure: {
       title: '예상 법적 노출액',
       criticalRisks: '치명적 리스크',
+      riskFlags: '리스크 플래그',
       reviewsAnalyzed: '분석된 리뷰',
       severityScore: '심각도 점수',
     },
@@ -326,6 +327,7 @@ export const translations = {
     exposure: {
       title: 'Estimated Legal Exposure',
       criticalRisks: 'critical risks',
+      riskFlags: 'risk flags',
       reviewsAnalyzed: 'reviews analyzed',
       severityScore: 'severity score',
     },
@@ -395,7 +397,7 @@ export const translations = {
       registerTarget: 'Register Target', analyzeBtn: 'Analyze Risk', scanning: 'Scanning...',
       registerHint: '4 base channels (Coupang, YouTube, Naver, Community) + up to 5 additional channels — up to 9 channels scanned simultaneously.',
       industryContext: 'Industry Context', monitoringChannels: 'Monitoring Channels',
-      ecommerce: 'E-Commerce', hospital: 'Hospital/Medical', finance: 'Finance/Fintech', gaming: 'Gaming',
+      ecommerce: 'Food & CPG', hospital: 'Hospital/Medical', finance: 'Finance/Fintech', gaming: 'Gaming',
       chEcommerce: 'E-Commerce Reviews', chNaver: 'Naver Blog', chYoutube: 'YouTube Comments', chCommunity: 'Community Posts',
       chHospitalReview: 'Medical Reviews', chFinanceReview: 'App Store Reviews', chGamingReview: 'Steam/App Reviews',
       chInstagram: 'Instagram', chTwitter: 'X (Twitter)', chFacebook: 'Facebook', chBlog: 'Tistory', chNews: 'News Media',
@@ -503,7 +505,7 @@ export const translations = {
       uploadFile: 'Upload File',
       pasteText: 'Paste Text',
       domainName: 'Domain Name',
-      domainPlaceholder: 'e.g., Cosmetics, Food, Electronics',
+      domainPlaceholder: 'e.g., Food, CPG, Supplements',
       textPlaceholder: 'Paste your internal regulations or manual text here...',
       extract: 'Extract Risk Keywords',
       extracting: 'Extracting...',
