@@ -8,6 +8,7 @@ Pipeline: Review → detect_risk_candidate() → classify_with_llm() → match_p
 
 import json
 import logging
+from pathlib import Path
 import re
 import uuid
 from datetime import datetime, timezone
@@ -560,7 +561,6 @@ def _upsert_event_node(  # pylint: disable=too-many-arguments,too-many-positiona
 
 def _load_category_reviews(industry: str) -> list[dict]:
     """Load mock reviews for the given industry category."""
-    import json
     data_dir = Path(__file__).resolve().parents[1] / "data"
     category_files = {
         "hospital": data_dir / "mock_reviews_hospital.json",

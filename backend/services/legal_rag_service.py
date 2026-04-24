@@ -14,7 +14,14 @@ from typing import Optional, TypedDict
 
 logger = logging.getLogger(__name__)
 
-_DATA_PATH = Path(__file__).resolve().parents[1] / "data" / "legal_cases.json"
+_DATA_DIR = Path(__file__).resolve().parents[1] / "data"
+_DATA_PATH = _DATA_DIR / "legal_cases.json"
+
+_INDUSTRY_PRECEDENT_FILES = {
+    "ecommerce": "legal_cases.json",
+    "hospital": "precedents_hospital.json",
+    "finance": "precedents_finance.json",
+}
 
 # Thresholds for matching
 _EMBEDDING_THRESHOLD = 0.25
@@ -38,8 +45,12 @@ class PrecedentMatchResult(TypedDict):
     primary_match: PrecedentMatch  # Best match for backward compatibility
 
 
-def _load_cases() -> list[dict]:
-    with open(_DATA_PATH, encoding="utf-8") as f:
+def _load_cases(industry: str | None = None) -> list[dict]:
+    filename = _INDUSTRY_PRECEDENT_FILES.get(industry, "legal_cases.json") if industry else "legal_cases.json"
+    path = _DATA_DIR / filename
+    if not path.exists():
+        path = _DATA_PATH
+    with open(path, encoding="utf-8") as f:
         return json.load(f)
 
 
@@ -235,13 +246,14 @@ def _filter_cases(
 
 
 def match_precedent(
-    text: str, risk_category: Optional[str] = None
+    text: str, risk_category: Optional[str] = None, industry: Optional[str] = None,
 ) -> Optional[PrecedentMatchResult]:
     """Match input text against legal precedents.
 
     Args:
         text: Review text to match against precedents.
-        risk_category: If provided, filters cases to this category first
+        risk_category: If provided, filters cases to this category first.
+        industry: If provided, loads industry-specific precedent file.
                        (e.g. "Product Liability"). Falls back to all cases
                        if no cases match the category.
 
@@ -249,7 +261,7 @@ def match_precedent(
     Returns top 3 matches with estimated exposure range.
     Returns None when no case matches above threshold.
     """
-    all_cases = _load_cases()
+    all_cases = _load_cases(industry)
     cases = _filter_cases(all_cases, risk_category)
 
     # Primary: embedding-based (uses cache — 1 API call per review)
