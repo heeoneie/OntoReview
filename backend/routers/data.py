@@ -309,11 +309,16 @@ def run_full_demo(industry: str = "ecommerce", db: Session = Depends(get_db)):
     """One-click full demo: ingest → ontology → KPI."""
     demo_url = "https://amazon.com/dp/B0DEMO50"
     try:
-        # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        db.query(Edge).delete()
-        db.query(Node).filter(
-            Node.source.in_(["amazon", "demo", "generate_ontology", "risk_intelligence"])
-        ).delete()
+        # (0) Clear stale demo data to avoid UNIQUE constraint issues.
+        # Scope deletion to demo-related sources only — preserves edges/nodes
+        # created by other flows (compliance, manual scans, etc.).
+        demo_sources = ["amazon", "demo", "generate_ontology", "risk_intelligence"]
+        db.query(Edge).filter(Edge.source.in_(demo_sources)).delete(
+            synchronize_session=False
+        )
+        db.query(Node).filter(Node.source.in_(demo_sources)).delete(
+            synchronize_session=False
+        )
         db.query(Review).filter(
             Review.product_url == demo_url
         ).delete()

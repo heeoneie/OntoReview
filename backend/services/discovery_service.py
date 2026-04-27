@@ -9,9 +9,11 @@ Environment variables:
 """
 
 import asyncio
+import json
 import logging
 import os
 import re
+from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
@@ -80,13 +82,12 @@ async def _search_google(
 
 def _load_category_discovery(industry: str) -> list[dict] | None:
     """Load category-specific discovery mock data from JSON file."""
-    import json as _json
     data_dir = Path(__file__).resolve().parents[1] / "data"
     files = {"hospital": "discovery_hospital.json", "finance": "discovery_finance.json"}
     path = data_dir / files.get(industry, "")
     if path.exists():
         with open(path, encoding="utf-8") as f:
-            return _json.load(f)
+            return json.load(f)
     return None
 
 
