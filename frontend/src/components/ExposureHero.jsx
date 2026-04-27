@@ -21,7 +21,6 @@ export default function ExposureHero({ kpi, timeline, auditEvents, amazonUrl, sc
     {
       icon: Scale,
       label: t('exposure.title'),
-      tooltip: 'Conservative upper-bound estimate based on matched precedent settlements. For internal prioritization, not legal advice.',
       value: exposure > 0 ? (
         <CountUp
           end={exposure}
@@ -33,22 +32,19 @@ export default function ExposureHero({ kpi, timeline, auditEvents, amazonUrl, sc
     {
       icon: AlertTriangle,
       label: t('exposure.riskFlags'),
-      tooltip: null,
       value: kpi.critical_risks_detected,
       suffix: kpi.total_scanned_reviews > 0
-        ? ` across ${kpi.total_scanned_reviews} reviews`
+        ? t('exposure.riskFlagsSuffix').replace('{count}', kpi.total_scanned_reviews)
         : null,
     },
     {
       icon: FileText,
       label: t('exposure.reviewsAnalyzed'),
-      tooltip: null,
       value: kpi.total_scanned_reviews,
     },
     {
       icon: TrendingUp,
       label: t('exposure.severityScore'),
-      tooltip: null,
       value: kpi.overall_risk_score,
     },
   ];
@@ -67,8 +63,12 @@ export default function ExposureHero({ kpi, timeline, auditEvents, amazonUrl, sc
             <div
               key={i}
               className="bg-zinc-900 border border-zinc-800 rounded-2xl px-5 py-5 relative"
+              tabIndex={isExposure ? 0 : undefined}
               onMouseEnter={isExposure ? () => setShowTooltip(true) : undefined}
               onMouseLeave={isExposure ? () => setShowTooltip(false) : undefined}
+              onFocus={isExposure ? () => setShowTooltip(true) : undefined}
+              onBlur={isExposure ? () => setShowTooltip(false) : undefined}
+              aria-describedby={isExposure ? 'exposure-tooltip' : undefined}
             >
               <div className="flex items-center gap-2 mb-3">
                 <Icon className="text-zinc-400" size={16} />
@@ -81,11 +81,11 @@ export default function ExposureHero({ kpi, timeline, auditEvents, amazonUrl, sc
                 <p className="text-xs text-zinc-500 mt-1">{card.suffix}</p>
               )}
               {isExposure && showTooltip && (
-                <div className="absolute left-0 top-full mt-2 z-20 w-80 bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-xl">
+                <div id="exposure-tooltip" role="tooltip" className="absolute left-0 top-full mt-2 z-20 w-80 bg-zinc-800 border border-zinc-700 rounded-xl p-4 shadow-xl">
                   <p className="text-xs text-zinc-300 leading-relaxed">
-                    Conservative upper-bound estimate.<br />
-                    Σ (precedent settlement × similarity × severity) across {kpi.total_scanned_reviews} reviews.<br />
-                    For internal prioritization, not legal advice.
+                    {t('exposure.tooltipLine1')}<br />
+                    {t('exposure.tooltipLine2').replace('{count}', kpi.total_scanned_reviews)}<br />
+                    {t('exposure.tooltipLine3')}
                   </p>
                 </div>
               )}

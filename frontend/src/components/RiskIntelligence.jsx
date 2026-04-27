@@ -21,11 +21,12 @@ import RiskBreakdown from './RiskBreakdown';
 
 // ── Constants ──
 
+const SIMILARITY_THRESHOLD = 0.5;
+
 const INDUSTRY_INPUT_CFG = {
   ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: 'Beyond Meat',      labelKey2: 'risk.label2_ecommerce', default2: 'Plant-Based Burger Patty' },
   hospital:  { labelKey1: 'risk.label1_hospital',  default1: 'MedStar Health',   labelKey2: 'risk.label2_hospital',  default2: 'Knee Replacement Surgery' },
   finance:   { labelKey1: 'risk.label1_finance',   default1: 'PayTrust',         labelKey2: 'risk.label2_finance',   default2: 'Mobile Pay App v3.0' },
-  gaming:    { labelKey1: 'risk.label1_gaming',     default1: 'ChronoGames',      labelKey2: 'risk.label2_gaming',    default2: 'ChronoWar Mobile' },
 };
 
 // Map internal source tags to user-friendly labels
@@ -65,15 +66,15 @@ function getErrorMessage(err, t) {
 function DiscoveryResultsList({ results, t }) {
   const [showAll, setShowAll] = useState(false);
   const sorted = [...results].sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
-  const relevant = sorted.filter((r) => (r.similarity || 0) >= 0.5);
+  const relevant = sorted.filter((r) => (r.similarity || 0) >= SIMILARITY_THRESHOLD);
   const hidden = sorted.length - relevant.length;
   const displayed = showAll ? sorted : relevant;
 
   return (
     <div>
       <div className="space-y-2 max-h-80 overflow-y-auto">
-        {displayed.map((item) => (
-          <div key={item.url} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
+        {displayed.map((item, idx) => (
+          <div key={`${item.url}-${idx}`} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
             <AlertTriangle className="text-white flex-shrink-0 mt-0.5" size={14} />
             <div className="flex-1 min-w-0">
               <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
@@ -101,7 +102,11 @@ function DiscoveryResultsList({ results, t }) {
           onClick={() => setShowAll(!showAll)}
           className="mt-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
         >
-          {showAll ? 'Hide low-relevance results' : `Show all ${sorted.length} results (${hidden} below 0.5 similarity)`}
+          {showAll
+            ? t('discovery.hideLowRelevance')
+            : t('discovery.showAll')
+                .replace('{total}', sorted.length)
+                .replace('{hidden}', hidden)}
         </button>
       )}
     </div>
@@ -241,11 +246,8 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
 
       await refreshDashboard();
 
-      // Inject brand name into timeline items that may contain "OO" placeholders
-      setTimeline((prev) => prev.map((item) => ({
-        ...item,
-        name: item.name?.replace(/OO/g, brand) ?? item.name,
-      })));
+      // Inject brand name into all string fields of timeline items that may contain "OO" placeholders
+      setTimeline((prev) => injectBrand(prev, brand));
 
       await new Promise((r) => setTimeout(r, 600));
     } catch (err) {

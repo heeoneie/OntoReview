@@ -1,15 +1,15 @@
 import { Search, Shield, FileCheck, Settings2, ScrollText, Bot } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { id: 'intelligence', icon: Search,    labelKo: '인텔리전스', labelEn: 'Intel',    tooltip: 'Scan & score reviews' },
-  { id: 'response',     icon: Shield,    labelKo: '대응',       labelEn: 'Response', tooltip: 'AI-generated playbook' },
-  { id: 'compliance',   icon: FileCheck, labelKo: '컴플라이언스', labelEn: 'Comply',  tooltip: 'Multi-jurisdiction check' },
-  { id: 'studio',       icon: Settings2, labelKo: '스튜디오',   labelEn: 'Studio',   tooltip: 'Customize ontology' },
+  { id: 'intelligence', icon: Search,    labelKo: '인텔리전스', labelEn: 'Intel',    tooltipKo: '리뷰 스캔 및 위험 점수화', tooltipEn: 'Scan & score reviews' },
+  { id: 'response',     icon: Shield,    labelKo: '대응',       labelEn: 'Response', tooltipKo: 'AI 대응 플레이북',        tooltipEn: 'AI-generated playbook' },
+  { id: 'compliance',   icon: FileCheck, labelKo: '컴플라이언스', labelEn: 'Comply',  tooltipKo: '다관할권 컴플라이언스',     tooltipEn: 'Multi-jurisdiction check' },
+  { id: 'studio',       icon: Settings2, labelKo: '스튜디오',   labelEn: 'Studio',   tooltipKo: '온톨로지 커스터마이징',     tooltipEn: 'Customize ontology' },
 ];
 
 const COMING_SOON = [
-  { id: 'audit', icon: ScrollText, labelEn: 'Audit',  tooltip: 'Coming Q3 2026' },
-  { id: 'agent', icon: Bot,        labelEn: 'Agent',  tooltip: 'Coming Q3 2026' },
+  { id: 'audit', icon: ScrollText, labelKo: '감사', labelEn: 'Audit',  tooltipKo: '2026년 3분기 출시 예정', tooltipEn: 'Coming Q3 2026' },
+  { id: 'agent', icon: Bot,        labelKo: '에이전트', labelEn: 'Agent',  tooltipKo: '2026년 3분기 출시 예정', tooltipEn: 'Coming Q3 2026' },
 ];
 
 export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle }) {
@@ -25,13 +25,13 @@ export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle 
 
       {/* Nav icons + labels */}
       <nav className="flex-1 flex flex-col items-center gap-1 pt-2">
-        {NAV_ITEMS.map(({ id, icon: Icon, labelKo, labelEn, tooltip }) => {
+        {NAV_ITEMS.map(({ id, icon: Icon, labelKo, labelEn, tooltipKo, tooltipEn }) => {
           const isActive = activeTab === id;
           return (
             <button
               key={id}
               onClick={() => onTabChange(id)}
-              title={tooltip}
+              title={lang === 'ko' ? tooltipKo : tooltipEn}
               className={`group relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md transition-colors ${
                 isActive
                   ? 'text-white'
@@ -53,16 +53,18 @@ export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle 
         <div className="w-8 h-px bg-zinc-800 my-1" />
 
         {/* Coming soon tabs */}
-        {COMING_SOON.map(({ id, icon: Icon, labelEn, tooltip }) => (
-          <div
+        {COMING_SOON.map(({ id, icon: Icon, labelKo, labelEn, tooltipKo, tooltipEn }) => (
+          <button
             key={id}
-            title={tooltip}
-            className="relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md text-zinc-700 cursor-default opacity-40"
+            type="button"
+            aria-disabled="true"
+            title={lang === 'ko' ? tooltipKo : tooltipEn}
+            className="relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md text-zinc-700 cursor-not-allowed opacity-40"
           >
             <Icon size={20} strokeWidth={1.5} />
-            <span className="text-[9px] font-medium leading-tight text-center">{labelEn}</span>
+            <span className="text-[9px] font-medium leading-tight text-center">{lang === 'ko' ? labelKo : labelEn}</span>
             <span className="absolute -top-0.5 -right-0.5 text-[6px] font-bold text-zinc-500 bg-zinc-800 px-1 rounded">Q3</span>
-          </div>
+          </button>
         ))}
       </nav>
 
