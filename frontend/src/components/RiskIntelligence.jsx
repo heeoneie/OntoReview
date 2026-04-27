@@ -21,11 +21,23 @@ import RiskBreakdown from './RiskBreakdown';
 
 // ── Constants ──
 
+const SIMILARITY_THRESHOLD = 0.5;
+
 const INDUSTRY_INPUT_CFG = {
-  ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: 'LANEIGE',          labelKey2: 'risk.label2_ecommerce', default2: 'Water Sleeping Mask' },
+  ecommerce: { labelKey1: 'risk.label1_ecommerce', default1: 'Beyond Meat',      labelKey2: 'risk.label2_ecommerce', default2: 'Plant-Based Burger Patty' },
   hospital:  { labelKey1: 'risk.label1_hospital',  default1: 'MedStar Health',   labelKey2: 'risk.label2_hospital',  default2: 'Knee Replacement Surgery' },
   finance:   { labelKey1: 'risk.label1_finance',   default1: 'PayTrust',         labelKey2: 'risk.label2_finance',   default2: 'Mobile Pay App v3.0' },
-  gaming:    { labelKey1: 'risk.label1_gaming',     default1: 'ChronoGames',      labelKey2: 'risk.label2_gaming',    default2: 'ChronoWar Mobile' },
+};
+
+// Map internal source tags to user-friendly labels
+const SOURCE_LABEL_MAP = {
+  demo: 'Amazon Review',
+  generate_ontology: 'Risk Engine',
+  youtube: 'YouTube',
+  reddit: 'Reddit',
+  fda: 'FDA Recall',
+  news: 'News',
+  risk_intelligence: 'Risk Engine',
 };
 
 // ── Helpers ──
@@ -47,6 +59,58 @@ function getErrorMessage(err, t) {
     return t('risk.errTimeout');
   }
   return err?.response?.data?.detail || t('risk.errGeneric');
+}
+
+// ── Discovery results with similarity filtering ──
+
+function DiscoveryResultsList({ results, t }) {
+  const [showAll, setShowAll] = useState(false);
+  const sorted = [...results].sort((a, b) => (b.similarity || 0) - (a.similarity || 0));
+  const relevant = sorted.filter((r) => (r.similarity || 0) >= SIMILARITY_THRESHOLD);
+  const hidden = sorted.length - relevant.length;
+  const displayed = showAll ? sorted : relevant;
+
+  return (
+    <div>
+      <div className="space-y-2 max-h-80 overflow-y-auto">
+        {displayed.map((item, idx) => (
+          <div key={`${item.url}-${idx}`} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
+            <AlertTriangle className="text-white flex-shrink-0 mt-0.5" size={14} />
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
+              <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
+              <div className="flex items-center gap-2 mt-2">
+                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-400">
+                  <Globe size={9} />
+                  {item.source_domain}
+                </span>
+                {item.similarity != null && (
+                  <span className="text-sm font-mono text-zinc-500">cos {item.similarity.toFixed(2)}</span>
+                )}
+                <a href={item.url} target="_blank" rel="noopener noreferrer"
+                  className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors">
+                  <ExternalLink size={9} />
+                  {t('discovery.source')}
+                </a>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+      {hidden > 0 && (
+        <button
+          onClick={() => setShowAll(!showAll)}
+          className="mt-2 text-sm text-zinc-500 hover:text-zinc-300 transition-colors"
+        >
+          {showAll
+            ? t('discovery.hideLowRelevance')
+            : t('discovery.showAll')
+                .replace('{total}', sorted.length)
+                .replace('{hidden}', hidden)}
+        </button>
+      )}
+    </div>
+  );
 }
 
 // ── Component ──
@@ -133,7 +197,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
     if (!b || discoveryLoading) return;
     setDiscoveryLoading(true);
     try {
-      const res = await searchBrandRisks(b, product || productName.trim() || null);
+      const res = await searchBrandRisks(b, product || productName.trim() || null, industry);
       setDiscoveryResults(res.data);
     } catch (err) {
       console.error('Discovery scan failed:', err);
@@ -159,7 +223,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
 
     try {
       const [ingestRes] = await Promise.all([
-        runFullDemo(),
+        runFullDemo(industry),
         handleDiscoveryScan(brand, product),
       ]);
       const d = ingestRes.data;
@@ -181,6 +245,9 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
       }
 
       await refreshDashboard();
+
+      // Inject brand name into all string fields of timeline items that may contain "OO" placeholders
+      setTimeline((prev) => injectBrand(prev, brand));
 
       await new Promise((r) => setTimeout(r, 600));
     } catch (err) {
@@ -238,6 +305,34 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
         />
       )}
 
+      {/* Cross-tab CTAs */}
+      {hasData && (
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => {
+              // Find highest-severity node from ontology or timeline
+              const topNode = ontology?.nodes
+                ?.slice()
+                .sort((a, b) => (b.severity || b.severity_score || 0) - (a.severity || a.severity_score || 0))[0];
+              const topTimeline = timeline
+                ?.slice()
+                .sort((a, b) => (b.severity || 0) - (a.severity || 0))[0];
+              const nodeName = topNode?.name || topNode?.label || topTimeline?.name || null;
+              onNavigatePlaybook?.(nodeName, industry);
+            }}
+            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white text-sm font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+          >
+            Generate Response Playbook →
+          </button>
+          <button
+            onClick={() => onComplianceData?.(compliance)}
+            className="px-4 py-2 bg-zinc-800 border border-zinc-700 text-white text-sm font-medium rounded-lg hover:bg-zinc-700 transition-colors"
+          >
+            Check Regulations →
+          </button>
+        </div>
+      )}
+
       {/* 4. Investigation Workspace (2-column) */}
       {hasData && (demoResult || timeline.length > 0 || discoveryResults || ontology) && (
         <InvestigationWorkspace
@@ -275,7 +370,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                           <div className="flex-1 min-w-0">
                             <p className="text-sm text-white font-medium truncate">{item.name}</p>
                             <div className="flex items-center gap-2 mt-1">
-                              <span className="text-sm text-zinc-500">{item.source}</span>
+                              <span className="text-sm text-zinc-500">{SOURCE_LABEL_MAP[item.source] || item.source}</span>
                               {item.case_id && (
                                 <span className="text-sm text-zinc-600 font-mono">{item.case_id}</span>
                               )}
@@ -325,32 +420,7 @@ export default function RiskIntelligence({ onNavigatePlaybook, onComplianceData,
                   )}
 
                   {discoveryResults && discoveryResults.results.length > 0 && (
-                    <div className="space-y-2 max-h-80 overflow-y-auto">
-                      {discoveryResults.results.map((item) => (
-                        <div key={item.url} className="flex items-start gap-3 px-4 py-3 rounded-xl bg-zinc-800/40 border border-zinc-800 hover:border-zinc-700 transition-colors">
-                          <AlertTriangle className="text-white flex-shrink-0 mt-0.5" size={14} />
-                          <div className="flex-1 min-w-0">
-                            <p className="text-sm font-medium text-white leading-snug">{item.title}</p>
-                            <p className="text-sm text-zinc-400 mt-1 leading-relaxed">{item.snippet}</p>
-                            <div className="flex items-center gap-2 mt-2">
-                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-800 border border-zinc-700 text-sm font-medium text-zinc-400">
-                                <Globe size={9} />
-                                {item.source_domain}
-                              </span>
-                              <a
-                                href={item.url}
-                                target="_blank"
-                                rel="noopener noreferrer"
-                                className="inline-flex items-center gap-1 text-sm text-zinc-400 hover:text-white transition-colors"
-                              >
-                                <ExternalLink size={9} />
-                                {t('discovery.source')}
-                              </a>
-                            </div>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
+                    <DiscoveryResultsList results={discoveryResults.results} t={t} />
                   )}
 
                   {discoveryResults && discoveryResults.results.length === 0 && (

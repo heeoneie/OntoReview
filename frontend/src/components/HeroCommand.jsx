@@ -5,7 +5,6 @@ const INDUSTRIES = [
   { id: 'ecommerce', labelKey: 'risk.ecommerce' },
   { id: 'hospital',  labelKey: 'risk.hospital' },
   { id: 'finance',   labelKey: 'risk.finance' },
-  { id: 'gaming',    labelKey: 'risk.gaming' },
 ];
 
 export default function HeroCommand({

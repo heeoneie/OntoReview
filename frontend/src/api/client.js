@@ -63,7 +63,8 @@ export const getKpiSummary = () => api.get('/kpi/summary');
 export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
-export const runFullDemo = () => api.post('/data/demo', null, { timeout: 180000 });
+export const runFullDemo = (industry = 'ecommerce') =>
+  api.post('/data/demo', null, { params: { industry }, timeout: 180000 });
 export const getOntologyGraph = (minSeverity = 0) =>
   api.get('/risk/ontology/graph', { params: { min_severity: minSeverity } });
 
@@ -73,8 +74,8 @@ export const getAuditEvents = (limit = 50) =>
 
 
 // Web Discovery API
-export const searchBrandRisks = (brand, product) =>
-  api.post('/discovery/search', { brand, product });
+export const searchBrandRisks = (brand, product, industry = 'ecommerce') =>
+  api.post('/discovery/search', { brand, product, industry });
 
 // Agent Communication Setup API
 export const getAgentConfigs = () => api.get('/agent/configs');

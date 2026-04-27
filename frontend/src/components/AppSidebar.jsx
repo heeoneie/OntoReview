@@ -1,35 +1,43 @@
-import { Search, Shield, FileCheck, Settings2 } from 'lucide-react';
+import { Search, Shield, FileCheck, Settings2, ScrollText, Bot } from 'lucide-react';
 
 const NAV_ITEMS = [
-  { id: 'intelligence', icon: Search,    labelKo: '인텔리전스', labelEn: 'Intel' },
-  { id: 'response',     icon: Shield,    labelKo: '대응',       labelEn: 'Response' },
-  { id: 'compliance',   icon: FileCheck, labelKo: '컴플라이언스', labelEn: 'Comply' },
-  { id: 'studio',       icon: Settings2, labelKo: '스튜디오',   labelEn: 'Studio' },
+  { id: 'intelligence', icon: Search,    labelKo: '인텔리전스', labelEn: 'Intel',    tooltipKo: '리뷰 스캔 및 위험 점수화', tooltipEn: 'Scan & score reviews' },
+  { id: 'response',     icon: Shield,    labelKo: '대응',       labelEn: 'Response', tooltipKo: 'AI 대응 플레이북',        tooltipEn: 'AI-generated playbook' },
+  { id: 'compliance',   icon: FileCheck, labelKo: '컴플라이언스', labelEn: 'Comply',  tooltipKo: '다관할권 컴플라이언스',     tooltipEn: 'Multi-jurisdiction check' },
+  { id: 'studio',       icon: Settings2, labelKo: '스튜디오',   labelEn: 'Studio',   tooltipKo: '온톨로지 커스터마이징',     tooltipEn: 'Customize ontology' },
+];
+
+const COMING_SOON = [
+  { id: 'audit', icon: ScrollText, labelKo: '감사', labelEn: 'Audit',  tooltipKo: '2026년 3분기 출시 예정', tooltipEn: 'Coming Q3 2026' },
+  { id: 'agent', icon: Bot,        labelKo: '에이전트', labelEn: 'Agent',  tooltipKo: '2026년 3분기 출시 예정', tooltipEn: 'Coming Q3 2026' },
 ];
 
 export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle }) {
   return (
     <aside className="fixed left-0 top-0 bottom-0 w-[72px] bg-zinc-900 border-r border-zinc-800 flex flex-col items-center z-50">
-      {/* Logo */}
-      <div className="h-14 flex items-center justify-center">
+      {/* Logo + tagline */}
+      <div className="flex flex-col items-center pt-3 pb-1 gap-1">
         <span className="text-white text-lg font-black select-none">◆</span>
+        <span className="text-[7px] text-zinc-500 font-medium text-center leading-tight px-1 tracking-wide">
+          LITIGATION<br />INTELLIGENCE
+        </span>
       </div>
 
       {/* Nav icons + labels */}
       <nav className="flex-1 flex flex-col items-center gap-1 pt-2">
-        {NAV_ITEMS.map(({ id, icon: Icon, labelKo, labelEn }) => {
+        {NAV_ITEMS.map(({ id, icon: Icon, labelKo, labelEn, tooltipKo, tooltipEn }) => {
           const isActive = activeTab === id;
           return (
             <button
               key={id}
               onClick={() => onTabChange(id)}
+              title={lang === 'ko' ? tooltipKo : tooltipEn}
               className={`group relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md transition-colors ${
                 isActive
                   ? 'text-white'
                   : 'text-zinc-500 hover:text-zinc-300'
               }`}
             >
-              {/* Active left border indicator */}
               {isActive && (
                 <span className="absolute left-0 top-2 bottom-2 w-0.5 rounded-r bg-white" />
               )}
@@ -40,11 +48,28 @@ export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle 
             </button>
           );
         })}
+
+        {/* Separator */}
+        <div className="w-8 h-px bg-zinc-800 my-1" />
+
+        {/* Coming soon tabs */}
+        {COMING_SOON.map(({ id, icon: Icon, labelKo, labelEn, tooltipKo, tooltipEn }) => (
+          <button
+            key={id}
+            type="button"
+            aria-disabled="true"
+            title={lang === 'ko' ? tooltipKo : tooltipEn}
+            className="relative w-14 flex flex-col items-center justify-center gap-0.5 py-2 rounded-md text-zinc-700 cursor-not-allowed opacity-40"
+          >
+            <Icon size={20} strokeWidth={1.5} />
+            <span className="text-[9px] font-medium leading-tight text-center">{lang === 'ko' ? labelKo : labelEn}</span>
+            <span className="absolute -top-0.5 -right-0.5 text-[6px] font-bold text-zinc-500 bg-zinc-800 px-1 rounded">Q3</span>
+          </button>
+        ))}
       </nav>
 
       {/* Bottom section */}
       <div className="flex flex-col items-center gap-3 pb-4">
-        {/* LIVE indicator */}
         <div className="flex flex-col items-center gap-0.5">
           <span className="relative flex h-1.5 w-1.5">
             <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-50" />
@@ -53,7 +78,6 @@ export default function AppSidebar({ activeTab, onTabChange, lang, onLangToggle 
           <span className="text-[9px] text-emerald-400 font-bold tracking-widest">LIVE</span>
         </div>
 
-        {/* Language toggle */}
         <button
           onClick={onLangToggle}
           className="w-8 h-8 flex items-center justify-center text-xs font-bold text-zinc-400 border border-zinc-700 rounded-md hover:bg-zinc-800 hover:text-zinc-200 transition-colors"
