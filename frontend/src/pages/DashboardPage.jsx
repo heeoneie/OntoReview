@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { LangProvider } from '../contexts/LangContext';
+import { LangProvider, useLang } from '../contexts/LangContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import RiskIntelligence from '../components/RiskIntelligence';
 import RiskPlaybook from '../components/RiskPlaybook';
@@ -19,7 +19,8 @@ const PAGE_TITLES = {
   studio: 'Studio',
 };
 
-export default function DashboardPage() {
+function DashboardShell() {
+  const { lang, setLang } = useLang();
   const [activeTab, setActiveTab] = useState('intelligence');
   const [playbookNode, setPlaybookNode] = useState(null);
   const [playbookIndustry, setPlaybookIndustry] = useState('ecommerce');
@@ -36,13 +37,12 @@ export default function DashboardPage() {
   const pageTitle = PAGE_TITLES[activeTab] || PAGE_TITLES.intelligence;
 
   return (
-    <LangProvider>
     <div className="min-h-screen bg-zinc-950 flex">
       <AppSidebar
         activeTab={activeTab}
         onTabChange={setActiveTab}
-        lang="en"
-        onLangToggle={() => {}}
+        lang={lang}
+        onLangToggle={() => setLang(lang === 'ko' ? 'en' : 'ko')}
       />
 
       <div className="flex-1 ml-[72px] flex flex-col min-h-screen">
@@ -117,6 +117,13 @@ export default function DashboardPage() {
         </main>
       </div>
     </div>
+  );
+}
+
+export default function DashboardPage() {
+  return (
+    <LangProvider>
+      <DashboardShell />
     </LangProvider>
   );
 }

@@ -170,7 +170,7 @@ export default function LandingPage() {
             {/* B1: Primary CTA = Try Live Demo (large), Secondary = Watch 2-min Video (text link) */}
             <div className="lp-hero__ctas">
               <Link className="lp-btn lp-btn--pri lp-btn--lg" to="/dashboard"><Play size={14} /><span>Try Live Demo</span></Link>
-              <a className="lp-hero__text-link" href="#"><Video size={14} /><span>Watch 2-min Video</span></a>
+              <button type="button" className="lp-hero__text-link" aria-disabled="true" title="Coming soon"><Video size={14} /><span>Watch 2-min Video</span></button>
             </div>
             {/* P1: Replace metrics with benefit-driven line */}
             <div className="lp-hero__benefits">
@@ -522,7 +522,7 @@ export default function LandingPage() {
           <span className="lp-foot__sep">·</span>
           <span className="lp-foot__note">Advisory board and launch partners to be announced Q3 2026.</span>
           <span className="lp-foot__sep">·</span>
-          <a href="#" className="lp-foot__link"><FileText size={12} /> Pitch Deck</a>
+          <button type="button" className="lp-foot__link" aria-disabled="true" title="Coming soon"><FileText size={12} /> Pitch Deck</button>
         </div>
         <div className="lp-foot__disclaimer">
           OntoReview provides decision-support information only. It is not legal advice. Consult qualified counsel for legal decisions.

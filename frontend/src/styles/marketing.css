@@ -182,8 +182,6 @@
 /* #9: Compact 3+2 grid for non-flagship modules */
 .lp-features { display: grid; grid-template-columns: repeat(3, 1fr); gap: 16px; }
 .lp-features--compact { grid-template-columns: repeat(3, 1fr); }
-.lp-features--compact .lp-feature:nth-child(4),
-.lp-features--compact .lp-feature:nth-child(5) { }
 @media (min-width: 768px) {
   .lp-features--compact { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
   .lp-features--compact .lp-feature { padding: 20px 20px 24px; }

@@ -61,6 +61,7 @@ const RISKS = [
 
 /* ─────────────────── Welcome (Step 0) ─────────────────── */
 function Welcome({ onStart }) {
+  const navigate = useNavigate();
   return (
     <div className="ob-welcome">
       <div className="ob-welcome__top">
@@ -68,7 +69,7 @@ function Welcome({ onStart }) {
           <img src={markSvg} alt="OntoReview" />
           <span>OntoReview</span>
         </div>
-        <button className="ob-top__skip">Sign in</button>
+        <button type="button" className="ob-top__skip" onClick={() => navigate('/dashboard')}>Sign in</button>
       </div>
       <div className="ob-welcome__body">
         <div className="ob-welcome__inner">
@@ -109,6 +110,7 @@ function Welcome({ onStart }) {
 
 /* ─────────────────── Shell for steps 1–4 ─────────────────── */
 function StepShell({ step, children, onBack, onNext, nextLabel, backLabel = 'Back', hint, canNext = true }) {
+  const navigate = useNavigate();
   const steps = [1, 2, 3, 4];
   return (
     <div className="ob-shell">
@@ -133,7 +135,7 @@ function StepShell({ step, children, onBack, onNext, nextLabel, backLabel = 'Bac
             <span className="ob-top__total">04</span>
             <span className="ob-top__name">{['Company', 'Role', 'Source', 'First findings'][step - 1]}</span>
           </div>
-          <button className="ob-top__skip">Skip onboarding</button>
+          <button type="button" className="ob-top__skip" onClick={() => navigate('/dashboard')}>Skip onboarding</button>
         </div>
         <div className="ob-body">
           <div className={step === 4 ? 'ob-result' : 'ob-content'}>
@@ -274,7 +276,7 @@ function Step3({ state, setState, onBack, onNext }) {
         ))}
       </div>
 
-      <button className="ob-skiplink" onClick={() => setState({ ...state, source: 'sample' })}>
+      <button type="button" className="ob-skiplink" onClick={() => { setState({ ...state, source: 'sample' }); onNext(); }}>
         <ArrowRight size={13} />
         <span>Skip — use sample dataset (Beyond Meat reviews, 500 samples)</span>
       </button>
@@ -284,6 +286,7 @@ function Step3({ state, setState, onBack, onNext }) {
 
 /* ─────────────────── Step 4: Result ─────────────────── */
 function Step4({ onBack, onFinish }) {
+  const navigate = useNavigate();
   return (
     <StepShell step={4} onBack={onBack} onNext={onFinish} nextLabel="Go to full dashboard"
       hint="Sample data — your real results will appear once connected."
@@ -344,7 +347,7 @@ function Step4({ onBack, onFinish }) {
       </div>
 
       <div style={{ display: 'flex', justifyContent: 'flex-start', marginTop: 20 }}>
-        <button className="ob-skiplink">
+        <button type="button" className="ob-skiplink" onClick={() => navigate('/dashboard')}>
           <Plus size={13} />
           <span>Connect my own data source instead</span>
         </button>
