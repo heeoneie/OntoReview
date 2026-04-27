@@ -17,7 +17,7 @@
   },
   {
     "case_id": "CF-2003-HCA",
-    "risk_category": "Consumer Fraud",
+    "risk_category": "False Advertising",
     "trigger_keywords": ["billing fraud", "upcoding", "overbilling", "unnecessary procedures", "false claims"],
     "case_title": "HCA Healthcare Billing Fraud Settlement",
     "precedent_summary": "Hospital chain settled federal fraud charges for systematic upcoding and billing for unnecessary procedures.",
@@ -33,7 +33,7 @@
   },
   {
     "case_id": "HIPAA-2015-AN",
-    "risk_category": "Privacy",
+    "risk_category": "Regulatory Risk",
     "trigger_keywords": ["data breach", "hipaa", "patient records", "unauthorized access", "identity theft"],
     "case_title": "Anthem HIPAA Data Breach Settlement",
     "precedent_summary": "Health insurer settled after massive data breach exposed 78.8 million patient records to hackers.",
@@ -41,7 +41,7 @@
   },
   {
     "case_id": "MED-2019-WS",
-    "risk_category": "Malpractice",
+    "risk_category": "Product Liability",
     "trigger_keywords": ["wrong-site surgery", "wrong knee", "wrong side", "surgical error", "never event"],
     "case_title": "Wrong-Site Surgery Malpractice Verdict",
     "precedent_summary": "Hospital found liable after surgeon operated on wrong knee, resulting in unnecessary surgery and prolonged recovery.",
@@ -49,7 +49,7 @@
   },
   {
     "case_id": "CF-2018-TH",
-    "risk_category": "Consumer Fraud",
+    "risk_category": "False Advertising",
     "trigger_keywords": ["blood test", "fraud", "theranos", "diagnostic", "false results"],
     "case_title": "Theranos Blood Test Fraud Settlement",
     "precedent_summary": "Medical testing company defrauded patients and investors with inaccurate blood test technology.",

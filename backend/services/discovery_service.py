@@ -9,7 +9,7 @@ Environment variables:
 """
 
 import asyncio
-import json as _json_mod
+import json
 import logging
 import os
 import re
@@ -90,7 +90,7 @@ def _load_category_discovery(industry: str) -> list[dict] | None:
     path = data_dir / filename
     if path.exists():
         with open(path, encoding="utf-8") as f:
-            return _json_mod.load(f)
+            return json.load(f)
     return None
 
 

@@ -15,6 +15,7 @@ router = APIRouter()
 class DiscoveryRequest(BaseModel):
     brand: str
     product: Optional[str] = None
+    industry: str = "ecommerce"
 
 
 @router.post("/search")
@@ -26,6 +27,7 @@ async def search_web_risks(request: DiscoveryRequest):
         return await search_brand_risks(
             request.brand.strip(),
             request.product.strip() if request.product else None,
+            industry=request.industry,
         )
     except Exception:
         logger.exception("Web discovery search failed")

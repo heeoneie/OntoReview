@@ -459,11 +459,10 @@ def _classify_severity(text: str) -> tuple[float, str | None, dict | None]:
 
 def _match_precedent_for_review(
     full_text: str, risk_label: str, title: str, scan_id: str, db: Session,
-    industry: str = "ecommerce",
 ):
     """Match legal precedent and log audit events. Returns (precedent_result, case_id, exposure)."""
     try:
-        precedent_result = match_precedent(full_text, risk_category=risk_label, industry=industry)
+        precedent_result = match_precedent(full_text, risk_category=risk_label)
     except Exception as exc:  # pylint: disable=broad-except
         logger.warning("Precedent matching failed for '%s': %s", title, exc)
         precedent_result = None
@@ -637,7 +636,7 @@ def ingest_amazon_mock(product_url: str, db: Session, industry: str = "ecommerce
             continue
 
         precedent_result = _match_precedent_for_review(
-            full_text, risk_label, item["title"], scan_id, db, industry=industry,
+            full_text, risk_label, item["title"], scan_id, db,
         )
 
         log_event(
