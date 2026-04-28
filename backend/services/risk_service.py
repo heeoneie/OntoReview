@@ -877,7 +877,7 @@ def _demo_generate_compliance(
 
 ## 출력 형식
 {{
-  "report_title": "LANEIGE Water Sleeping Mask — Emergency Risk Report",
+  "report_title": "OO — Emergency Risk Report",
   "report_date": "2026-03-12",
   "overall_risk_level": "Danger",
   "monitoring_summary": "Simultaneous detection across 4 channels.",
@@ -923,7 +923,7 @@ def _demo_generate_compliance(
     content = call_openai_json(client, prompt, system_prompt=_get_system_prompt(lang))
     result = extract_json_from_text(content)
     return result if result else {
-        "report_title": "LANEIGE Water Sleeping Mask — Emergency Risk Report",
+        "report_title": "OO — Emergency Risk Report",
         "overall_risk_level": "Danger",
         "monitoring_summary": "Critical risk detected across 4 channels",
         "monitored_channels": [],
@@ -963,7 +963,7 @@ def _demo_generate_meeting(client, incident_context: str, lang: str = "ko") -> d
     content = call_openai_json(client, prompt, system_prompt=_get_system_prompt(lang))
     result = extract_json_from_text(content)
     return result if result else {
-        "meeting_title": "LANEIGE Chemical Burn Crisis — Executive Response Meeting",
+        "meeting_title": "OO Crisis — Executive Response Meeting",
         "urgency": "Critical",
         "attendees": [],
         "agenda_items": [],
