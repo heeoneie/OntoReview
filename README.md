@@ -2,13 +2,12 @@
 
 **AI-powered litigation prevention OS that converts customer reviews into legal intelligence.**
 
-Powered by **Amazon Nova 2 Lite** on AWS Bedrock + OWL Ontology Reasoning.
+Powered by **OpenAI GPT-4o-mini** with Gemini 2.0 Flash fallback + OWL Ontology Reasoning.
 
 > *"Palantir for Reputation & Legal Risk"*
 
-**Live Demo:** https://onto-review.vercel.app  
-**Hackathon:** Amazon Nova AI Hackathon 2026 · Category: Agentic AI  
-**Hashtag:** #AmazonNova
+**Live:** https://onto-review.vercel.app  
+**Status:** Production
 
 ---
 
@@ -25,7 +24,7 @@ When K-Beauty and K-Food brands enter the US market, a single review like *"this
 ```
 Amazon Reviews (ASIN input)
         ↓
-  Risk Classification (Amazon Nova 2 Lite)
+  Risk Classification (OpenAI GPT-4o-mini)
         ↓
   OWL Ontology Reasoning (owlready2)
         ↓
@@ -50,9 +49,9 @@ Every analyzed review generates:
 
 ---
 
-## Amazon Nova Integration
+## LLM Reasoning Engine
 
-Amazon Nova 2 Lite (`amazon.nova-2-lite-v1:0`) serves as the **primary reasoning engine** through AWS Bedrock. Nova powers every intelligent component:
+OpenAI `gpt-4o-mini` serves as the **primary reasoning engine** with Google's `gemini-2.0-flash` as automatic fallback. The LLM powers every intelligent component:
 
 - **Risk Classification** — analyzes review text, assigns legal risk categories with severity scores (1–10) and confidence levels
 - **Legal Exposure Estimation** — cross-references detected risks with matched legal precedents to estimate financial damages
@@ -62,13 +61,14 @@ Amazon Nova 2 Lite (`amazon.nova-2-lite-v1:0`) serves as the **primary reasoning
 
 ### LLM Provider Architecture
 
-The system uses a clean provider abstraction layer. Switching between Nova, OpenAI, and Gemini requires only one environment variable:
+The system uses a clean provider abstraction layer. Switch primary/fallback order via a single environment variable:
 
 ```bash
-LLM_PROVIDER=bedrock   # Amazon Nova (hackathon / production)
-LLM_PROVIDER=openai    # OpenAI GPT-4o-mini (fallback)
-LLM_PROVIDER=google    # Gemini 2.0 Flash (local development)
+LLM_PROVIDER=openai    # OpenAI GPT-4o-mini → Gemini fallback (production default)
+LLM_PROVIDER=google    # Gemini 2.0 Flash → OpenAI fallback (local dev)
 ```
+
+OpenAI failures trigger automatic Gemini fallback. In Gemini-primary mode, 429 rate-limit errors trigger backoff retries before failing over to OpenAI.
 
 Implementation: [`core/utils/openai_client.py`](core/utils/openai_client.py)
 
@@ -104,7 +104,7 @@ Configurable AI agent autonomy levels (1–5) for automated risk response. Inclu
 
 | Layer | Technology |
 |-------|-----------|
-| LLM | Amazon Nova 2 Lite via AWS Bedrock |
+| LLM | OpenAI GPT-4o-mini (primary) · Gemini 2.0 Flash (fallback) |
 | Ontology | OWL 2 (owlready2) |
 | Backend | Python, FastAPI |
 | Frontend | React, Tailwind CSS |
@@ -129,7 +129,7 @@ OntoReview/
 │   │   ├── discovery.py         # Web discovery engine
 │   │   └── ...
 │   ├── services/                # Business logic
-│   │   ├── risk_service.py      # Core risk analysis (Nova-powered)
+│   │   ├── risk_service.py      # Core risk analysis (LLM-powered)
 │   │   ├── ontology_engine.py   # OWL ontology reasoning
 │   │   ├── legal_rag_service.py # Legal precedent matching (Micro-RAG)
 │   │   ├── playbook_service.py  # Risk response playbook generation
@@ -142,7 +142,7 @@ OntoReview/
 ├── core/
 │   ├── config.py                # Environment & LLM configuration
 │   └── utils/
-│       └── openai_client.py     # Multi-provider LLM abstraction (Nova/OpenAI/Gemini)
+│       └── openai_client.py     # Multi-provider LLM abstraction (OpenAI/Gemini)
 ├── frontend/
 │   └── src/
 │       ├── components/          # React UI components
@@ -168,7 +168,8 @@ OntoReview/
 
 - Python 3.11+
 - Node.js 20+
-- AWS Account with Bedrock access (Amazon Nova 2 Lite enabled in us-east-1)
+- OpenAI API key (primary LLM)
+- Google AI Studio API key (Gemini fallback, optional but recommended)
 
 ### Setup
 
@@ -193,14 +194,11 @@ cd ..
 Create a `.env` file in the project root:
 
 ```bash
-# AWS Bedrock (Amazon Nova) — Required
-AWS_ACCESS_KEY_ID=your_aws_access_key
-AWS_SECRET_ACCESS_KEY=your_aws_secret_key
-AWS_DEFAULT_REGION=us-east-1
-LLM_PROVIDER=bedrock
-
-# Fallback LLMs (Optional)
+# Primary LLM (Required)
 OPENAI_API_KEY=your_openai_key
+LLM_PROVIDER=openai
+
+# Fallback LLM (Optional but recommended for production)
 GOOGLE_API_KEY=your_google_key
 ```
 
@@ -219,16 +217,14 @@ Open http://localhost:5173
 
 ---
 
-## Demo Scenario
-
-The system supports this 3-minute demo flow:
+## End-to-end Flow
 
 1. **Input** — Enter an Amazon ASIN or use demo data
 2. **Ingest** — System loads product reviews
-3. **Analyze** — Amazon Nova classifies legal risks with severity scores
+3. **Analyze** — GPT-4o-mini classifies legal risks with severity scores
 4. **Match** — Micro-RAG finds relevant US legal precedents
 5. **Dashboard** — Risk Intelligence displays total legal exposure (e.g., $5.4M)
-6. **Playbook** — AI generates risk mitigation strategies
+6. **Playbook** — LLM generates risk mitigation strategies
 7. **Audit** — Immutable audit trail records all events for compliance
 
 ---
@@ -241,7 +237,7 @@ RiskScore = Σ(severity_i × confidence_i)
 TotalLegalExposure = Σ(estimated_loss_usd_i)
 ```
 
-Where `severity_i` is the Nova-generated risk severity (1–10), `confidence_i` is classification confidence (0–1), and `estimated_loss_usd_i` is derived from matched US legal precedent settlement data.
+Where `severity_i` is the LLM-generated risk severity (1–10), `confidence_i` is classification confidence (0–1), and `estimated_loss_usd_i` is derived from matched US legal precedent settlement data.
 
 ### Risk Categories
 
@@ -286,13 +282,11 @@ services:
     startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: LLM_PROVIDER
-        value: bedrock
-      - key: AWS_ACCESS_KEY_ID
+        value: openai
+      - key: OPENAI_API_KEY
         sync: false
-      - key: AWS_SECRET_ACCESS_KEY
+      - key: GOOGLE_API_KEY
         sync: false
-      - key: AWS_DEFAULT_REGION
-        value: us-east-1
 ```
 
 ---
