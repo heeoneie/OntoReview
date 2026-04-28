@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { LangProvider, useLang } from '../contexts/LangContext';
+import { useLang } from '../contexts/LangContext';
 import ErrorBoundary from '../components/ErrorBoundary';
 import RiskIntelligence from '../components/RiskIntelligence';
 import RiskPlaybook from '../components/RiskPlaybook';
@@ -48,7 +48,7 @@ function DashboardShell() {
       <div className="flex-1 ml-[72px] flex flex-col min-h-screen">
         <TopBar title={pageTitle} />
 
-        <main className="flex-1 px-6 py-5">
+        <main id="main-content" className="flex-1 px-6 py-5">
           <div style={{ display: activeTab === 'intelligence' ? undefined : 'none' }}>
             <ErrorBoundary>
               <RiskIntelligence
@@ -121,9 +121,5 @@ function DashboardShell() {
 }
 
 export default function DashboardPage() {
-  return (
-    <LangProvider>
-      <DashboardShell />
-    </LangProvider>
-  );
+  return <DashboardShell />;
 }

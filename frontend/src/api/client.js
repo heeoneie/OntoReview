@@ -1,9 +1,18 @@
 import axios from 'axios';
 
+// Default 30s for sync request/response endpoints. Long-running scans should pass
+// their own AbortController + per-call timeout instead of relying on a global
+// 2-minute window that masks upstream failures.
+export const DEFAULT_TIMEOUT_MS = 30_000;
+export const LONG_TIMEOUT_MS = 120_000;
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 120000,
+  timeout: DEFAULT_TIMEOUT_MS,
 });
+
+// Per-call override for endpoints that legitimately need the longer window (e.g. full LLM scans).
+export const withLongTimeout = (config = {}) => ({ timeout: LONG_TIMEOUT_MS, ...config });
 
 export const uploadCSV = (file) => {
   const formData = new FormData();

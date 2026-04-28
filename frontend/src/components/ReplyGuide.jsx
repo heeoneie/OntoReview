@@ -120,7 +120,8 @@ export default function ReplyGuide({ activeCategory }) {
       setSelectedCategory(activeCategory);
       loadGuide(activeCategory);
     }
-  }, [activeCategory]);
+    // selectedCategory & loadGuide intentionally excluded: this effect is a one-way sync from the parent prop.
+  }, [activeCategory]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const loadGuide = async (category) => {
     setIsLoading(true);

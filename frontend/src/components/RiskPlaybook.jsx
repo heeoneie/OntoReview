@@ -88,9 +88,13 @@ export default function RiskPlaybook({ nodeName, industry, onBack }) {
 
   useEffect(() => {
     if (!hasNode) {
+      // Reset derived fetch state when the user clears the selected node.
+      // React 18+ batches these into a single render; the lint rule is a perf hint, not a correctness issue.
+      /* eslint-disable react-hooks/set-state-in-effect */
       setIsLoading(false);
       setScenarios(null);
       setError(null);
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 

@@ -48,7 +48,15 @@ export default function RiskBreakdown({ timeline }) {
   const total = breakdown.reduce((s, b) => s + b.count, 0);
   const radius = 40;
   const circumference = 2 * Math.PI * radius;
-  let offset = 0;
+  // Pre-compute segment offsets so we never mutate during render.
+  const segments = breakdown.reduce((acc, item) => {
+    const pct = item.count / total;
+    const dashLen = pct * circumference;
+    const dashGap = circumference - dashLen;
+    const startOffset = acc.length ? acc[acc.length - 1].endOffset : 0;
+    acc.push({ ...item, dashLen, dashGap, startOffset, endOffset: startOffset + dashLen });
+    return acc;
+  }, []);
 
   return (
     <div className="bg-zinc-900 rounded-2xl border border-zinc-800 p-4">
@@ -63,27 +71,19 @@ export default function RiskBreakdown({ timeline }) {
       <div className="flex items-center gap-4">
         {/* Donut */}
         <svg width="96" height="96" viewBox="0 0 100 100" className="flex-shrink-0">
-          {breakdown.map((item) => {
-            const pct = item.count / total;
-            const dashLen = pct * circumference;
-            const dashGap = circumference - dashLen;
-            const currentOffset = offset;
-            offset += dashLen;
-
-            return (
-              <circle
-                key={item.category}
-                cx="50" cy="50" r={radius}
-                fill="none"
-                stroke={item.color}
-                strokeWidth="14"
-                strokeDasharray={`${dashLen} ${dashGap}`}
-                strokeDashoffset={-currentOffset}
-                strokeLinecap="butt"
-                style={{ transition: 'stroke-dasharray 0.5s ease' }}
-              />
-            );
-          })}
+          {segments.map((item) => (
+            <circle
+              key={item.category}
+              cx="50" cy="50" r={radius}
+              fill="none"
+              stroke={item.color}
+              strokeWidth="14"
+              strokeDasharray={`${item.dashLen} ${item.dashGap}`}
+              strokeDashoffset={-item.startOffset}
+              strokeLinecap="butt"
+              style={{ transition: 'stroke-dasharray 0.5s ease' }}
+            />
+          ))}
           <text x="50" y="48" textAnchor="middle" fill="#e4e4e7" fontSize="18" fontWeight="800">
             {total}
           </text>

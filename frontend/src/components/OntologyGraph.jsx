@@ -252,6 +252,8 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
 
   useEffect(() => {
     if (data?.nodes != null) {
+      // Reset detail panel + apply incoming graph snapshot. Batched into one render in React 18+.
+      /* eslint-disable react-hooks/set-state-in-effect */
       setSelectedNode(null);
       if (data.nodes.length > 0) {
         applyGraphData(data.nodes, data.edges ?? data.links ?? []);
@@ -259,6 +261,7 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
         setNodes([]);
         setEdges([]);
       }
+      /* eslint-enable react-hooks/set-state-in-effect */
       return;
     }
 
@@ -267,8 +270,8 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
     hasMounted.current = true;
 
     const timer = setTimeout(() => {
-      const baseURL =
-        import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api';
+      // Use the same base resolution as api/client.js so dev (vite proxy) and prod (same-origin) both work.
+      const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
       setIsLoading(true);
       setFetchError(null);
 

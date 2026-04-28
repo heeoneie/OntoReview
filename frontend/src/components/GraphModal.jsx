@@ -156,10 +156,17 @@ export default function GraphModal({ ontology, subgraph, onClose, onNavigatePlay
   const fullGraph = useMemo(() => processOntologyForModal(ontology), [ontology]);
 
   // Use subgraph if full graph is empty
-  const graphToShow = fullGraph.nodes.length > 0 ? fullGraph : (subgraph ? layoutGraph(subgraph.nodes, subgraph.edges) : { nodes: [], edges: [] });
+  const graphToShow = useMemo(
+    () => (fullGraph.nodes.length > 0
+      ? fullGraph
+      : subgraph
+        ? layoutGraph(subgraph.nodes, subgraph.edges)
+        : { nodes: [], edges: [] }),
+    [fullGraph, subgraph],
+  );
 
-  const [nodes, setNodes, onNodesChange] = useNodesState(graphToShow.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(graphToShow.edges);
+  const [nodes, , onNodesChange] = useNodesState(graphToShow.nodes);
+  const [edges, , onEdgesChange] = useEdgesState(graphToShow.edges);
 
   // ESC to close
   useEffect(() => {
@@ -178,12 +185,6 @@ export default function GraphModal({ ontology, subgraph, onClose, onNavigatePlay
       onNavigatePlaybook(node.data.label);
     }
   }, [onNavigatePlaybook]);
-
-  // Stable layout for dagre
-  const stableLayout = useMemo(() => {
-    const g = layoutGraph(graphToShow.nodes, graphToShow.edges);
-    return g;
-  }, [graphToShow]);
 
   return (
     <div

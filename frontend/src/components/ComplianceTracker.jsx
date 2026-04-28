@@ -30,10 +30,6 @@ function violationBadge(level) {
   return 'bg-zinc-800 text-zinc-400 border-zinc-700';
 }
 
-function scoreColor(pct) {
-  return 'text-white';
-}
-
 function scoreBarColor(pct) {
   if (pct >= 80) return 'bg-white';
   if (pct >= 60) return 'bg-zinc-400';
