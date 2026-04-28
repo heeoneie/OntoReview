@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "CF-2016-WF",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["fake accounts", "unauthorized", "cross-selling", "identity", "consent"],
+    "case_title": "Wells Fargo Fake Accounts Scandal",
+    "precedent_summary": "Bank settled after employees opened millions of unauthorized accounts to meet sales quotas.",
+    "historical_settlement": {"min": 12000000, "max": 24000000, "avg": 18000000}
+  },
+  {
+    "case_id": "PV-2017-EQ",
+    "risk_category": "Privacy",
+    "trigger_keywords": ["data breach", "ssn", "credit report", "identity theft", "equifax"],
+    "case_title": "Equifax Data Breach Settlement",
+    "precedent_summary": "Credit bureau settled after data breach exposed SSNs and personal data of 147 million consumers.",
+    "historical_settlement": {"min": 14000000, "max": 26000000, "avg": 20000000}
+  },
+  {
+    "case_id": "SEC-2021-RH",
+    "risk_category": "Securities",
+    "trigger_keywords": ["trading halt", "gamestop", "restricted", "market manipulation", "trading restriction"],
+    "case_title": "Robinhood GameStop Trading Halt Settlement",
+    "precedent_summary": "Brokerage settled after restricting trading on volatile stocks during market frenzy, harming retail investors.",
+    "historical_settlement": {"min": 6000000, "max": 13000000, "avg": 9500000}
+  },
+  {
+    "case_id": "CF-2022-NV",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["student loan", "servicing", "forbearance", "misapplied payments", "default"],
+    "case_title": "CFPB v. Navient Student Loan Servicing",
+    "precedent_summary": "Student loan servicer settled CFPB charges for misapplying payments and steering borrowers into costly forbearance.",
+    "historical_settlement": {"min": 15000000, "max": 28000000, "avg": 22000000}
+  },
+  {
+    "case_id": "PV-2022-CB",
+    "risk_category": "Privacy",
+    "trigger_keywords": ["unauthorized access", "account takeover", "crypto", "hack", "wallet"],
+    "case_title": "Coinbase Unauthorized Access Class Action",
+    "precedent_summary": "Crypto exchange faced class action after account takeovers resulted in stolen funds with delayed customer support.",
+    "historical_settlement": {"min": 5000000, "max": 10000000, "avg": 7500000}
+  },
+  {
+    "case_id": "PV-2019-CO",
+    "risk_category": "Privacy",
+    "trigger_keywords": ["data breach", "capital one", "cloud", "misconfiguration", "personal data"],
+    "case_title": "Capital One Data Breach Settlement",
+    "precedent_summary": "Bank settled after cloud misconfiguration exposed 100 million customer records and SSNs.",
+    "historical_settlement": {"min": 13000000, "max": 25000000, "avg": 19000000}
+  },
+  {
+    "case_id": "CF-2018-WA",
+    "risk_category": "Consumer Fraud",
+    "trigger_keywords": ["auto insurance", "force-placed", "unnecessary", "overcharge", "collateral protection"],
+    "case_title": "Wells Fargo Auto Insurance Misrepresentation",
+    "precedent_summary": "Bank settled after force-placing unnecessary auto insurance on hundreds of thousands of borrowers.",
+    "historical_settlement": {"min": 9000000, "max": 19000000, "avg": 14000000}
+  },
+  {
+    "case_id": "FA-2019-SF",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["student loan", "refinance", "apr", "interest rate", "misleading"],
+    "case_title": "SoFi Student Loan Advertising Settlement",
+    "precedent_summary": "Fintech company settled FTC charges for misleading student loan refinancing rate advertisements.",
+    "historical_settlement": {"min": 4000000, "max": 8500000, "avg": 6200000}
+  }
+]

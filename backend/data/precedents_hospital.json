@@ -1,0 +1,66 @@
+[
+  {
+    "case_id": "MED-2013-DJ",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["hip implant", "metal-on-metal", "corrosion", "revision surgery", "implant failure"],
+    "case_title": "DePuy Hip Implant Defect Settlement",
+    "precedent_summary": "Massive settlement after metal-on-metal hip implants caused metallosis and required revision surgeries in thousands of patients.",
+    "historical_settlement": {"min": 10000000, "max": 20000000, "avg": 15000000}
+  },
+  {
+    "case_id": "MED-2011-MT",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["bone graft", "off-label", "complications", "spinal", "adverse events"],
+    "case_title": "Medtronic Infuse Bone Graft Off-Label Settlement",
+    "precedent_summary": "Medical device company settled after promoting bone graft product for off-label spinal uses causing severe complications.",
+    "historical_settlement": {"min": 15000000, "max": 28000000, "avg": 22000000}
+  },
+  {
+    "case_id": "CF-2003-HCA",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["billing fraud", "upcoding", "overbilling", "unnecessary procedures", "false claims"],
+    "case_title": "HCA Healthcare Billing Fraud Settlement",
+    "precedent_summary": "Hospital chain settled federal fraud charges for systematic upcoding and billing for unnecessary procedures.",
+    "historical_settlement": {"min": 12000000, "max": 24000000, "avg": 18000000}
+  },
+  {
+    "case_id": "MED-2016-SK",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["hip recall", "rejuvenate", "abg", "modular", "metal debris"],
+    "case_title": "Stryker Rejuvenate Hip Recall Settlement",
+    "precedent_summary": "Hip implant recall after modular neck design caused fretting corrosion and metal debris in patients.",
+    "historical_settlement": {"min": 9000000, "max": 18000000, "avg": 13500000}
+  },
+  {
+    "case_id": "HIPAA-2015-AN",
+    "risk_category": "Regulatory Risk",
+    "trigger_keywords": ["data breach", "hipaa", "patient records", "unauthorized access", "identity theft"],
+    "case_title": "Anthem HIPAA Data Breach Settlement",
+    "precedent_summary": "Health insurer settled after massive data breach exposed 78.8 million patient records to hackers.",
+    "historical_settlement": {"min": 10000000, "max": 22000000, "avg": 16000000}
+  },
+  {
+    "case_id": "MED-2019-WS",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["wrong-site surgery", "wrong knee", "wrong side", "surgical error", "never event"],
+    "case_title": "Wrong-Site Surgery Malpractice Verdict",
+    "precedent_summary": "Hospital found liable after surgeon operated on wrong knee, resulting in unnecessary surgery and prolonged recovery.",
+    "historical_settlement": {"min": 5000000, "max": 12000000, "avg": 8200000}
+  },
+  {
+    "case_id": "CF-2018-TH",
+    "risk_category": "False Advertising",
+    "trigger_keywords": ["blood test", "fraud", "theranos", "diagnostic", "false results"],
+    "case_title": "Theranos Blood Test Fraud Settlement",
+    "precedent_summary": "Medical testing company defrauded patients and investors with inaccurate blood test technology.",
+    "historical_settlement": {"min": 6000000, "max": 13000000, "avg": 9500000}
+  },
+  {
+    "case_id": "MED-2017-ZB",
+    "risk_category": "Product Liability",
+    "trigger_keywords": ["knee implant", "loosening", "revision", "defect", "prosthetic"],
+    "case_title": "Zimmer Biomet Knee Implant Defect Settlement",
+    "precedent_summary": "Knee implant manufacturer settled after design defect caused premature loosening requiring revision surgeries.",
+    "historical_settlement": {"min": 12000000, "max": 22000000, "avg": 17000000}
+  }
+]

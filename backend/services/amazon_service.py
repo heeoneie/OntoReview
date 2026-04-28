@@ -8,10 +8,10 @@ Pipeline: Review → detect_risk_candidate() → classify_with_llm() → match_p
 
 import json
 import logging
+from pathlib import Path
 import re
 import uuid
 from datetime import datetime, timezone
-from pathlib import Path
 from typing import Optional
 
 from sqlalchemy.orm import Session
@@ -104,8 +104,10 @@ MOCK_REVIEWS = [
         "rating": 1,
         "title": "Undeclared soy allergen caused my daughter's anaphylaxis",
         "body": (
-            "My daughter is severely allergic to soy. Nothing on the label mentions soy, but she "
-            "had an anaphylactic reaction within minutes of eating this patty. We had to use an EpiPen "
+            "My daughter is severely allergic to soy. Nothing on the "
+            "label mentions soy, but she "
+            "had an anaphylactic reaction within minutes of "
+            "eating this patty. We had to use an EpiPen "
             "and rush to the ER. Filing an FDA complaint and contacting a lawyer."
         ),
     },
@@ -140,8 +142,10 @@ MOCK_REVIEWS = [
         "rating": 1,
         "title": "Found plastic fragment in the patty",
         "body": (
-            "Bit into this burger patty and felt something hard. Pulled out a clear plastic shard "
-            "about 1cm long. This is a choking hazard and a manufacturing defect. Saved the fragment "
+            "Bit into this burger patty and felt something hard. "
+            "Pulled out a clear plastic shard "
+            "about 1cm long. This is a choking hazard and a "
+            "manufacturing defect. Saved the fragment "
             "and contacted the company. No response after 2 weeks."
         ),
     },
@@ -158,8 +162,10 @@ MOCK_REVIEWS = [
         "rating": 1,
         "title": "Mold on the surface before opening",
         "body": (
-            "Visible white and green mold on two of the four patties inside a sealed, non-expired "
-            "package. The vacuum seal was intact. This is a cold chain or manufacturing contamination "
+            "Visible white and green mold on two of the four "
+            "patties inside a sealed, non-expired "
+            "package. The vacuum seal was intact. This is a "
+            "cold chain or manufacturing contamination "
             "issue. Reported to FDA and kept evidence."
         ),
     },
@@ -176,8 +182,10 @@ MOCK_REVIEWS = [
         "rating": 1,
         "title": "Labeled 'organic' but contains GMO ingredients",
         "body": (
-            "Third-party testing confirmed GMO soy in this 'USDA Organic' labeled product. "
-            "This is a federal labeling violation. I've reported this to the USDA organic integrity "
+            "Third-party testing confirmed GMO soy in this "
+            "'USDA Organic' labeled product. "
+            "This is a federal labeling violation. I've reported "
+            "this to the USDA organic integrity "
             "database and am considering joining a class action."
         ),
     },
@@ -239,8 +247,10 @@ MOCK_REVIEWS = [
         "rating": 1,
         "title": "Cross-contamination with gluten despite 'gluten-free' label",
         "body": (
-            "I have celiac disease and trusted the 'gluten-free' label. Had a severe reaction "
-            "after eating this. Independent testing confirmed gluten above 20ppm — the FDA threshold. "
+            "I have celiac disease and trusted the 'gluten-free' "
+            "label. Had a severe reaction "
+            "after eating this. Independent testing confirmed "
+            "gluten above 20ppm — the FDA threshold. "
             "This is dangerous mislabeling."
         ),
     },
@@ -249,7 +259,8 @@ MOCK_REVIEWS = [
         "title": "Saturated fat content understated by 40%",
         "body": (
             "Had this product tested at a university food science lab. Saturated fat is 8g per "
-            "serving, not the 5g on the label. For people managing cholesterol, this understatement "
+            "serving, not the 5g on the label. For people "
+            "managing cholesterol, this understatement "
             "could cause real health harm."
         ),
     },
@@ -457,7 +468,7 @@ def _classify_severity(text: str) -> tuple[float, str | None, dict | None]:
         return 2.0, None, None
 
 
-def _match_precedent_for_review(
+def _match_precedent_for_review(  # pylint: disable=too-many-arguments,too-many-positional-arguments
     full_text: str, risk_label: str, title: str, scan_id: str, db: Session,
 ):
     """Match legal precedent and log audit events. Returns (precedent_result, case_id, exposure)."""
