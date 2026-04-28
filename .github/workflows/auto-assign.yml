@@ -1,0 +1,29 @@
+name: Auto-assign PR to author
+
+# Adds the PR author as an assignee whenever a PR is opened or reopened.
+# Saves the manual "Assignees" click on every PR.
+#
+# Notes
+# - Skips Dependabot PRs (assigning bots is noisy).
+# - Uses the built-in GITHUB_TOKEN; no PAT required.
+# - Idempotent: re-running on an already-assigned PR is a no-op.
+
+on:
+  pull_request_target:
+    types: [opened, reopened, ready_for_review]
+
+permissions:
+  pull-requests: write
+
+jobs:
+  assign-author:
+    if: github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Assign PR author
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR: ${{ github.event.pull_request.number }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: gh pr edit "$PR" --add-assignee "$AUTHOR"
