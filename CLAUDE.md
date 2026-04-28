@@ -102,7 +102,7 @@ and a decommission criterion.
 
 Currently in scope (use freely when justified):
 
-- Vector databases (Chroma, pgvector, Qdrant) for precedent matching at > 1K cases
+- Vector databases (Chroma, pgvector, Qdrant) for precedent matching above ~200 cases — see the Micro-RAG section for the canonical threshold
 - Background workers / queues (Celery + Redis or similar) for long-running scans
 - Container orchestration (Docker Compose for staging; managed K8s/ECS for prod)
 - Tenant-aware authentication (OAuth, SSO via Auth0/WorkOS for Enterprise tier)
@@ -178,9 +178,9 @@ FastAPI Backend
 ↓
 Risk Engine
 ↓
-Micro-RAG (JSON)
+Micro-RAG (vector store + JSON manifest)
 ↓
-SQLite
+PostgreSQL (production) · SQLite (dev/CI only)
 
 
 ---
@@ -278,8 +278,10 @@ Production techniques (in order of preference):
 - TF-IDF + keyword + category matching used as a deterministic secondary signal,
   blended into the final score for explainability.
 
-External RAG services (Pinecone, Weaviate, etc.) are permitted but require an
-ADR justifying the dependency, and per-tenant data isolation must be verified.
+The default vector store is Chroma or pgvector (in-process or self-hosted).
+External RAG services (Pinecone, Weaviate, etc.) are an **exception path** —
+each adoption requires a written ADR justifying the dependency and explicit
+verification that per-tenant data isolation is preserved end-to-end.
 
 Every match must record `cosine_score`, `severity_weight`, and the chosen
 `matched_case_id` to the audit trail so the score can be reproduced later.
@@ -288,7 +290,8 @@ Every match must record `cosine_score`, `severity_weight`, and the chosen
 
 The system must prove Duty of Care.
 
-Create an append-only SQLite table:
+Create an append-only `audit_events` table on the configured database
+(PostgreSQL in production, SQLite in dev/CI):
 
 audit_events
 
