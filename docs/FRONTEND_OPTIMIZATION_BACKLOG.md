@@ -14,6 +14,8 @@ Companion review: see git history around commit `feat: frontend P0/P1 cleanup`
 
 Each entry has:
 
+- **Owner** — the person who picks the item up. `TBD` until scheduled.
+- **Tracking issue** — link to the GitHub issue once filed. `TBD` until then.
 - **Why deferred** — what the trade-off was at the time
 - **Effort** — rough sizing (hours / days / weeks)
 - **Touches** — files / components / config that would change
@@ -22,9 +24,18 @@ Each entry has:
 
 Order is roughly *highest leverage → lowest*. Re-prioritize before each sprint.
 
+> **Migration note for the in-session "What was DONE" list:**
+> The closing section recaps what shipped via PRs #17–#21 in the same review
+> pass that produced this backlog. It exists so that a future contributor
+> doesn't redo work, but it duplicates information that's already in
+> `git log`. When in doubt, `git log --oneline 459c87c..main` is the source
+> of truth — this file just provides the human-readable framing.
+
 ---
 
 ## 1. TypeScript point-of-entry (`.tsx` for new code)
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — Multi-week migration. Touches every component eventually.
 The product is a *legal-risk OS* sold to GCs; long-term, dynamic typing is a
@@ -56,6 +67,8 @@ file by file). Full conversion 6-8 weeks.
 ---
 
 ## 2. Server-state library (TanStack Query or SWR)
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — 5+ components currently hand-roll `useEffect + setState +
 try/catch + AbortController`. Migration is invasive but each component is
@@ -83,6 +96,8 @@ similar enough to template.
 ---
 
 ## 3. Tailwind v4 `@theme` + `tokens.css` unification
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — The project mixes Tailwind utilities (AppSidebar, Dashboard)
 with hand-written BEM in `marketing.css` (744 lines). `tokens.css` defines CSS
@@ -112,6 +127,8 @@ a separate multi-week task and may not be worth it.
 ---
 
 ## 4. `LandingPage.jsx` decomposition
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — 611 lines, but mostly static marketing content. Splitting
 is mechanical but invasive. Risky to do alongside copy changes.
@@ -141,6 +158,8 @@ is mechanical but invasive. Risky to do alongside copy changes.
 ---
 
 ## 5. i18n on landing + onboarding
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — `src/i18n.js` already has 635 lines of KR/EN translations,
 but only the dashboard uses them. Marketing is English-only despite K-Brand
@@ -167,6 +186,8 @@ positioning.
 ---
 
 ## 6. Reusable `<Button />` + small UI primitives
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — Today the same `lp-btn lp-btn--pri lp-btn--lg` class trio
 is hand-typed in 7+ places. The CTA-unification PR earlier in this session had
@@ -193,6 +214,8 @@ to touch each call site individually.
 ---
 
 ## 7. Comprehensive component test coverage
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — Currently 24 tests across 4 components + 1 utility. Critical
 flows untested.
@@ -222,6 +245,8 @@ flows untested.
 ---
 
 ## 8. Brand assets (favicon, OG image, manifest)
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 **Why deferred** — Requires design assets, not just code.
 
@@ -246,6 +271,8 @@ flows untested.
 ---
 
 ## 9. Misc smaller items
+**Owner:** TBD &nbsp;·&nbsp; **Tracking issue:** TBD
+
 
 The cleanup list — group these into a single "frontend hygiene" PR if/when
 someone has half a day.
