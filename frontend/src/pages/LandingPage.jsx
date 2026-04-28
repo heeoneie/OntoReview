@@ -131,6 +131,55 @@ function HeroPreviewCard() {
   );
 }
 
+/* ── Exposure calculation explainer ── */
+function ExposureExplainer() {
+  const [open, setOpen] = useState(false);
+  return (
+    <div className="lp-exposure">
+      <button className="lp-exposure__toggle" onClick={() => setOpen(!open)}>
+        <span>How exposure is calculated</span>
+        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
+      </button>
+      {open && (
+        <div className="lp-exposure__body">
+          <div className="lp-exposure__formula">
+            <code>estimated_exposure = Σ (matched_precedent_settlement × similarity_score × severity)</code>
+          </div>
+          <div className="lp-exposure__example">
+            <div className="lp-exposure__example-title">Example: Beyond Meat — Plant-Based Burger Patty</div>
+            <div className="lp-exposure__steps">
+              <div className="lp-exposure__step">
+                <span className="lp-exposure__step-label">Review mentions</span>
+                <span>"protein content misrepresentation"</span>
+              </div>
+              <div className="lp-exposure__step">
+                <span className="lp-exposure__step-label">Matched to</span>
+                <span>FTC v. Protein-Plus (2022 settlement: $3.2M) at 81% similarity</span>
+              </div>
+              <div className="lp-exposure__step">
+                <span className="lp-exposure__step-label">Severity</span>
+                <span>8/10 (FDA labeling violation pattern)</span>
+              </div>
+              <div className="lp-exposure__step">
+                <span className="lp-exposure__step-label">Contribution</span>
+                <span>This review contributes ~$2.1M to total exposure</span>
+              </div>
+              <div className="lp-exposure__step">
+                <span className="lp-exposure__step-label">Total</span>
+                <span>Across 1,284 reviews, 8 flagged items summed to <strong>$5.4M</strong></span>
+              </div>
+            </div>
+          </div>
+          <p className="lp-exposure__disclaimer">
+            Estimates based on publicly available settlement data from 30+ US legal precedents
+            (FDA, FTC, class-action databases). Not legal advice. Not a guarantee of outcome.
+          </p>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function LandingPage() {
   return (
     <div className="lp-body">
@@ -431,12 +480,12 @@ export default function LandingPage() {
             {
               name: 'Legal', amt: '$7,500', per: 'per month · up to 15 brands', justify: 'Early customers identified $240K+ in potential exposure per month.',
               features: ['Everything in Team', 'Append-only audit trail (duty-of-care)', 'PDF quarterly risk reports', 'Slack / Teams real-time alerts', 'Role-based sharing (Legal · Marketing · C-level)', 'Up to 50,000 reviews / mo'],
-              cta: 'Talk to sales', feat: true, sub: 'For GCs preparing for regulatory audits.',
+              cta: 'Talk to sales', feat: true, sub: 'For GCs preparing for regulatory audits.', href: 'mailto:sales@ontoreview.com',
             },
             {
               name: 'Enterprise', amt: 'Custom', per: 'starting $60K / year', justify: null,
               features: ['Everything in Legal', 'SSO, SOC 2 Type II', 'Custom OWL ontology', 'Multi-jurisdiction compliance (US + EU + KR)', 'Agent automation (Q3 2026)', 'Dedicated CS + legal-liaison contact'],
-              cta: 'Contact sales', feat: false, sub: null,
+              cta: 'Contact sales', feat: false, sub: null, href: 'mailto:sales@ontoreview.com',
             },
           ].map((p, i) => (
             <div key={i} className={`lp-price${p.feat ? ' is-feat' : ''}`}>
@@ -452,7 +501,9 @@ export default function LandingPage() {
                   <li key={j}><Check size={14} /><span>{f}</span></li>
                 ))}
               </ul>
-              <Link className="lp-price__cta" to="/onboarding">{p.cta}</Link>
+              {p.href
+                ? <a className="lp-price__cta" href={p.href}>{p.cta}</a>
+                : <Link className="lp-price__cta" to="/onboarding">{p.cta}</Link>}
             </div>
           ))}
         </div>
@@ -528,57 +579,6 @@ export default function LandingPage() {
           OntoReview provides decision-support information only. It is not legal advice. Consult qualified counsel for legal decisions.
         </div>
       </footer>
-    </div>
-  );
-}
-
-/* ── P2: Exposure calculation explainer ── */
-function ExposureExplainer() {
-  const [open, setOpen] = useState(false);
-  return (
-    <div className="lp-exposure">
-      <button className="lp-exposure__toggle" onClick={() => setOpen(!open)}>
-        <span>How exposure is calculated</span>
-        {open ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-      </button>
-      {open && (
-        <div className="lp-exposure__body">
-          <div className="lp-exposure__formula">
-            <code>estimated_exposure = Σ (matched_precedent_settlement × similarity_score × severity)</code>
-          </div>
-
-          <div className="lp-exposure__example">
-            <div className="lp-exposure__example-title">Example: Beyond Meat — Plant-Based Burger Patty</div>
-            <div className="lp-exposure__steps">
-              <div className="lp-exposure__step">
-                <span className="lp-exposure__step-label">Review mentions</span>
-                <span>"protein content misrepresentation"</span>
-              </div>
-              <div className="lp-exposure__step">
-                <span className="lp-exposure__step-label">Matched to</span>
-                <span>FTC v. Protein-Plus (2022 settlement: $3.2M) at 81% similarity</span>
-              </div>
-              <div className="lp-exposure__step">
-                <span className="lp-exposure__step-label">Severity</span>
-                <span>8/10 (FDA labeling violation pattern)</span>
-              </div>
-              <div className="lp-exposure__step">
-                <span className="lp-exposure__step-label">Contribution</span>
-                <span>This review contributes ~$2.1M to total exposure</span>
-              </div>
-              <div className="lp-exposure__step">
-                <span className="lp-exposure__step-label">Total</span>
-                <span>Across 1,284 reviews, 8 flagged items summed to <strong>$5.4M</strong></span>
-              </div>
-            </div>
-          </div>
-
-          <p className="lp-exposure__disclaimer">
-            Estimates based on publicly available settlement data from 30+ US legal precedents
-            (FDA, FTC, class-action databases). Not legal advice. Not a guarantee of outcome.
-          </p>
-        </div>
-      )}
     </div>
   );
 }

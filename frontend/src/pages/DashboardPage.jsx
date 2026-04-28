@@ -63,7 +63,7 @@ function DashboardShell() {
             <div className="space-y-6">
               <ErrorBoundary>
                 <RiskPlaybook
-                  key={playbookNode}
+                  key={playbookNode ?? 'default'}
                   nodeName={playbookNode}
                   industry={playbookIndustry}
                   onBack={() => {
