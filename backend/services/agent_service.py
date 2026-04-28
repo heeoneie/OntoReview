@@ -85,7 +85,8 @@ _DEFAULT_CONFIGS: dict[str, dict] = {
     },
 }
 
-# In-memory store (SQLite 불필요 — 해커톤 데모용)
+# TODO(prod): replace in-memory store with persistent storage (Postgres) so agent
+#   configs survive process restarts and are tenant-scoped. See ADR before lifting.
 _agent_configs: dict[str, dict] = {}
 
 

@@ -1,4 +1,4 @@
-# CLAUDE.md — OntoReview Hackathon Development Guide
+# CLAUDE.md — OntoReview Production Development Guide
 
 This file provides **strict guidance to Claude Code** when working on this repository.  
 Read this file before generating or modifying any code.
@@ -25,38 +25,37 @@ Then estimates **potential financial exposure using US legal precedent.**
 
 ---
 
-# ⏱ Hackathon Context
+# ⏱ Production Context
 
-This product is being built for:
+OntoReview is in **production mode**.
 
-- **Amazon Hackathon (March 16)**
-- **YC Pitch (March 26)**
-
-We have **less than 13 days**.
+The system is shipped to paying customers (Free, Team, Legal, Enterprise tiers).
+Customers depend on it for legal-risk monitoring with regulatory implications.
 
 Therefore:
 
-**Speed > Perfection**
+**Correctness > Speed.** **Auditability > Cleverness.** **Boring > Novel.**
 
-This is a **hackathon prototype**, not a production system.
+We optimize for: long-term maintainability, customer trust, defensible behavior under
+audit, and operational reliability. There is no demo deadline driving decisions.
 
 ---
 
-# 🚨 HACKATHON MODE RULE (CRITICAL)
+# 🚨 PRODUCTION MODE RULE (CRITICAL)
 
-This project exists for a **3-minute live demo**.
+Every change must be safe to deploy to live customers.
 
-If a feature does NOT improve the demo flow, **do NOT build it.**
+Before merging, the change must satisfy:
 
-Priority order:
+1. **Correctness** — Risk classification, exposure math, and audit events behave deterministically and are unit-tested.
+2. **Auditability** — Any state-changing action emits an `audit_events` row. No silent fallbacks for legal-risk findings.
+3. **Reliability** — Errors degrade gracefully (LLM fallback chain, retries with backoff, idempotent scans).
+4. **Security & Privacy** — Customer review data is isolated per tenant. Secrets via env, never committed. PII handling documented.
+5. **UX polish** — Production-grade: empty states, loading states, error boundaries, accessibility.
 
-1. Demo Flow Stability  
-2. Legal Risk Detection  
-3. Financial Exposure ($)  
-4. Audit Log (Duty of Care)  
-5. UI Polish  
-
-Anything outside this list should be ignored.
+If a feature improves measurable customer outcomes (risk caught, exposure
+quantified, audit trail completeness, time-to-insight), it ships. Otherwise it
+needs a written justification before being built.
 
 ---
 
@@ -93,68 +92,80 @@ $5,400,000
 
 ---
 
-# ⚠️ STRICT ENGINEERING CONSTRAINTS
+# ⚠️ ENGINEERING CONSTRAINTS
 
-## 1. NO OVER-ENGINEERING
+## 1. Add complexity only when justified
 
-Do NOT build:
+Adopt new infrastructure only when there's a measurable need (load, scale,
+reliability, compliance). Each addition must come with: an owner, a runbook,
+and a decommission criterion.
 
-- Vector databases (Pinecone, Chroma, Qdrant) for production paths
-- Microservice architectures
-- Complex authentication systems
-- Large-scale crawlers
-- Distributed queues
-- Kubernetes / Docker orchestration
+Currently in scope (use freely when justified):
 
-> **Note:** `chromadb` exists in requirements.txt and `core/experiments/rag_system.py`
-> as an experimental/research path only. It is NOT used in the demo pipeline.
-> Confirmed not used in March 16 demo. Remove chromadb and core/experiments/ by March 20.
+- Vector databases (Chroma, pgvector, Qdrant) for precedent matching at > 1K cases
+- Background workers / queues (Celery + Redis or similar) for long-running scans
+- Container orchestration (Docker Compose for staging; managed K8s/ECS for prod)
+- Tenant-aware authentication (OAuth, SSO via Auth0/WorkOS for Enterprise tier)
+- Observability stack (structured logs, metrics, traces — OpenTelemetry-compatible)
 
-This is a **hackathon demo system**.
-
----
-
-## 2. Keep Architecture Simple
-
-Allowed stack:
-
-Frontend  
-- React
-- Tailwind (dark mode)
-
-Backend  
-- FastAPI
-
-Database  
-- SQLite
-
-ORM  
-- SQLAlchemy
-
-LLM (default: gpt-4o-mini)
-- GPT-4o-mini (primary, default)
-- Gemini 2.0 Flash (fallback when OpenAI fails)
-- Amazon Nova via Bedrock (optional, for AWS demos only)
+> **Note:** `chromadb` exists in `requirements.txt` and `core/experiments/rag_system.py`.
+> Promote `core/experiments/rag_system.py` to a first-class module under `core/rag/`
+> with tests before relying on it in the live precedent-matching path. Do not
+> import from `core/experiments/` in production code.
 
 ---
 
-## 3. No Large Data Pipelines
+## 2. Default Architecture
 
-Do NOT rely on:
+Stack of record (deviate only with a documented ADR):
 
-- Kaggle datasets
-- Large CSV ingestion
-- Big data infrastructure
+Frontend
+- React + Vite
+- Tailwind + design tokens (`src/styles/tokens.css`, `src/styles/marketing.css`)
+- React Router v7
 
-Use a **small curated dataset instead.**
+Backend
+- FastAPI (Python 3.11+)
+- Pydantic v2 for I/O contracts
 
-Data location:
+Database
+- PostgreSQL for production (per-tenant schema or row-level isolation)
+- SQLite acceptable for local dev and CI only
 
+ORM / Migrations
+- SQLAlchemy 2.x
+- Alembic for schema migrations (every schema change goes through a migration)
+
+LLM (provider-agnostic abstraction in `core/utils/openai_client.py`)
+- Primary: OpenAI GPT-4o-mini (default for production, `LLM_PROVIDER=openai`)
+- Fallback: Gemini 2.0 Flash (automatic on OpenAI failure, with structured retry)
+- Embeddings: `text-embedding-3-small` (cached per legal case revision)
+- Larger models (GPT-4 family, Claude) allowed for high-stakes flows
+  (e.g., final exposure justification) when the cost/quality tradeoff is documented.
+
+Infrastructure
+- Render for the current production deployment (`render.yaml`)
+- Secrets via environment variables; never commit to git
+- CI runs `lint`, `typecheck` where applicable, `test`, `build`
+
+---
+
+## 3. Data & Knowledge Base
+
+The legal precedent dataset is curated and versioned.
+
+Primary location:
 
 backend/data/legal_cases.json
 
+There is no hard cap on dataset size, but every case must be:
+- Sourced from a publicly available US legal precedent
+- Reviewed by a human before merge (PR template: `case_id`, source URL, jurisdiction)
+- Embedded at startup or via offline batch into the configured vector store
 
-Maximum size: **< 200 cases**
+Larger ingestion pipelines (CSV bulk loads, scraping, third-party feeds) are
+allowed but must run as separate background jobs with audit-event emission and
+must not block the request path.
 
 ---
 
@@ -260,18 +271,18 @@ Example entry:
 
 Matching Strategy
 
-Allowed techniques:
-- In-memory Embedding Cache (computed at FastAPI startup)
-- Cosine similarity via NumPy
-- TF-IDF Fallback
-- keyword matching
-- category matching
+Production techniques (in order of preference):
+- Vector store (Chroma or pgvector) with precomputed embeddings, refreshed on
+  case-revision deploy. This is the default path for > 200 cases.
+- In-memory NumPy cosine fallback for local dev and CI environments.
+- TF-IDF + keyword + category matching used as a deterministic secondary signal,
+  blended into the final score for explainability.
 
-NOT allowed:
-- External Vector databases (Pinecone, Chroma, Qdrant)
-- external RAG services
+External RAG services (Pinecone, Weaviate, etc.) are permitted but require an
+ADR justifying the dependency, and per-tenant data isolation must be verified.
 
-Dataset size is intentionally small.
+Every match must record `cosine_score`, `severity_weight`, and the chosen
+`matched_case_id` to the audit trail so the score can be reproduced later.
 
 🛡 The Shield — Audit Log
 
@@ -361,61 +372,47 @@ Displays:
 
 🤖 LLM Usage Rules
 
-Default model: `gpt-4o-mini`
-Fallback model: `gemini-2.0-flash` (automatic on OpenAI failure)
+Models are configured via `core/utils/openai_client.py`. Pick by job, not by habit.
 
-Allowed exceptions:
-- Amazon Nova via Bedrock (AWS demo environments only)
-- `text-embedding-3-small` for legal case embedding (cached at startup)
+- **Primary (production):** OpenAI `gpt-4o-mini` — set `LLM_PROVIDER=openai`.
+- **Fallback:** `gemini-2.0-flash` (automatic on OpenAI failure, with structured
+  retry). Failover transitions must emit an audit event.
+- **Local dev:** `LLM_PROVIDER=google` flips the order — Gemini primary with
+  429-aware backoff, OpenAI as fallback.
+- **High-stakes flows:** GPT-4 / Claude are permitted when the decision is
+  consumer-visible (final exposure dollar number, executive PDF output) and the
+  cost/quality tradeoff is documented in a code comment or ADR.
+- **Embeddings:** `text-embedding-3-small` is the default; cache per legal-case
+  revision. Larger embedding models (`text-embedding-3-large`, etc.) require
+  benchmarking evidence before adoption.
 
-Do NOT use:
-- GPT-4 / GPT-4 Turbo (too expensive for hackathon)
-- Large embedding models (ada-002 etc.)
+Token budgets are tuned per endpoint, not globally. Default `max_tokens` is set
+in the client; override per call only when the use case justifies it.
 
-Maximum tokens per request: 500
-🎬 Required Demo Scenario
+Cost & latency:
+- Track p50/p95 latency and per-tenant token cost.
+- Budget alerts wired to operational dashboards.
 
-The entire system must support this 3-minute demo flow.
+---
 
-Step 1
+🎬 Production User Flow
 
-User inputs Amazon ASIN
+The product must support this primary flow end-to-end without manual operator
+intervention:
 
-Step 2
+1. User signs in (per-tenant auth) and selects a brand.
+2. System ingests reviews from the configured connector (Amazon, Trustpilot,
+   Bazaarvoice, or CSV upload). Ingestion is incremental and idempotent.
+3. Risk engine classifies each review against the OWL ontology.
+4. Precedent matcher returns top-k cases with `cosine_score` and severity.
+5. Dashboard shows: Total Legal Exposure (KPI), severity timeline, per-finding
+   detail with matched precedent and confidence interval.
+6. Risk Response Playbook produces mitigation steps per matched precedent.
+7. Audit log records every classification, match, alert, and export.
+8. Optional: scheduled scans, Slack/Teams alerts, PDF quarterly reports.
 
-System ingests reviews (mock data allowed)
-
-Step 3
-
-Risk engine analyzes reviews
-
-Step 4
-
-Micro-RAG matches US legal precedent
-
-Step 5
-
-Dashboard displays:
-
-Risk Category
-Severity
-Estimated Legal Exposure
-Step 6
-
-System generates:
-
-Risk Mitigation Playbook
-Step 7
-
-Audit log records the event
-
-Final Demo Screen
-
-The demo must end with:
-
-⚠️ Estimated Legal Exposure
-
-$5,400,000
+Each step has SLOs (latency, error rate, audit completeness) tracked in the
+operational dashboard.
 💻 Development Commands
 Setup
 python -m venv venv
