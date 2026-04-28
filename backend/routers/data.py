@@ -305,21 +305,27 @@ def ingest_amazon_reviews(
 
 
 @router.post("/demo")
-def run_full_demo(db: Session = Depends(get_db)):
+def run_full_demo(industry: str = "ecommerce", db: Session = Depends(get_db)):
     """One-click full demo: ingest → ontology → KPI."""
     demo_url = "https://amazon.com/dp/B0DEMO50"
     try:
-        # (0) Clear stale demo data to avoid UNIQUE constraint issues
-        # FUTURE: Scope Edge deletion to demo-related edges only in production
-        db.query(Edge).delete()
-        db.query(Node).filter(Node.source == "amazon").delete()
+        # (0) Clear stale demo data to avoid UNIQUE constraint issues.
+        # Scope deletion to demo-related sources only — preserves edges/nodes
+        # created by other flows (compliance, manual scans, etc.).
+        demo_sources = ["amazon", "demo", "generate_ontology", "risk_intelligence"]
+        db.query(Edge).filter(Edge.source.in_(demo_sources)).delete(
+            synchronize_session=False
+        )
+        db.query(Node).filter(Node.source.in_(demo_sources)).delete(
+            synchronize_session=False
+        )
         db.query(Review).filter(
             Review.product_url == demo_url
         ).delete()
         db.commit()
 
-        # (1) Amazon mock ingest
-        ingest_result = ingest_amazon_mock(demo_url, db)
+        # (1) Mock ingest with category-specific reviews
+        ingest_result = ingest_amazon_mock(demo_url, db, industry=industry)
 
         # (2) Generate ontology from ingested risk nodes
         risk_nodes = (
@@ -342,7 +348,7 @@ def run_full_demo(db: Session = Depends(get_db)):
                     "emerging_issues": [],
                     "recommendations": [],
                     "all_categories": {},
-                    "industry": "ecommerce",
+                    "industry": industry,
                     "lang": "en",
                 },
                 db,
@@ -358,12 +364,18 @@ def run_full_demo(db: Session = Depends(get_db)):
             .filter(Node.severity_score >= 8.0)
             .count()
         )
-        total_exposure = (
+        # Deduplicate by case_id + cap (same logic as /kpi/summary)
+        case_rows = (
             db.query(
-                func.coalesce(func.sum(Node.estimated_loss_usd), 0)
-            ).scalar()
-            or 0
+                func.coalesce(Node.case_id, Node.name),
+                func.max(Node.estimated_loss_usd),
+            )
+            .filter(Node.estimated_loss_usd > 0)
+            .group_by(func.coalesce(Node.case_id, Node.name))
+            .all()
         )
+        raw_exposure = sum(r[1] for r in case_rows)
+        total_exposure = min(raw_exposure, 10_000_000) if raw_exposure > 0 else 0
 
         return {
             "scan_id": ingest_result["scan_id"],
