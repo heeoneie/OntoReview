@@ -13,15 +13,18 @@ const SOURCES = [
 export default function DataSources({ kpi, discoveryResults, hasScanned }) {
   const { t } = useLang();
   const [elapsed, setElapsed] = useState(0);
-  const lastSyncRef = useRef(Date.now());
+  const lastSyncRef = useRef(null);
 
   useEffect(() => {
     if (!hasScanned) return;
     lastSyncRef.current = Date.now();
+    // Reset elapsed counter when a new scan completes; isolated from the tick interval below.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setElapsed(0);
   }, [hasScanned, kpi?.total_scanned_reviews, discoveryResults?.total_scanned]);
 
   useEffect(() => {
+    if (lastSyncRef.current === null) lastSyncRef.current = Date.now();
     const iv = setInterval(() => {
       setElapsed(Math.floor((Date.now() - lastSyncRef.current) / 1000));
     }, 1000);

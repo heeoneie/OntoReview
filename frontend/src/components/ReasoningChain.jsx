@@ -25,6 +25,8 @@ export default function ReasoningChain({ timeline, kpi, visible }) {
       const timer = setTimeout(() => setMounted(true), 60);
       return () => clearTimeout(timer);
     }
+    // Reset entrance animation when the section is hidden.
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(false);
   }, [visible]);
 

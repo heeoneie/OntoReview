@@ -80,7 +80,6 @@ export default function RiskReport({ kpi, timeline, auditEvents, amazonUrl, scan
 
       const imgWidth = 210;
       const imgHeight = (img.height * imgWidth) / img.width;
-      // eslint-disable-next-line new-cap
       const pdf = new jsPDF('p', 'mm', 'a4');
       let yOffset = 0;
       const pageHeight = 297;

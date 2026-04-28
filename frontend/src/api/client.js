@@ -1,9 +1,18 @@
 import axios from 'axios';
 
+// Default 30s for sync request/response endpoints. Long-running scans should pass
+// their own AbortController + per-call timeout instead of relying on a global
+// 2-minute window that masks upstream failures.
+export const DEFAULT_TIMEOUT_MS = 30_000;
+export const LONG_TIMEOUT_MS = 120_000;
+
 const api = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || '/api',
-  timeout: 120000,
+  timeout: DEFAULT_TIMEOUT_MS,
 });
+
+// Per-call override for endpoints that legitimately need the longer window (e.g. full LLM scans).
+export const withLongTimeout = (config = {}) => ({ timeout: LONG_TIMEOUT_MS, ...config });
 
 export const uploadCSV = (file) => {
   const formData = new FormData();
@@ -52,7 +61,7 @@ export const generateOntology = (analysisData) => api.post('/risk/ontology', ana
 export const generateComplianceReport = (analysisData) => api.post('/risk/compliance', analysisData);
 export const generateMeetingAgenda = (analysisData) => api.post('/risk/meeting', analysisData);
 export const runDemoScenario = (industry = 'ecommerce', lang = 'ko') =>
-  api.post('/risk/demo', null, { params: { industry, lang }, timeout: 180000 });
+  api.post('/risk/demo', null, withLongTimeout({ params: { industry, lang } }));
 
 // 플레이북 API
 export const generatePlaybook = (body, config = {}) =>
@@ -64,9 +73,12 @@ export const getRiskTimeline = (limit = 20) =>
   api.get('/kpi/timeline', { params: { limit } });
 export const ingestAmazon = (url) => api.post('/data/amazon', { url });
 export const runFullDemo = (industry = 'ecommerce') =>
-  api.post('/data/demo', null, { params: { industry }, timeout: 180000 });
-export const getOntologyGraph = (minSeverity = 0) =>
-  api.get('/risk/ontology/graph', { params: { min_severity: minSeverity } });
+  api.post('/data/demo', null, withLongTimeout({ params: { industry } }));
+export const getOntologyGraph = (minSeverity = 0, limit = null, config = {}) =>
+  api.get('/risk/ontology/graph', {
+    params: { min_severity: minSeverity, ...(limit ? { limit } : {}) },
+    ...config,
+  });
 
 // Audit trail
 export const getAuditEvents = (limit = 50) =>

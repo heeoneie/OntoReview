@@ -13,10 +13,8 @@ export default function HeroCommand({
   industry,
   onIndustryChange,
   brandName,
-  onBrandChange,
   brandLabel,
   productName,
-  onProductChange,
   productLabel,
   // Actions
   onRunAnalysis,

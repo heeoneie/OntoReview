@@ -28,7 +28,7 @@ export default function ReplyPanel({ review, onClose }) {
       );
       setReplyData(data);
       setEditedReply(data.reply);
-    } catch (err) {
+    } catch {
       setError('답변 생성에 실패했습니다. 다시 시도해주세요.');
     } finally {
       setIsGenerating(false);
