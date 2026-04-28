@@ -348,7 +348,7 @@ def run_full_demo(industry: str = "ecommerce", db: Session = Depends(get_db)):
                     "emerging_issues": [],
                     "recommendations": [],
                     "all_categories": {},
-                    "industry": "ecommerce",
+                    "industry": industry,
                     "lang": "en",
                 },
                 db,
@@ -364,12 +364,18 @@ def run_full_demo(industry: str = "ecommerce", db: Session = Depends(get_db)):
             .filter(Node.severity_score >= 8.0)
             .count()
         )
-        total_exposure = (
+        # Deduplicate by case_id + cap (same logic as /kpi/summary)
+        case_rows = (
             db.query(
-                func.coalesce(func.sum(Node.estimated_loss_usd), 0)
-            ).scalar()
-            or 0
+                func.coalesce(Node.case_id, Node.name),
+                func.max(Node.estimated_loss_usd),
+            )
+            .filter(Node.estimated_loss_usd > 0)
+            .group_by(func.coalesce(Node.case_id, Node.name))
+            .all()
         )
+        raw_exposure = sum(r[1] for r in case_rows)
+        total_exposure = min(raw_exposure, 10_000_000) if raw_exposure > 0 else 0
 
         return {
             "scan_id": ingest_result["scan_id"],
