@@ -35,8 +35,8 @@ const FAQS = [
   },
 ];
 
-function FaqItem({ q, a }) {
-  const [open, setOpen] = useState(false);
+function FaqItem({ q, a, defaultOpen = false }) {
+  const [open, setOpen] = useState(defaultOpen);
   return (
     <div className="lp-faq__item">
       <button className="lp-faq__q" onClick={() => setOpen(!open)}>
@@ -47,6 +47,12 @@ function FaqItem({ q, a }) {
     </div>
   );
 }
+
+const FAQ_OPEN_BY_DEFAULT = new Set([
+  'Is our review data used to train models?',
+  'Is OntoReview legal advice?',
+  'What is your liability in case of a missed risk?',
+]);
 
 /* ── B2: Hero preview card with Executive/Technical toggle ── */
 function HeroPreviewCard() {
@@ -81,7 +87,7 @@ function HeroPreviewCard() {
             <div className="lp-preview__hero-sub">
               {view === 'executive'
                 ? 'Based on matched US legal precedents'
-                : 'Σ estimated_loss_usd · Nova 2 Lite'}
+                : 'Σ estimated_loss_usd · GPT-4o-mini'}
             </div>
           </div>
           <div className="lp-preview__hero-mini">
@@ -199,11 +205,12 @@ export default function LandingPage() {
             <a href="#pricing">Pricing</a>
             <a href="#faq">FAQ</a>
           </div>
-          <Link className="lp-nav__cta" to="/dashboard">Open Dashboard</Link>
+          <Link className="lp-nav__cta lp-nav__cta--sec" to="/dashboard">See sample dashboard</Link>
         </div>
       </nav>
 
       {/* ── Hero ── */}
+      <main id="main-content">
       <section id="top" className="lp-section lp-hero">
         <div className="lp-hero__grid">
           <div>
@@ -212,9 +219,8 @@ export default function LandingPage() {
               Your next class-action is already in your review feed.<br />
               <span className="navy">OntoReview finds it before the plaintiff's lawyer does.</span>
             </h1>
-            <p className="lp-hero__lede">
-              We scan every review, match it to past settled cases, and show you the dollar risk
-              before it becomes a lawsuit. One Beyond Meat scan found $5.4M in 90 seconds.
+            <p className="lp-hero__deck">
+              The litigation early-warning system for US food &amp; CPG legal teams — we turn review feeds into prevention.
             </p>
             {/* B1: Primary CTA = Try Live Demo (large), Secondary = Watch 2-min Video (text link) */}
             <div className="lp-hero__ctas">
@@ -227,8 +233,13 @@ export default function LandingPage() {
             </div>
           </div>
 
-          {/* B2: Dashboard preview with Executive/Technical toggle */}
-          <HeroPreviewCard />
+          <div className="lp-hero__right">
+            {/* B2: Dashboard preview with Executive/Technical toggle */}
+            <HeroPreviewCard />
+            <p className="lp-hero__sim-caption">
+              <strong>$5.4M in 90 seconds.</strong> Simulation on 1,284 public Beyond Meat reviews. Not an endorsement.
+            </p>
+          </div>
         </div>
 
         {/* Roadmap with status badges */}
@@ -236,7 +247,7 @@ export default function LandingPage() {
           <div className="lp-timeline">
             {[
               { status: 'shipped',     date: 'Q1 2026', title: 'Ontology v1',        body: '14 OWL classes spanning US food & CPG legal categories.' },
-              { status: 'shipped',     date: 'Q2 2026', title: 'Nova Integration',    body: 'Amazon Nova 2 Lite wired to risk scoring and exposure estimation.' },
+              { status: 'shipped',     date: 'Q2 2026', title: 'LLM Provider Stack', body: 'GPT-4o-mini primary with automatic Gemini fallback for risk scoring and exposure estimation.' },
               { status: 'in-progress', date: 'Q3 2026', title: 'Audit & Compliance',  body: 'Append-only audit trail, role-based sharing, PDF export.' },
               { status: 'planned',     date: 'Q4 2026', title: 'Enterprise GA',       body: 'SSO, SOC 2 Type II, multi-jurisdiction coverage.' },
             ].map((n, i) => (
@@ -260,6 +271,9 @@ export default function LandingPage() {
       <section className="lp-casestudy">
         <div className="lp-casestudy__inner">
           <strong>Beyond Meat case study:</strong> OntoReview surfaced $5.4M of hidden exposure across 1,284 reviews in 90 seconds.
+          <div className="lp-casestudy__disclaimer">
+            Simulation on 1,284 public Beyond Meat reviews. Not an endorsement.
+          </div>
         </div>
       </section>
 
@@ -272,7 +286,7 @@ export default function LandingPage() {
       <section id="problem" className="lp-section">
         <div className="lp-section__label">Problem · Solution</div>
         <h2 className="lp-section__title">Legal teams are blind to the risk buried in review feeds.</h2>
-        <p className="lp-section__sub">Every customer review is a potential deposition. At volume, the signal is impossible to catch manually — and the cost of missing one is measured in settlements.</p>
+        <p className="lp-section__sub">Even the best legal teams can't read 10,000 reviews a month — the volume, not the skill, is the problem.</p>
 
         <div className="lp-ps">
           <div className="lp-ps__col lp-ps__col--p">
@@ -293,7 +307,7 @@ export default function LandingPage() {
             <div className="lp-ps__rows">
               {[
                 'OWL ontology auto-classifies every review into 14 legal categories.',
-                'Amazon Nova LLM risk scoring with confidence intervals and precedent matches.',
+                'GPT-4o-mini risk scoring with confidence intervals and precedent matches.',
                 'Role-based views for Legal, Marketing, and C-level — one source of truth.',
                 'Full action audit log, PDF-exportable for duty-of-care compliance.',
               ].map((t, i) => (
@@ -354,7 +368,7 @@ export default function LandingPage() {
           <div>
             <div className="lp-feature-hero__label">01 · Flagship · Risk Intelligence</div>
             <h3 className="lp-feature-hero__title">Every review, scored for legal exposure in real time.</h3>
-            <p className="lp-feature-hero__body">The Risk Intelligence dashboard is the heart of OntoReview. Run a scan against any brand or SKU, watch Nova classify reviews against your OWL ontology, and see the precedent-matched exposure update in a single KPI.</p>
+            <p className="lp-feature-hero__body">The Risk Intelligence dashboard is the heart of OntoReview. Run a scan against any brand or SKU, watch GPT-4o-mini classify reviews against your OWL ontology, and see the precedent-matched exposure update in a single KPI.</p>
             <ul className="lp-feature-hero__list">
               <li>Total Legal Exposure KPI, driven by matched US precedent settlements.</li>
               <li>Severity timeline with cosine similarity and confidence per finding.</li>
@@ -382,7 +396,7 @@ export default function LandingPage() {
 
         <div className="lp-features lp-features--compact">
           {[
-            { icon: ShieldCheck, num: '02', title: 'Risk Response Playbook', body: 'Nova-generated mitigation steps for each matched precedent and severity.' },
+            { icon: ShieldCheck, num: '02', title: 'Risk Response Playbook', body: 'LLM-generated mitigation steps for each matched precedent and severity.' },
             { icon: Globe2, num: '03', title: 'Global Compliance Tracker', body: 'Multi-jurisdiction regulation checks across FDA, FTC, and state frameworks.' },
             { icon: GitBranch, num: '04', title: 'Domain Ontology Studio', body: 'Extend the OWL ontology with industry-specific classes and rules.' },
             { icon: ScrollText, num: '05', title: 'Trust & Safety Audit', body: 'Append-only audit log with PDF export for duty-of-care compliance.', soon: true },
@@ -402,7 +416,7 @@ export default function LandingPage() {
       <section id="technology" className="lp-section lp-section--tight">
         <div className="lp-section__label">Infrastructure</div>
         <div className="lp-stack">
-          {['Amazon Nova 2 Lite', 'AWS Bedrock', 'SOC 2-ready infra'].map(t => (
+          {['OpenAI GPT-4o-mini', 'Gemini 2.0 Flash fallback', 'SOC 2-ready infra'].map(t => (
             <span key={t} className="lp-stack__pill">{t}</span>
           ))}
         </div>
@@ -465,17 +479,19 @@ export default function LandingPage() {
         <p className="lp-section__sub">Try OntoReview free. Upgrade when your review volume or compliance footprint demands it.</p>
         <p className="lp-pricing__anchor">One prevented class-action typically costs $2M–$10M to defend. OntoReview Legal is less than 0.5% of that.</p>
 
+        {/* TODO(pricing): consider adding Solo tier between Free and Team to reduce $0→$2.4k jump. */}
         <div className="lp-pricing lp-pricing--4">
           {[
             {
               name: 'Free', amt: '$0', per: '1 brand · 500 reviews / mo', justify: null,
               features: ['Risk Intelligence dashboard', 'Precedent matching (30 cases)', 'CSV export'],
-              cta: 'Start free', feat: false, sub: null,
+              cta: 'Try Live Demo', ctaIcon: Play, feat: false, sub: null, to: '/dashboard',
+              microCopy: 'No signup. Sample data preloaded.',
             },
             {
               name: 'Team', amt: '$2,400', per: 'per month · up to 5 brands', justify: 'Early customers identified $60K+ in potential exposure per month.',
               features: ['Everything in Free', 'Response Playbooks (3 scenarios)', 'Risk alerts (email)', 'Up to 5,000 reviews / mo'],
-              cta: 'Start Team trial', feat: false, sub: 'For small legal teams running monthly risk reviews.',
+              cta: 'Start Team trial', feat: false, sub: 'For small legal teams running monthly risk reviews.', to: '/onboarding',
             },
             {
               name: 'Legal', amt: '$7,500', per: 'per month · up to 15 brands', justify: 'Early customers identified $240K+ in potential exposure per month.',
@@ -485,7 +501,7 @@ export default function LandingPage() {
             {
               name: 'Enterprise', amt: 'Custom', per: 'starting $60K / year', justify: null,
               features: ['Everything in Legal', 'SSO, SOC 2 Type II', 'Custom OWL ontology', 'Multi-jurisdiction compliance (US + EU + KR)', 'Agent automation (Q3 2026)', 'Dedicated CS + legal-liaison contact'],
-              cta: 'Contact sales', feat: false, sub: null, href: 'mailto:sales@ontoreview.com',
+              cta: 'Talk to sales', feat: false, sub: null, href: 'mailto:sales@ontoreview.com',
             },
           ].map((p, i) => (
             <div key={i} className={`lp-price${p.feat ? ' is-feat' : ''}`}>
@@ -495,6 +511,11 @@ export default function LandingPage() {
               <div className="lp-price__per">{p.per}</div>
               {p.sub && <div className="lp-price__sub">{p.sub}</div>}
               {p.justify && <div className="lp-price__justify">{p.justify}</div>}
+              {p.justify && (
+                <div className="lp-price__justify-note">
+                  Based on internal pilot simulations. Named customer case studies coming Q3 2026.
+                </div>
+              )}
               <div className="lp-price__divider" />
               <ul className="lp-price__list">
                 {p.features.map((f, j) => (
@@ -503,7 +524,15 @@ export default function LandingPage() {
               </ul>
               {p.href
                 ? <a className="lp-price__cta" href={p.href}>{p.cta}</a>
-                : <Link className="lp-price__cta" to="/onboarding">{p.cta}</Link>}
+                : (
+                  <Link className="lp-price__cta" to={p.to || '/onboarding'}>
+                    {p.ctaIcon && <p.ctaIcon size={14} />}
+                    <span>{p.cta}</span>
+                  </Link>
+                )}
+              {p.microCopy && (
+                <div className="lp-price__microcopy">{p.microCopy}</div>
+              )}
             </div>
           ))}
         </div>
@@ -527,7 +556,7 @@ export default function LandingPage() {
                 { cap: 'Financial exposure estimate', or: { icon: Check, cls: 'ic-yes', text: 'Precedent-matched $' }, tp: { icon: X, cls: 'ic-no' }, bv: { icon: X, cls: 'ic-no' }, rm: { icon: X, cls: 'ic-no' } },
                 { cap: 'Audit trail for compliance', or: { icon: Check, cls: 'ic-yes', text: 'Append-only, PDF' }, tp: { icon: Minus, cls: 'ic-mid', text: 'Basic log' }, bv: { icon: Check, cls: 'ic-yes' }, rm: { icon: X, cls: 'ic-no' } },
                 { cap: 'Role-based sharing', or: { icon: Check, cls: 'ic-yes', text: 'Legal · Marketing · C-level' }, tp: { icon: Minus, cls: 'ic-mid', text: 'Marketing only' }, bv: { icon: Minus, cls: 'ic-mid', text: 'Marketing only' }, rm: { icon: X, cls: 'ic-no' } },
-                { cap: 'LLM inference', or: { icon: Check, cls: 'ic-yes', text: 'Amazon Nova 2 Lite' }, tp: { icon: X, cls: 'ic-no' }, bv: { icon: Minus, cls: 'ic-mid', text: 'Proprietary' }, rm: { icon: X, cls: 'ic-no' } },
+                { cap: 'LLM inference', or: { icon: Check, cls: 'ic-yes', text: 'OpenAI GPT-4o-mini' }, tp: { icon: X, cls: 'ic-no' }, bv: { icon: Minus, cls: 'ic-mid', text: 'Proprietary' }, rm: { icon: X, cls: 'ic-no' } },
               ].map((row, i) => (
                 <tr key={i}>
                   <td>{row.cap}</td>
@@ -551,7 +580,7 @@ export default function LandingPage() {
         <div className="lp-section__label">FAQ</div>
         <h2 className="lp-section__title">Common questions</h2>
         <div className="lp-faq">
-          {FAQS.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} />)}
+          {FAQS.map((f, i) => <FaqItem key={i} q={f.q} a={f.a} defaultOpen={FAQ_OPEN_BY_DEFAULT.has(f.q)} />)}
         </div>
       </section>
 
@@ -565,11 +594,12 @@ export default function LandingPage() {
         </div>
         <Link className="lp-close__tertiary" to="/onboarding">or start free with sample data</Link>
       </section>
+      </main>
 
       {/* Footer — P3: advisory note replaces full section, Pitch Deck link */}
       <footer className="lp-foot">
         <div className="lp-foot__top">
-          <span>&copy; 2026 OntoReview · Built on Amazon Nova 2 Lite · For US food &amp; consumer goods.</span>
+          <span>&copy; 2026 OntoReview · Built on OpenAI GPT-4o-mini · For US food &amp; consumer goods.</span>
           <span className="lp-foot__sep">·</span>
           <span className="lp-foot__note">Advisory board and launch partners to be announced Q3 2026.</span>
           <span className="lp-foot__sep">·</span>

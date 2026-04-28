@@ -27,9 +27,13 @@
   padding: 8px 14px; border-radius: var(--radius-sm);
   background: var(--navy); color: #fff;
   font: 600 13px/18px var(--font-sans); text-decoration: none;
-  transition: background var(--dur-fast) var(--ease);
+  transition: background var(--dur-fast) var(--ease), border-color var(--dur-fast) var(--ease);
 }
 .lp-nav__cta:hover { background: var(--navy-ink); }
+.lp-nav__cta--sec {
+  background: #fff; color: #000; border: 1px solid var(--rule-strong);
+}
+.lp-nav__cta--sec:hover { background: var(--surface); border-color: var(--ink-3); }
 
 /* #14: Reduce vertical padding between sections */
 .lp-section { max-width: 1200px; margin: 0 auto; padding: 72px 28px; }
@@ -44,7 +48,8 @@
 
 /* ── Hero (#14: reduce bottom padding) ────────────────────────────────── */
 .lp-hero { padding-top: 132px; padding-bottom: 48px; }
-.lp-hero__grid { display: grid; grid-template-columns: 1.05fr 1fr; gap: 72px; align-items: center; }
+.lp-hero__grid { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 72px; align-items: center; }
+.lp-hero__right { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
 .lp-hero__pill {
   display: inline-flex; align-items: center; gap: 8px;
   padding: 6px 12px; border-radius: var(--radius-full);
@@ -56,9 +61,27 @@
   content:""; width: 6px; height: 6px; border-radius: 999px; background: var(--navy);
   animation: pulse 2s var(--ease) infinite;
 }
-.lp-hero__h1 { font: 600 60px/64px var(--font-sans); letter-spacing: -0.025em; color: #000; margin: 0 0 28px; }
-.lp-hero__h1 .navy { color: var(--navy); }
+.lp-hero__h1 {
+  font-family: var(--font-sans); font-weight: 600;
+  /* Scaled down ~0.8x from clamp(36px, 4.4vw + 0.5rem, 60px) so the deck/category line stays above the fold at 1280–1440px. */
+  font-size: clamp(30px, 3.5vw + 0.4rem, 48px);
+  line-height: 1.08;
+  letter-spacing: -0.025em; color: #000; margin: 0 0 20px;
+  text-wrap: balance;
+}
+/* Second sentence ("OntoReview finds it…") rendered ~0.85x of the headline so the page enters with one bold statement, not two. */
+.lp-hero__h1 .navy { color: var(--navy); font-size: 0.85em; }
+.lp-hero__deck {
+  font: 500 17px/26px var(--font-sans); color: var(--ink-2);
+  margin: 0 0 18px; max-width: 560px;
+}
 .lp-hero__lede { font: 400 18px/28px var(--font-sans); color: var(--ink-2); margin: 0 0 36px; max-width: 560px; }
+.lp-hero__sim-caption {
+  font: 400 12px/18px var(--font-sans); color: var(--ink-3);
+  margin: 0; padding: 10px 14px; background: var(--surface);
+  border-radius: var(--radius-sm); border: 1px solid var(--rule);
+}
+.lp-hero__sim-caption strong { color: #000; font-weight: 600; }
 .lp-hero__lede .inline-pill {
   display: inline-block; padding: 1px 9px; margin: 0 1px;
   background: var(--highlight); color: #000;
@@ -215,9 +238,9 @@
 .lp-stack__pill::before { content:""; width: 5px; height: 5px; border-radius: 999px; background: var(--navy); }
 
 /* ── Market: TAM/SAM/SOM ───────────────────────────────────────────────── */
-.lp-market { display: grid; grid-template-columns: 1fr 1fr; gap: 40px; align-items: center; }
-.lp-rings { position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 460px; }
-.lp-rings svg { width: 100%; height: 100%; }
+.lp-market { display: grid; grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 56px; align-items: center; }
+.lp-rings { position: relative; width: 100%; aspect-ratio: 1 / 1; max-width: 420px; justify-self: start; }
+.lp-rings svg { width: 100%; height: 100%; display: block; }
 
 .lp-market__list { display: grid; gap: 20px; }
 .lp-market__row { display: grid; grid-template-columns: 60px 1fr auto; gap: 18px; align-items: baseline; padding: 16px 0; border-top: 1px solid var(--rule); }
@@ -251,10 +274,23 @@
 .lp-price__list svg { width: 14px; height: 14px; color: var(--navy); margin-top: 3px; }
 .lp-price.is-feat .lp-price__list svg { color: #fff; }
 .lp-price__cta {
-  display:block; text-align: center; margin-top: 22px;
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  width: 100%; box-sizing: border-box; text-align: center; margin-top: 22px;
   padding: 10px 14px; border-radius: var(--radius-sm);
   font: 600 13px/18px var(--font-sans); text-decoration: none;
 }
+.lp-price__cta svg { width: 14px; height: 14px; }
+.lp-price__justify-note {
+  font: 400 11px/16px var(--font-sans); color: var(--ink-3);
+  margin-top: 4px;
+}
+.lp-price.is-feat .lp-price__justify-note { color: rgba(255,255,255,0.55); }
+/* Tier-level micro-copy directly under the CTA (e.g. "No signup. Sample data preloaded.") */
+.lp-price__microcopy {
+  margin-top: 8px; text-align: center;
+  font: 400 12px/16px var(--font-sans); color: var(--ink-3);
+}
+.lp-price.is-feat .lp-price__microcopy { color: rgba(255,255,255,0.6); }
 .lp-price .lp-price__cta { background: #000; color: #fff; }
 .lp-price.is-feat .lp-price__cta { background: #fff; color: var(--navy); }
 .lp-price__badge {
@@ -279,10 +315,17 @@
 .lp-compare td .ic-mid { color: var(--ink-3); }
 
 /* ── Closing ───────────────────────────────────────────────────────────── */
-.lp-close { text-align: center; padding: 120px 28px 100px; max-width: 900px; margin: 0 auto; border-top: 1px solid var(--rule); }
-.lp-close__h { font: 600 44px/52px var(--font-sans); letter-spacing: -0.02em; color: #000; margin: 0 0 16px; }
+.lp-close { text-align: center; padding: 96px 28px 80px; max-width: 880px; margin: 0 auto; border-top: 1px solid var(--rule); }
+/* Scaled down ~0.8x to match the Hero h1 reduction so the whole closing block fits the 1280px viewport. */
+.lp-close__h {
+  font-family: var(--font-sans); font-weight: 600;
+  font-size: clamp(28px, 2.6vw + 0.4rem, 36px);
+  line-height: 1.18;
+  letter-spacing: -0.02em; color: #000; margin: 0 0 14px;
+  text-wrap: balance;
+}
 .lp-close__h .navy { color: var(--navy); }
-.lp-close__p { font: 400 17px/26px var(--font-sans); color: var(--ink-3); margin: 0 0 32px; }
+.lp-close__p { font: 400 16px/24px var(--font-sans); color: var(--ink-3); margin: 0 0 24px; }
 .lp-close__ctas { display:flex; justify-content:center; gap: 10px; }
 
 /* #6: Trust / social proof section */
@@ -338,6 +381,10 @@
   font: 500 17px/26px var(--font-sans); color: #000;
 }
 .lp-casestudy__inner strong { font-weight: 700; }
+.lp-casestudy__disclaimer {
+  font: 400 12px/18px var(--font-sans); color: var(--ink-3);
+  margin-top: 8px;
+}
 
 /* #8: How it works — 3-step section */
 .lp-how { display: grid; grid-template-columns: repeat(3, 1fr); gap: 24px; }
@@ -681,3 +728,32 @@
 .ob-foot__buttons { display:flex; gap: 10px; }
 
 @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.3; } }
+
+/* ── Landing responsive (1024–1280: tighten Hero & Market) ────────────── */
+@media (max-width: 1280px) {
+  .lp-hero__grid { gap: 48px; }
+  .lp-market { gap: 40px; }
+  .lp-rings { max-width: 360px; }
+}
+@media (max-width: 1024px) {
+  .lp-hero__grid { grid-template-columns: 1fr; gap: 40px; }
+  .lp-hero__right { max-width: 560px; }
+  .lp-market { grid-template-columns: 1fr; gap: 32px; }
+  .lp-rings { max-width: 360px; margin: 0 auto; justify-self: center; }
+  .lp-pricing--4 { grid-template-columns: repeat(2, 1fr); }
+  .lp-price { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .lp-price:nth-child(odd) { border-right: 1px solid var(--rule); }
+  .lp-feature-hero { grid-template-columns: 1fr; }
+  .lp-how { grid-template-columns: 1fr; }
+  .lp-ps { grid-template-columns: 1fr; }
+  .lp-ps__col--s { border-left: 0; border-top: 1px solid var(--rule); }
+  .lp-timeline { grid-template-columns: repeat(2, 1fr); gap: 24px 0; }
+  .lp-timeline::before { display: none; }
+}
+@media (max-width: 640px) {
+  .lp-pricing--4 { grid-template-columns: 1fr; }
+  .lp-price { border-right: 0 !important; }
+  .lp-features, .lp-features--compact { grid-template-columns: 1fr; }
+  .lp-timeline { grid-template-columns: 1fr; }
+  .lp-nav__links { display: none; }
+}
