@@ -22,6 +22,7 @@ import {
   SlidersHorizontal,
   Crosshair,
 } from 'lucide-react';
+import { getOntologyGraph } from '../api/client';
 import { useLang } from '../contexts/LangContext';
 
 /* ────────────────────────────────────────────
@@ -270,20 +271,12 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
     hasMounted.current = true;
 
     const timer = setTimeout(() => {
-      // Use the same base resolution as api/client.js so dev (vite proxy) and prod (same-origin) both work.
-      const baseURL = import.meta.env.VITE_API_BASE_URL || '/api';
       setIsLoading(true);
       setFetchError(null);
 
-      fetch(
-        `${baseURL}/risk/ontology/graph?limit=100&min_severity=${minSeverity}`,
-        { signal: controller.signal },
-      )
+      getOntologyGraph(minSeverity, 100, { signal: controller.signal })
         .then((res) => {
-          if (!res.ok) throw new Error(`HTTP ${res.status}`);
-          return res.json();
-        })
-        .then((result) => {
+          const result = res.data;
           if (result.nodes?.length > 0) {
             setSelectedNode(null);
             applyGraphData(result.nodes, result.edges ?? []);
@@ -294,7 +287,8 @@ export default function OntologyGraph({ id, data, loading, error: parentError, o
           }
         })
         .catch((err) => {
-          if (err.name !== 'AbortError') {
+          // axios maps abort to a CanceledError with code === 'ERR_CANCELED'
+          if (err.name !== 'CanceledError' && err.code !== 'ERR_CANCELED') {
             setFetchError(err.message);
           }
         })

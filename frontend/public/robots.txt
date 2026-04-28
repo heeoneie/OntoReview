@@ -2,5 +2,3 @@ User-agent: *
 Allow: /
 Disallow: /dashboard
 Disallow: /onboarding
-
-Sitemap: https://onto-review.vercel.app/sitemap.xml
