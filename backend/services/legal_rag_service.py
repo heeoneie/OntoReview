@@ -46,7 +46,10 @@ class PrecedentMatchResult(TypedDict):
 
 
 def _load_cases(industry: str | None = None) -> list[dict]:
-    filename = _INDUSTRY_PRECEDENT_FILES.get(industry, "legal_cases.json") if industry else "legal_cases.json"
+    default = "legal_cases.json"
+    filename = _INDUSTRY_PRECEDENT_FILES.get(
+        industry, default,
+    ) if industry else default
     path = _DATA_DIR / filename
     if not path.exists():
         path = _DATA_PATH

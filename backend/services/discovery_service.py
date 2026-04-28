@@ -102,7 +102,8 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
     # Default: food/CPG
     return [
         {
-            "url": "https://www.classaction.org/news/plant-based-protein-mislabeling-class-action-2026",
+            "url": ("https://www.classaction.org/news/"
+                    "plant-based-protein-mislabeling-class-action-2026"),
             "title": "Plant-based protein mislabeling class action gains new plaintiffs",
             "snippet": (
                 "A federal class action alleging that a major plant-based meat brand overstated "
@@ -114,10 +115,13 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
             "similarity": 0.91,
         },
         {
-            "url": "https://www.fda.gov/safety/recalls-market-withdrawals/plant-based-allergen-recall-2026",
+            "url": ("https://www.fda.gov/safety/"
+                    "recalls-market-withdrawals/"
+                    "plant-based-allergen-recall-2026"),
             "title": "FDA recalls plant-based burger patties over undeclared soy allergen",
             "snippet": (
-                "The FDA has issued a Class I recall for plant-based burger patties after lab tests "
+                "The FDA has issued a Class I recall for "
+                "plant-based burger patties after lab tests "
                 "confirmed undeclared soy protein. 23 adverse event reports filed, including 3 "
                 "anaphylactic reactions requiring hospitalization."
             ),
@@ -126,7 +130,9 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
             "similarity": 0.88,
         },
         {
-            "url": "https://www.reuters.com/business/retail-consumer/plant-based-meat-ecoli-investigation-2026",
+            "url": ("https://www.reuters.com/business/"
+                    "retail-consumer/"
+                    "plant-based-meat-ecoli-investigation-2026"),
             "title": "E. coli investigation targets plant-based meat processing facility",
             "snippet": (
                 "CDC and FDA are jointly investigating an E. coli outbreak linked to a plant-based "
@@ -137,11 +143,15 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
             "similarity": 0.84,
         },
         {
-            "url": "https://www.ftc.gov/news-events/news/press-releases/2026/03/ftc-food-labeling-enforcement",
+            "url": ("https://www.ftc.gov/news-events/news/"
+                    "press-releases/2026/03/"
+                    "ftc-food-labeling-enforcement"),
             "title": "FTC increases enforcement on food nutrition label accuracy",
             "snippet": (
-                "The FTC announced expanded enforcement actions targeting food brands whose nutrition "
-                "labels deviate more than 20% from actual tested values, citing consumer protection concerns."
+                "The FTC announced expanded enforcement actions "
+                "targeting food brands whose nutrition "
+                "labels deviate more than 20% from actual "
+                "tested values, citing consumer protection."
             ),
             "risk_detected": True,
             "source_domain": "ftc.gov",
@@ -152,7 +162,8 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
             "title": "Consumer complaints: plant-based patties linked to food poisoning",
             "snippet": (
                 "ConsumerAffairs has received 89 complaints in the past 60 days from consumers "
-                "reporting nausea, vomiting, and diarrhea after consuming plant-based burger patties "
+                "reporting nausea, vomiting, and diarrhea after "
+                "consuming plant-based burger patties "
                 "from multiple brands."
             ),
             "risk_detected": True,
@@ -171,7 +182,9 @@ def _mock_results(industry: str = "ecommerce") -> list[dict]:
             "similarity": 0.52,
         },
         {
-            "url": "https://www.reddit.com/r/PlantBased/comments/xyz/grey_discoloration_in_patties/",
+            "url": ("https://www.reddit.com/r/PlantBased/"
+                    "comments/xyz/"
+                    "grey_discoloration_in_patties/"),
             "title": "Grey discoloration inside plant-based patties — safety concern?",
             "snippet": (
                 "Multiple users on r/PlantBased reporting grey or green discoloration inside "

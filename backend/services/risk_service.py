@@ -349,11 +349,15 @@ DEMO_DATA = {
         "incident_title": "OO — Product Mislabeling & Food Safety Incident",
         "incident_summary": (
             "Simultaneous detection across Amazon Reviews, YouTube, Reddit, and FDA Recall DB. "
-            "Multiple reports of false protein claims, undeclared allergens, and foodborne illness. "
-            "Escalated to critical risk (RED) due to compound signals: false advertising, product liability, and regulatory investigation."
+            "Multiple reports of false protein claims, "
+            "undeclared allergens, and foodborne illness. "
+            "Escalated to critical risk (RED) due to compound "
+            "signals: false advertising, product liability, "
+            "and regulatory investigation."
         ),
         "clustering_reason": (
-            "Keywords 'mislabeled', 'allergen', 'food poisoning', 'lawsuit', 'recall' detected simultaneously "
+            "Keywords 'mislabeled', 'allergen', 'food poisoning',"
+            " 'lawsuit', 'recall' detected simultaneously "
             "across 4 channels → Ontology engine clustered as single incident"
         ),
         "signals": [
@@ -363,7 +367,8 @@ DEMO_DATA = {
                 "data_type": "Product Review",
                 "item_name": "OO",
                 "content": (
-                    "Says 20g of protein on the package but my dietitian tested it and it's more like 14g. "
+                    "Says 20g of protein on the package but my "
+                    "dietitian tested it and it's more like 14g. "
                     "This is false advertising. I've been tracking macros for a medical condition "
                     "and this mislabeling could seriously hurt people. Filing an FTC complaint."
                 ),
@@ -387,9 +392,11 @@ DEMO_DATA = {
                 "video_title": "OO HONEST Review — Are the nutrition labels accurate?",
                 "channel_name": "FoodTruthLab",
                 "content": (
-                    "DO NOT trust the label. I'm severely allergic to soy and had an anaphylactic reaction. "
+                    "DO NOT trust the label. I'm severely allergic "
+                    "to soy and had an anaphylactic reaction. "
                     "There's nothing about soy on the ingredients list but it's clearly in there. "
-                    "This is a class action waiting to happen. Undeclared allergens are an FDA recall trigger."
+                    "This is a class action waiting to happen. "
+                    "Undeclared allergens are an FDA recall trigger."
                 ),
                 "metadata": {
                     "likes": 892, "replies_count": 147,
@@ -411,7 +418,8 @@ DEMO_DATA = {
                 "post_title": "PSA: OO causing food poisoning — multiple reports in r/PlantBased",
                 "content": (
                     "Posting this as a warning. My family ate these patties and within hours "
-                    "we all had severe stomach cramps and vomiting. Checked the batch — grey discoloration inside. "
+                    "we all had severe stomach cramps and vomiting. "
+                    "Checked the batch — grey discoloration inside. "
                     "I've contacted a personal injury attorney. If anyone else is affected, "
                     "there may be grounds for a class action lawsuit."
                 ),
@@ -435,7 +443,8 @@ DEMO_DATA = {
                 "post_title": "FDA MedWatch — Adverse Event Reports for OO",
                 "content": (
                     "23 adverse event reports filed in the past 30 days for OO. "
-                    "Reported issues include undeclared soy allergen, E. coli contamination suspicion, "
+                    "Reported issues include undeclared soy "
+                    "allergen, E. coli contamination suspicion, "
                     "and protein content mislabeling. "
                     "FDA is evaluating whether to issue a safety alert."
                 ),
@@ -443,7 +452,11 @@ DEMO_DATA = {
                     "view_count": 8900, "recommend_count": 0,
                     "board_name": "MedWatch", "timestamp": "2026-03-12T09:00:00Z",
                 },
-                "risk_indicators": ["Regulatory investigation", "23 adverse events", "Potential recall"],
+                "risk_indicators": [
+                    "Regulatory investigation",
+                    "23 adverse events",
+                    "Potential recall",
+                ],
                 "metric_label": "Adverse reports",
                 "viral_risk": "High",
                 "comment_growth": [
@@ -867,7 +880,7 @@ def _demo_generate_compliance(
   "report_title": "LANEIGE Water Sleeping Mask — Emergency Risk Report",
   "report_date": "2026-03-12",
   "overall_risk_level": "Danger",
-  "monitoring_summary": "Simultaneous detection across Amazon Reviews, YouTube, Reddit, and FDA Recall DB. Multiple chemical burn reports and regulatory investigation flagged. Individual channel alerts compounded to critical (RED) level.",
+  "monitoring_summary": "Simultaneous detection across 4 channels.",
   "monitored_channels": [
     {{"channel": "Amazon Reviews", "feed_count": 1, "risk_count": 1, "status": "active"}},
     {{"channel": "YouTube Comments", "feed_count": 1, "risk_count": 1, "status": "active"}},
